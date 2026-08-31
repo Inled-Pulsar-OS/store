@@ -14,7 +14,11 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-CATALOG_URL = "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/schema/index.json"
+CATALOG_URLS = [
+    "https://store-os.inled.es/schema/index.json",
+    "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/schema/index.json",
+    "https://pulsar-store.pages.dev/schema/index.json",
+]
 CACHE_FILE = Path.home() / ".cache" / "pulsar-store" / "index.json"
 GNOME_EXT_DIR = Path.home() / ".local" / "share" / "gnome-shell" / "extensions"
 SAYRI_SKILLS_DIR = Path.home() / ".config" / "sayri" / "skills"
@@ -30,19 +34,27 @@ def get_catalog(force_refresh=False):
     CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
     if not force_refresh and CACHE_FILE.is_file():
         try:
+            # Check cache age (max 10 minutes)
+            if time.time() - CACHE_FILE.stat().st_mtime < 600:
+                return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    for u in CATALOG_URLS:
+        try:
+            req = urllib.request.Request(u, headers={"User-Agent": "PulsarStoreCLI/1.0"})
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                if data and "packages" in data and len(data["packages"]) > 0:
+                    CACHE_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
+                    return data
+        except Exception:
+            continue
+    if CACHE_FILE.is_file():
+        try:
             return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
         except Exception:
             pass
-    try:
-        req = urllib.request.Request(CATALOG_URL, headers={"User-Agent": "PulsarStoreCLI/1.0"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            CACHE_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
-            return data
-    except Exception:
-        if CACHE_FILE.is_file():
-            return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
-        return {"packages": []}
+    return {"packages": []}
 
 def check_updates():
     catalog_data = get_catalog(force_refresh=True)
@@ -93,6 +105,67 @@ def check_updates():
 
     return updates
 
+def show_install_success_popup(name: str, pkg_id: str, pkg_type: str):
+    """Shows a desktop popup confirming installation, auto-closing after 5 seconds."""
+    script = f"""
+import sys, time
+try:
+    import gi
+    gi.require_version("Gtk", "4.0")
+    from gi.repository import Gtk, GLib
+except Exception:
+    sys.exit(0)
+
+app = Gtk.Application(application_id=f"es.inled.pulsar.store.notify.{{int(time.time()*1000)}}")
+
+def on_activate(app):
+    win = Gtk.Window(application=app)
+    win.set_title("Pulsar Store")
+    win.set_default_size(360, 160)
+    win.set_resizable(False)
+
+    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+    box.set_margin_top(18)
+    box.set_margin_bottom(18)
+    box.set_margin_start(20)
+    box.set_margin_end(20)
+
+    title = Gtk.Label()
+    title.set_markup("<span weight='bold' size='12500' foreground='#22c55e'>✓ Installed Successfully</span>")
+    box.append(title)
+
+    desc = Gtk.Label()
+    desc.set_markup(f"<span size='11000'><b>{name}</b></span>\\n<span size='8500' foreground='#94a3b8'>{pkg_id} • Ready to use in Pulsar OS</span>")
+    desc.set_justify(Gtk.Justification.CENTER)
+    desc.set_wrap(True)
+    box.append(desc)
+
+    btn = Gtk.Button(label="OK (closes in 5s)")
+    btn.connect("clicked", lambda _: win.close())
+    box.append(btn)
+
+    win.set_child(box)
+    win.present()
+
+    countdown = [5]
+    def _tick():
+        countdown[0] -= 1
+        if countdown[0] <= 0:
+            win.close()
+            return False
+        btn.set_label(f"OK (closes in {{countdown[0]}}s)")
+        return True
+
+    GLib.timeout_add_seconds(1, _tick)
+
+app.connect("activate", on_activate)
+app.run(None)
+"""
+    try:
+        subprocess.Popen([sys.executable, "-c", script])
+    except Exception as e:
+        print(f"[Notice] Could not display popup: {e}")
+
 def install_package(pkg):
     pkg_type = pkg.get("type")
     pkg_id = pkg.get("id")
@@ -105,9 +178,10 @@ def install_package(pkg):
         print(f"🛡️ OpenCode Report: {sec.get('score', 95)}/100 ({sec.get('status', 'PASSED')})")
         print(f"📋 Summary: {sec.get('summary', '')}\n")
 
+    ok = False
     if pkg_type == "flatpak":
         ref = pkg.get("metadata", {}).get("flatpakref_url") or url or pkg_id
-        return subprocess.run(["flatpak", "install", "-y", ref]).returncode == 0
+        ok = subprocess.run(["flatpak", "install", "-y", ref]).returncode == 0
 
     elif pkg_type == "gnome_extension":
         uuid = pkg.get("metadata", {}).get("uuid") or pkg_id
@@ -120,10 +194,12 @@ def install_package(pkg):
                 z.extractall(target)
             subprocess.run(["gnome-extensions", "enable", uuid], capture_output=True)
             print(f"✅ Extension '{name}' ({uuid}) installed and enabled.")
-            return True
+            ok = True
 
     elif pkg_type in ("sayri_skill", "sayri_plugin"):
-        dest_root = SAYRI_SKILLS_DIR if pkg_type == "sayri_skill" else SAYRI_PLUGINS_DIR
+        # Install into plugins directory if it is a gateway/plugin, else skills
+        is_plugin = ("gateway" in pkg_id or "plugin" in pkg_id or pkg_type == "sayri_plugin")
+        dest_root = SAYRI_PLUGINS_DIR if is_plugin else SAYRI_SKILLS_DIR
         target = dest_root / pkg_id
         with tempfile.TemporaryDirectory() as tmp:
             pkg_p = Path(tmp) / "pkg.zip"
@@ -131,8 +207,18 @@ def install_package(pkg):
             target.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(pkg_p, "r") as z:
                 z.extractall(target)
-            print(f"✅ {'Skill' if pkg_type == 'sayri_skill' else 'Plugin'} '{name}' installed into {target}.")
-            return True
+            # Also if it's a plugin, ensure both dirs have it if needed
+            if is_plugin:
+                alt_target = SAYRI_SKILLS_DIR / pkg_id
+                alt_target.mkdir(parents=True, exist_ok=True)
+                with zipfile.ZipFile(pkg_p, "r") as z:
+                    z.extractall(alt_target)
+            print(f"✅ {'Plugin' if is_plugin else 'Skill'} '{name}' installed into {target}.")
+            ok = True
+
+    if ok:
+        show_install_success_popup(name, pkg_id, pkg_type)
+        return True
 
     return False
 
@@ -249,19 +335,26 @@ def main():
     elif args.command == "install":
         pkg_id = args.id.replace("pulsar://install/", "").strip()
         catalog = get_catalog()
-        for p in catalog.get("packages", []):
-            if p["id"] == pkg_id:
-                install_package(p)
-                return
+        pkg = next((p for p in catalog.get("packages", []) if p["id"] == pkg_id or p.get("name", "").lower() == pkg_id.lower()), None)
+        if not pkg:
+            catalog = get_catalog(force_refresh=True)
+            pkg = next((p for p in catalog.get("packages", []) if p["id"] == pkg_id or p.get("name", "").lower() == pkg_id.lower()), None)
+        if pkg:
+            install_package(pkg)
+            return
         print(f"❌ Package '{pkg_id}' not found in catalog.")
 
     elif args.command == "handle-url":
         pkg_id = args.url.replace("pulsar://install/", "").strip()
         catalog = get_catalog()
-        for p in catalog.get("packages", []):
-            if p["id"] == pkg_id:
-                install_package(p)
-                return
+        pkg = next((p for p in catalog.get("packages", []) if p["id"] == pkg_id or p.get("name", "").lower() == pkg_id.lower()), None)
+        if not pkg:
+            catalog = get_catalog(force_refresh=True)
+            pkg = next((p for p in catalog.get("packages", []) if p["id"] == pkg_id or p.get("name", "").lower() == pkg_id.lower()), None)
+        if pkg:
+            install_package(pkg)
+            return
+        print(f"❌ Package '{pkg_id}' not found in catalog.")
 
     elif args.command == "info":
         catalog = get_catalog()
