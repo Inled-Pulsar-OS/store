@@ -1,6 +1,6 @@
 /*
-  PULSAR STORE — CLEAN DESIGN SYSTEM (os.inled.es)
-  Flat, clean, unified typography, zero boxed slop.
+  PULSAR STORE — DESIGN SYSTEM (os.inled.es)
+  Pure typography, flat layout, undeformed spinner, double-layer security review.
 */
 
 :root {
@@ -219,7 +219,7 @@ html.dark .site-header {
 }
 
 /* ==========================================================================
-   Buttons
+   Buttons & Non-Deformed Circular Spinner
    ========================================================================== */
 .btn {
   display: inline-flex;
@@ -235,12 +235,14 @@ html.dark .site-header {
   transition: all var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid transparent;
   text-decoration: none;
-  position: relative;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 .btn-sm {
-  padding: 6px 16px;
+  padding: 6px 18px;
   font-size: 0.82rem;
+  min-height: 32px;
 }
 
 .btn-primary {
@@ -265,23 +267,36 @@ html.dark .site-header {
   text-decoration: none;
 }
 
-/* Loading State on Buttons */
 .btn.loading {
   pointer-events: none;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
+/* Perfectly Circular Non-Deformed Spinner */
 .btn-spinner {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: block;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+  box-sizing: border-box;
+  border: 2px solid rgba(255, 255, 255, 0.35);
   border-radius: 50%;
   border-top-color: #ffffff;
-  animation: spin 0.6s linear infinite;
+  animation: spin 0.65s linear infinite;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+}
+
+.btn-secondary .btn-spinner {
+  border-color: rgba(150, 108, 232, 0.3);
+  border-top-color: var(--accent-purple);
 }
 
 @keyframes spin {
+  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
@@ -514,7 +529,7 @@ html.dark .pkg-card:hover {
 }
 
 /* ==========================================================================
-   Full Dedicated Detail Page (Flat, no boxed nesting or side-border slop)
+   Full Dedicated Detail Page (Flat, no boxed nesting or slop)
    ========================================================================== */
 .package-detail-container {
   padding: 36px 24px 80px 24px;
@@ -541,7 +556,7 @@ html.dark .pkg-card:hover {
   color: var(--text-primary);
 }
 
-/* Flat Detail Article Layout */
+/* Flat Detail Article */
 .detail-article {
   display: flex;
   flex-direction: column;
@@ -590,7 +605,7 @@ html.dark .pkg-card:hover {
   line-height: 1.65;
 }
 
-/* Simple Background Highlight for Terminal Snippet (No borders-in-borders) */
+/* Simple Background Highlight for Terminal Snippet */
 .terminal-highlight-box {
   background-color: var(--bg-highlight);
   border-radius: 16px;
@@ -653,11 +668,11 @@ html.dark .pkg-card:hover {
   font-weight: 500;
 }
 
-/* Subtle Security Highlight (No side stripe / no extra box) */
+/* Double-layer Security Highlight (OpenCode + VirusTotal) */
 .security-highlight-box {
   background-color: var(--bg-success);
   border-radius: 16px;
-  padding: 20px;
+  padding: 22px;
 }
 
 .security-box-title {
@@ -665,12 +680,13 @@ html.dark .pkg-card:hover {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--status-green);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .security-box-text {
   font-size: 0.92rem;
   color: var(--text-primary);
+  line-height: 1.6;
 }
 
 /* ==========================================================================

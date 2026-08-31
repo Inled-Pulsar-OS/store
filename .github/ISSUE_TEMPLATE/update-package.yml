@@ -1,19 +1,37 @@
-name: "🔄 Actualizar Paquete Existente"
-description: "Envía una nueva versión de un paquete ya existente en Pulsar Store"
+name: "🔄 Update Package Version"
+description: "Publish a new version for an existing application, extension, or skill"
 title: "update: "
-labels: ["actualizacion-zip"]
+labels: ["update", "version-bump"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🔄 Update Package Version
+        Submit a new release version for an existing package.
   - type: input
     id: id
     attributes:
-      label: "Package ID / UUID"
-      placeholder: "org.mi-app.id / mi-skill-id"
+      label: "Package ID"
+      placeholder: "sayri-skill-web-search"
     validations:
       required: true
   - type: input
-    id: zip_url
+    id: version
     attributes:
-      label: "Nuevo Archivo ZIP / Flatpak"
-      placeholder: "Arrastra el archivo actualizado aquí..."
+      label: "New Version Number"
+      placeholder: "1.3.0"
     validations:
       required: true
+  - type: textarea
+    id: zip_url
+    attributes:
+      label: "New Release ZIP Archive"
+      description: "Drag and drop the updated package .zip file."
+      placeholder: "Drag and drop your updated .zip here..."
+    validations:
+      required: true
+  - type: textarea
+    id: changelog
+    attributes:
+      label: "Changelog / Release Notes"
+      placeholder: "Summary of bugfixes, changes, and new features..."

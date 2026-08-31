@@ -1,72 +1,73 @@
-name: "🧩 Publicar Extensión de GNOME"
-description: "Envía una extensión para GNOME Shell para auditar con OpenCode (GJS) y VirusTotal"
+name: "🧩 Submit GNOME Extension"
+description: "Submit a GNOME Shell extension package for automated OpenCode and VirusTotal security verification"
 title: "[Extension]: "
-labels: ["nueva-extension", "gnome"]
+labels: ["extension", "gnome", "submission"]
 body:
   - type: markdown
     attributes:
       value: |
-        ### 🧩 Publicación de Extensión de GNOME Shell
-        Sube el archivo ZIP con `metadata.json` y `extension.js`.
+        ### 🧩 GNOME Shell Extension Submission
+        Please upload your packaged extension `.zip` archive containing `metadata.json` and `extension.js`.
   - type: input
     id: id
     attributes:
       label: "Extension UUID"
-      description: "UUID oficial de la extensión declarado en metadata.json"
-      placeholder: "mi-extension@pulsar.org"
+      description: "Official extension UUID declared in metadata.json"
+      placeholder: "my-extension@pulsar.org"
     validations:
       required: true
   - type: input
     id: name
     attributes:
-      label: "Nombre de la Extensión"
+      label: "Extension Name"
       placeholder: "Transparent Top Bar"
     validations:
       required: true
   - type: textarea
     id: description
     attributes:
-      label: "Descripción"
-      placeholder: "Describe la funcionalidad de la extensión..."
+      label: "Description"
+      placeholder: "Describe the functionality and features of your extension..."
     validations:
       required: true
   - type: input
     id: github_url
     attributes:
-      label: "Enlace al Repositorio de GitHub (Opcional)"
-      placeholder: "https://github.com/usuario/mi-extension"
-  - type: input
+      label: "GitHub Repository (Optional)"
+      placeholder: "https://github.com/author/my-extension"
+  - type: textarea
     id: zip_url
     attributes:
-      label: "Archivo .ZIP de la Extensión"
-      description: "Arrastra el archivo ZIP empaquetado aquí"
-      placeholder: "Arrastra el archivo .zip aquí..."
+      label: "Extension ZIP Archive"
+      description: "Drag and drop or upload your packaged .zip file directly into this box (GitHub will generate the file attachment link)."
+      placeholder: "Drag and drop your .zip archive here..."
     validations:
       required: true
-  - type: input
+  - type: textarea
     id: icon_url
     attributes:
-      label: "Icono (PNG)"
-      description: "Arrastra una imagen PNG cuadrada (mínimo 128x128)"
-      placeholder: "Arrastra el icono PNG aquí..."
+      label: "Extension Icon (PNG or SVG)"
+      description: "Drag and drop a square PNG or SVG icon image (recommended 128x128 or larger)."
+      placeholder: "Drag and drop your icon image here..."
     validations:
       required: true
   - type: textarea
     id: demo_urls
     attributes:
-      label: "Capturas de Pantalla (Demos)"
-      placeholder: "Arrastra imágenes demo1.png, demo2.png..."
+      label: "Screenshots & Demo Images (Optional)"
+      description: "Drag and drop preview screenshots or GIFs."
+      placeholder: "Drag and drop preview screenshots here..."
   - type: markdown
     attributes:
       value: |
         ---
-        ### ⚙️ Configuración del Agente OpenCode / Proveedor de IA (Opcional)
+        ### ⚙️ OpenCode Audit Pipeline Configuration (Optional)
   - type: dropdown
     id: ai_provider
     attributes:
-      label: "Proveedor de IA para Auditoría"
+      label: "AI Audit Provider"
       options:
-        - "Por defecto (Groq Llama 3.3 70B del repositorio)"
+        - "Default (Repository Groq Llama 3.3 70B)"
         - "Groq"
         - "OpenAI"
         - "OpenRouter"
@@ -75,10 +76,10 @@ body:
   - type: input
     id: ai_api_key
     attributes:
-      label: "API Key de tu Proveedor (Opcional)"
+      label: "Custom Provider API Key (Optional)"
       placeholder: "gsk_... / sk-..."
   - type: input
     id: ai_model
     attributes:
-      label: "Modelo de IA Personalizado (Opcional)"
+      label: "Custom AI Model Name (Optional)"
       placeholder: "llama-3.3-70b-versatile"

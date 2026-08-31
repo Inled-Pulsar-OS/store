@@ -1,95 +1,58 @@
-name: "📦 Publicar Aplicación (Flatpak)"
-description: "Envía una aplicación Flatpak o paquete para auditar con OpenCode y VirusTotal"
+name: "📦 Submit Flatpak Desktop App"
+description: "Register or index a Flatpak desktop application for Pulsar OS"
 title: "[App]: "
-labels: ["nueva-app", "flatpak"]
+labels: ["app", "flatpak", "submission"]
 body:
   - type: markdown
     attributes:
       value: |
-        ### 📦 Publicación de Aplicación para Pulsar Store
-        Completa este formulario. El pipeline auditará el paquete con **VirusTotal** y realizará una auditoría semántica con **OpenCode**.
+        ### 📦 Flatpak Application Submission
+        Index your Flatpak application or Flathub container reference.
   - type: input
     id: id
     attributes:
-      label: "Application ID (AppStream ID)"
-      description: "Identificador inverso de dominio (ej. org.pulsar.BraveBrowser, com.spotify.Client)"
-      placeholder: "org.miorganizacion.MiApp"
+      label: "Flatpak Application ID"
+      description: "Reverse-DNS format application identifier"
+      placeholder: "com.brave.Browser"
     validations:
       required: true
   - type: input
     id: name
     attributes:
-      label: "Nombre de la Aplicación"
-      placeholder: "Mi Aplicación"
+      label: "Application Name"
+      placeholder: "Brave Web Browser"
     validations:
       required: true
   - type: textarea
     id: description
     attributes:
-      label: "Descripción"
-      placeholder: "Explica brevemente qué funciones ofrece la aplicación..."
-    validations:
-      required: true
-  - type: input
-    id: github_url
-    attributes:
-      label: "Enlace al Repositorio de Código Fuente (GitHub / GitLab)"
-      placeholder: "https://github.com/usuario/mi-app"
+      label: "Description"
+      placeholder: "Describe the application functionality and features..."
     validations:
       required: true
   - type: input
     id: zip_url
     attributes:
-      label: "Archivo Flatpak (.flatpak / .flatpakref / ZIP de Release)"
-      description: "Arrastra y suelta el archivo o pega el enlace directo"
-      placeholder: "Arrastra el archivo aquí..."
-    validations:
-      required: true
-  - type: input
-    id: icon_url
-    attributes:
-      label: "Logotipo / Icono de la App (PNG)"
-      description: "Arrastra una imagen PNG cuadrada (mínimo 128x128)"
-      placeholder: "Arrastra el icono PNG aquí..."
+      label: "Flatpakref URL or Download Link"
+      description: "Official .flatpakref link from Flathub or direct container repository"
+      placeholder: "https://dl.flathub.org/repo/appstream/com.brave.Browser.flatpakref"
     validations:
       required: true
   - type: textarea
-    id: demo_urls
+    id: icon_url
     attributes:
-      label: "Capturas de Pantalla (Opcional)"
-      description: "Arrastra una o varias capturas de pantalla de la app"
-      placeholder: "Arrastra imágenes demo1.png, demo2.png..."
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ### ⚙️ Configuración del Agente OpenCode / Proveedor de IA (Opcional)
-        *Si deseas usar tus propios tokens o un modelo específico (Groq, OpenAI, Anthropic, OpenRouter, DeepSeek).*
-  - type: dropdown
-    id: ai_provider
-    attributes:
-      label: "Proveedor de IA para Auditoría"
-      options:
-        - "Por defecto (Groq Llama 3.3 70B del repositorio)"
-        - "Groq"
-        - "OpenAI"
-        - "OpenRouter"
-        - "DeepSeek"
-        - "Anthropic"
-        - "Mistral"
-        - "Custom OpenAI Endpoint"
+      label: "Application Icon (PNG or SVG)"
+      description: "Drag and drop the app icon image."
+      placeholder: "Drag and drop icon image here..."
+    validations:
+      required: true
   - type: input
-    id: ai_api_key
+    id: promo_url
     attributes:
-      label: "API Key de tu Proveedor (Se anonimiza en logs)"
-      placeholder: "gsk_... / sk-..."
+      label: "Official Website (Optional)"
+      placeholder: "https://brave.com"
   - type: input
-    id: ai_model
+    id: github_url
     attributes:
-      label: "Modelo de IA Personalizado (Opcional)"
-      placeholder: "llama-3.3-70b-versatile / gpt-4o / claude-3-5-sonnet"
-  - type: input
-    id: ai_base_url
-    attributes:
-      label: "Base URL Personalizada (Solo si usas Custom Endpoint)"
-      placeholder: "https://api.mi-servidor.com/v1"
+      label: "Source Repository (Optional)"
+      placeholder: "https://github.com/flathub/com.brave.Browser"

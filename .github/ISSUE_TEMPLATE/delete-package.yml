@@ -1,12 +1,24 @@
-name: "🗑️ Eliminar Paquete"
-description: "Solicita la eliminación de un paquete del catálogo (solo autores o admins)"
+name: "🗑️ Request Package Deletion"
+description: "Request deprecation or removal of a package from the catalog (Owner/Admin only)"
 title: "delete: "
-labels: ["eliminar-paquete"]
+labels: ["removal", "admin"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🗑️ Request Package Deletion
+        Request removal of a package from the Pulsar Store index.
   - type: input
     id: id
     attributes:
-      label: "Package ID / UUID a eliminar"
-      placeholder: "mi-paquete-id"
+      label: "Package ID to Remove"
+      placeholder: "package-id"
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: "Reason for Deletion"
+      placeholder: "Explain the reason for removal..."
     validations:
       required: true

@@ -1,83 +1,84 @@
-name: "🤖 Publicar Habilidad de Sayri (Skill)"
-description: "Envía una habilidad con SKILL.md, dependencias y scripts para el asistente Sayri"
+name: "🧠 Submit Sayri Skill"
+description: "Submit an autonomous AI skill or subagent bundle for Sayri AI on Pulsar OS"
 title: "[Skill]: "
-labels: ["nueva-skill", "sayri"]
+labels: ["skill", "sayri", "submission"]
 body:
   - type: markdown
     attributes:
       value: |
-        ### 🤖 Publicación de Skill para Sayri (Estilo OpenClaw / ClawHub)
-        Sube el archivo ZIP con el archivo `SKILL.md`, `requirements.txt` (si aplica) y la carpeta `scripts/`.
+        ### 🧠 Sayri AI Skill Submission
+        Submit your Sayri skill package with `SKILL.md` declaration and isolated execution adapters.
   - type: input
     id: id
     attributes:
       label: "Skill ID"
-      description: "Identificador único en minúsculas y guiones (ej. discord-voice-agent, web-browser-tool)"
-      placeholder: "mi-skill-id"
+      description: "Unique skill identifier starting with sayri-skill-"
+      placeholder: "sayri-skill-discord-support"
     validations:
       required: true
   - type: input
     id: name
     attributes:
-      label: "Nombre de la Habilidad"
-      placeholder: "Discord Voice Agent"
+      label: "Skill Name"
+      placeholder: "Discord Voice & Support Agent"
     validations:
       required: true
   - type: textarea
     id: description
     attributes:
-      label: "Descripción"
-      placeholder: "Explica qué capacidades añade al asistente Sayri y qué herramientas expone..."
+      label: "Skill Description"
+      placeholder: "Explain what this subagent or skill provides to Sayri..."
     validations:
       required: true
   - type: dropdown
-    id: sandbox
+    id: sandbox_level
     attributes:
-      label: "Nivel de Sandbox Requerido"
+      label: "Declared Sandbox Isolation Level"
+      description: "Security boundary level for execution"
       options:
-        - "LEVEL_0_NO_EXEC (Solo conversación / Cero comandos)"
-        - "LEVEL_1_READONLY (Lectura de archivos aislada)"
-        - "LEVEL_2_ISOLATED_DEV (Entorno de desarrollo aislado bwrap)"
-        - "LEVEL_3_HOST_USER (Acceso a comandos de usuario estándar)"
+        - "LEVEL_0_NO_EXEC (Isolated / No host execution)"
+        - "LEVEL_1_READ_ONLY (Read-only sandbox)"
+        - "LEVEL_2_STRICT_BWRAP (Bubblewrap filesystem container)"
+        - "LEVEL_3_FULL_HOST (Full Host Access with explicit user confirmation)"
+    validations:
+      required: true
+  - type: textarea
+    id: zip_url
+    attributes:
+      label: "Skill ZIP Archive"
+      description: "Drag and drop or upload your packaged skill .zip archive containing SKILL.md and tools."
+      placeholder: "Drag and drop your skill .zip archive here..."
+    validations:
+      required: true
+  - type: textarea
+    id: icon_url
+    attributes:
+      label: "Skill Icon (PNG or SVG)"
+      description: "Drag and drop a square PNG or SVG icon."
+      placeholder: "Drag and drop your icon here..."
     validations:
       required: true
   - type: input
     id: github_url
     attributes:
-      label: "Enlace al Repositorio de GitHub (Opcional)"
-      placeholder: "https://github.com/usuario/mi-skill"
-  - type: input
-    id: zip_url
-    attributes:
-      label: "Archivo ZIP / Tarball de la Skill"
-      description: "Arrastra el archivo comprimido (.zip o .tar.gz)"
-      placeholder: "Arrastra el archivo comprimido aquí..."
-    validations:
-      required: true
-  - type: input
-    id: icon_url
-    attributes:
-      label: "Icono (PNG)"
-      description: "Arrastra una imagen PNG cuadrada (mínimo 128x128)"
-      placeholder: "Arrastra el icono PNG aquí..."
-    validations:
-      required: true
+      label: "Source Repository (Optional)"
+      placeholder: "https://github.com/author/sayri-skill-custom"
   - type: textarea
     id: demo_urls
     attributes:
-      label: "Capturas de Pantalla (Opcional)"
-      placeholder: "Arrastra imágenes demo1.png..."
+      label: "Demo Screenshots or Videos (Optional)"
+      placeholder: "Drag and drop demo screenshots here..."
   - type: markdown
     attributes:
       value: |
         ---
-        ### ⚙️ Configuración del Agente OpenCode / Proveedor de IA (Opcional)
+        ### ⚙️ OpenCode Audit Pipeline Configuration (Optional)
   - type: dropdown
     id: ai_provider
     attributes:
-      label: "Proveedor de IA para Auditoría"
+      label: "AI Audit Provider"
       options:
-        - "Por defecto (Groq Llama 3.3 70B del repositorio)"
+        - "Default (Repository Groq Llama 3.3 70B)"
         - "Groq"
         - "OpenAI"
         - "OpenRouter"
@@ -86,10 +87,10 @@ body:
   - type: input
     id: ai_api_key
     attributes:
-      label: "API Key de tu Proveedor (Opcional)"
+      label: "Custom Provider API Key (Optional)"
       placeholder: "gsk_... / sk-..."
   - type: input
     id: ai_model
     attributes:
-      label: "Modelo de IA Personalizado (Opcional)"
+      label: "Custom AI Model Name (Optional)"
       placeholder: "llama-3.3-70b-versatile"
