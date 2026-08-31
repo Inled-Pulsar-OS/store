@@ -96,10 +96,10 @@
       "security_report": {
         "score": 95,
         "status": "PASSED",
-        "audited_by": "OpenCode (llama-3.3-70b-versatile) + VirusTotal",
-        "summary": "Clean source code verified against security policies.",
+        "audited_by": "OpenCode (allam-2-7b) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (allam-2-7b - Score: 95/100):\nThe code appears to be a legitimate Discord support skill for Pulsar OS, adhering to the declared Sandbox Level and following the rules for LEVEL_0_NO_EXEC.",
         "virustotal_detections": 0,
-        "timestamp": 1788183253699
+        "timestamp": 1788183541184
       },
       "metadata": {
         "shell_versions": [],
