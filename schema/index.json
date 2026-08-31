@@ -48,7 +48,12 @@
       },
       "metadata": {
         "uuid": "transparent-topbar@pulsar.org",
-        "shell_versions": ["45", "46", "47", "48"]
+        "shell_versions": [
+          "45",
+          "46",
+          "47",
+          "48"
+        ]
       }
     },
     {
@@ -73,6 +78,31 @@
       },
       "metadata": {
         "sandbox_level": "FLATPAK_ISOLATED"
+      }
+    },
+    {
+      "id": "sayri-skill-web-search",
+      "type": "sayri_skill",
+      "name": "Web Search Tool",
+      "description": "Autonomous web search and public API query assistant skill for Sayri.",
+      "version": "1.2.0",
+      "author": "jaimegh-es",
+      "download_url": "https://raw.githubusercontent.com/pulsar-os/store/main/packages/skills/sayri-skill-web-search.zip",
+      "icon_url": "assets/icons/sayri-skill-web-search.png",
+      "demo_urls": [],
+      "github_url": "",
+      "promo_url": "",
+      "security_report": {
+        "score": 95,
+        "status": "PASSED",
+        "audited_by": "OpenCode (llama-3.3-70b-versatile) + VirusTotal",
+        "summary": "Clean source code verified against security policies.",
+        "virustotal_detections": 0,
+        "timestamp": 1788177892499
+      },
+      "metadata": {
+        "shell_versions": [],
+        "sandbox_level": "LEVEL_1_READONLY"
       }
     }
   ]

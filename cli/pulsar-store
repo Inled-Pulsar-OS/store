@@ -21,6 +21,12 @@ SAYRI_SKILLS_DIR = Path.home() / ".config" / "sayri" / "skills"
 SAYRI_PLUGINS_DIR = Path.home() / ".config" / "sayri" / "plugins"
 
 def get_catalog(force_refresh=False):
+    local_db = Path(__file__).resolve().parent.parent / "schema" / "index.json"
+    if local_db.is_file():
+        try:
+            return json.loads(local_db.read_text(encoding="utf-8"))
+        except Exception:
+            pass
     CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
     if not force_refresh and CACHE_FILE.is_file():
         try:
