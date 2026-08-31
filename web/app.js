@@ -171,6 +171,7 @@ function showPackageDetail(pkgId) {
         <button class="btn btn-primary" onclick="handleInstall(event, '${escapeHtml(pkg.id)}', this)">
           Install in Pulsar OS
         </button>
+        ${pkg.skill_md ? `<button class="btn btn-secondary" onclick="document.getElementById('skill-spec-section')?.scrollIntoView({behavior: 'smooth'})">📄 View SKILL.md</button>` : ''}
         ${pkg.github_url ? `<a href="${escapeHtml(pkg.github_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">View Source Code ↗</a>` : ''}
       </div>
 
@@ -211,7 +212,7 @@ function showPackageDetail(pkgId) {
       </div>
 
       ${pkg.skill_md ? `
-      <div>
+      <div id="skill-spec-section">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
           <h3 class="detail-section-heading" style="margin: 0;">Skill Specification (SKILL.md)</h3>
           <button class="btn-copy" onclick="copyCode(this, ${JSON.stringify(pkg.skill_md)})">Copy SKILL.md</button>
