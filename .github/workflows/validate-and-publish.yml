@@ -66,7 +66,6 @@ jobs:
           ISSUE_LABELS: ${{ github.event.issue.labels && toJson(github.event.issue.labels) || env.ISSUE_LABELS }}
           REPOSITORY: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ADMIN_USER: "jaimegh-es"
         run: |
           node scripts/audit.js
