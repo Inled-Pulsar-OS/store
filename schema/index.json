@@ -164,7 +164,7 @@
       "demo_urls": [],
       "github_url": "https://github.com/Inled-Pulsar-OS/store",
       "promo_url": "",
-      "skill_md": "{\n  \"id\": \"sayri-gateway-telegram\",\n  \"name\": \"Telegram Bot Gateway\",\n  \"version\": \"1.1.0\",\n  \"entrypoint\": \"gateway.py\",\n  \"sandbox_level\": \"LEVEL_1_READONLY\",\n  \"required_secrets\": [\"TELEGRAM_BOT_TOKEN\"],\n  \"authorization\": {\n    \"mode\": \"pairing_otp\",\n    \"allowed_users\": [],\n    \"pairing_pin_required\": true\n  }\n}",
+      "skill_md": "---\nname: sayri-gateway-telegram\ntitle: Telegram Bot Gateway\ndescription: Autonomous Telegram Bot Gateway bridging external chat messages to Sayri with Desktop OTP pairing.\nversion: 1.1.0\nauthor: jaimegh-es\nsandbox_level: LEVEL_1_READONLY\nrequired_secrets:\n  - TELEGRAM_BOT_TOKEN\nauthorization:\n  mode: pairing_otp\n---\n\n# Role & Capabilities\nAutonomous Telegram Bot Gateway bridging external chat messages to Sayri with Desktop OTP pairing and whitelist authorization.\n\n## Authentication & Security\n1. Message the bot in Telegram (`/start`).\n2. Sayri desktop displays a 6-digit OTP Pairing PIN in the Gateways tab.\n3. Reply in Telegram with `/pair <PIN>` to authorize your account.",
       "security_report": {
         "score": 90,
         "status": "PASSED",

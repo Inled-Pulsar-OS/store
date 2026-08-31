@@ -244,9 +244,12 @@ function showStaticView(viewId) {
   }
 }
 
-// ── Install Button Handler with Perfectly Circular Spinner ────────────────
+// ── Install Button Handler with Perfectly Circular Spinner & Feedback ─────
 function handleInstall(event, pkgId, buttonEl) {
-  if (event) event.preventDefault();
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
   if (!buttonEl) return;
 
   const originalContent = buttonEl.innerHTML;
@@ -254,20 +257,28 @@ function handleInstall(event, pkgId, buttonEl) {
 
   buttonEl.style.minWidth = `${originalWidth}px`;
   buttonEl.classList.add('loading');
-  // Replace button content completely with only the circular spinner
-  buttonEl.innerHTML = `<span class="btn-spinner" aria-label="Loading"></span>`;
+  buttonEl.innerHTML = `<span class="btn-spinner" aria-label="Loading" style="display:inline-block; margin-right:6px; vertical-align:middle;"></span> Installing…`;
 
   // Launch scheme handler
   setTimeout(() => {
     window.location.href = `pulsar://install/${pkgId}`;
   }, 100);
 
-  // Restore button state after browser prompt triggers
+  // Show success state
   setTimeout(() => {
     buttonEl.classList.remove('loading');
+    buttonEl.innerHTML = `✓ Sent to Desktop!`;
+    buttonEl.style.backgroundColor = 'var(--status-green)';
+    buttonEl.style.borderColor = 'var(--status-green)';
+  }, 1200);
+
+  // Restore button state after 4s
+  setTimeout(() => {
     buttonEl.innerHTML = originalContent;
+    buttonEl.style.backgroundColor = '';
+    buttonEl.style.borderColor = '';
     buttonEl.style.minWidth = '';
-  }, 2200);
+  }, 4000);
 }
 
 // ── Render Catalog Grid ───────────────────────────────────────────────────
