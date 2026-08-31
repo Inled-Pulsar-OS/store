@@ -750,6 +750,22 @@ html.dark .pkg-card:hover {
   padding-top: 20px;
 }
 
+.skill-md-box {
+  background-color: var(--bg-highlight);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-family: 'Space Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 450px;
+  overflow-y: auto;
+  margin: 0 0 20px 0;
+}
+
 .hidden {
   display: none !important;
 }

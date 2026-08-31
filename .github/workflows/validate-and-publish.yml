@@ -39,6 +39,8 @@ jobs:
           ISSUE_USER: ${{ github.event.issue.user.login }}
           ISSUE_LABELS: ${{ toJson(github.event.issue.labels) }}
           REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ADMIN_USER: "jaimegh-es"
         run: |
           node scripts/audit.js
@@ -50,6 +52,6 @@ jobs:
         run: |
           git config --global user.name "pulsar-store-bot[bot]"
           git config --global user.email "pulsar-store-bot@users.noreply.github.com"
-          git add schema/index.json CATALOG.md assets/ packages/
+          git add schema/index.json CATALOG.md assets/
           git commit -m "Auto-publish package from Issue #${{ github.event.issue.number }}" || echo "No changes to commit"
           git push

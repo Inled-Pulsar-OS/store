@@ -210,6 +210,15 @@ function showPackageDetail(pkgId) {
         </table>
       </div>
 
+      ${pkg.skill_md ? `
+      <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h3 class="detail-section-heading" style="margin: 0;">Skill Specification (SKILL.md)</h3>
+          <button class="btn-copy" onclick="copyCode(this, ${JSON.stringify(pkg.skill_md)})">Copy SKILL.md</button>
+        </div>
+        <pre class="skill-md-box"><code>${escapeHtml(pkg.skill_md)}</code></pre>
+      </div>` : ''}
+
       <!-- Automated Double-Layer Security Status (OpenCode AI + VirusTotal) -->
       <div class="security-highlight-box">
         <div class="security-box-title">

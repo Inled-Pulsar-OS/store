@@ -281,6 +281,7 @@ async function run() {
     let shellVersions = [];
     let declaredSandbox = formData.sandbox_level || "LEVEL_0_NO_EXEC";
     let extractedCode = "";
+    let extractedSkillMd = "";
 
     if (archiveExt.endsWith('.zip')) {
         try {
@@ -292,6 +293,9 @@ async function run() {
                 if (name.endsWith('metadata.json') || name.endsWith('manifest.json') || name.endsWith('plugin.yaml') || name.endsWith('skill.md')) {
                     try {
                         const metaContent = zip.readAsText(entry);
+                        if (name.endsWith('skill.md')) {
+                            extractedSkillMd = metaContent;
+                        }
                         if (name.endsWith('.json')) {
                             const parsed = JSON.parse(metaContent);
                             version = parsed.version || version;
@@ -530,14 +534,25 @@ Strict Rules:
     await updateStep('ai', 'success', aiVerdict);
 
     // 7. PUBLICATION & CATALOG COMMIT
-    await updateStep('publish', 'running', 'Publishing artifacts and updating Pulsar Store catalog...');
-    const targetCategoryDir = pkgType === 'flatpak' ? 'apps' : (pkgType === 'gnome_extension' ? 'extensions' : (pkgType === 'sayri_skill' ? 'skills' : 'plugins'));
-    const finalDir = path.join('packages', targetCategoryDir);
-    fs.mkdirSync(finalDir, { recursive: true });
-    
+    await updateStep('publish', 'running', 'Publishing package asset to GitHub Releases and updating catalog...');
+    const repo = process.env.REPOSITORY || 'Inled-Pulsar-OS/store';
+    const releaseTag = "packages";
     const finalArchiveName = archiveExt.endsWith('.flatpak') ? `${pkgId}.flatpak` : `${pkgId}.zip`;
-    const finalArchivePath = path.join(finalDir, finalArchiveName);
-    fs.copyFileSync(downloadedPkgPath, finalArchivePath);
+
+    let finalDownloadUrl = formData.zip_url;
+    if (archiveExt.endsWith('.zip') || (archiveExt.endsWith('.flatpak') && !formData.zip_url.includes('flathub.org'))) {
+        try {
+            console.log(`[GitHub Release] Publishing ${finalArchiveName} to release '${releaseTag}' on ${repo}...`);
+            const { execSync } = require('child_process');
+            execSync(`gh release view ${releaseTag} --repo ${repo} || gh release create ${releaseTag} --repo ${repo} --title "Pulsar Store Binary Packages" --notes "Official storage for approved store packages."`, { stdio: 'inherit' });
+            execSync(`gh release upload ${releaseTag} "${downloadedPkgPath}#${finalArchiveName}" --repo ${repo} --clobber`, { stdio: 'inherit' });
+            finalDownloadUrl = `https://github.com/${repo}/releases/download/${releaseTag}/${finalArchiveName}`;
+            console.log(`[GitHub Release] Published asset at: ${finalDownloadUrl}`);
+        } catch (relErr) {
+            console.warn(`[GitHub Release] Upload notice: ${relErr.message}`);
+            finalDownloadUrl = `https://github.com/${repo}/releases/download/${releaseTag}/${finalArchiveName}`;
+        }
+    }
 
     const pkgEntry = {
         id: pkgId,
@@ -546,11 +561,12 @@ Strict Rules:
         description: formData.description || "",
         version: version,
         author: issueUser,
-        download_url: `https://raw.githubusercontent.com/${process.env.REPOSITORY || 'Inled-Pulsar-OS/store'}/main/${finalArchivePath}`,
+        download_url: finalDownloadUrl,
         icon_url: `assets/icons/${pkgId}.png`,
         demo_urls: demoPaths,
         github_url: formData.github_url || "",
         promo_url: formData.promo_url || "",
+        skill_md: extractedSkillMd || "",
         security_report: {
             score: safetyScore,
             status: "PASSED",
