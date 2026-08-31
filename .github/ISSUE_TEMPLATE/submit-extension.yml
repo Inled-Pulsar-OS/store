@@ -1,0 +1,84 @@
+name: "🧩 Publicar Extensión de GNOME"
+description: "Envía una extensión para GNOME Shell para auditar con OpenCode (GJS) y VirusTotal"
+title: "[Extension]: "
+labels: ["nueva-extension", "gnome"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🧩 Publicación de Extensión de GNOME Shell
+        Sube el archivo ZIP con `metadata.json` y `extension.js`.
+  - type: input
+    id: id
+    attributes:
+      label: "Extension UUID"
+      description: "UUID oficial de la extensión declarado en metadata.json"
+      placeholder: "mi-extension@pulsar.org"
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: "Nombre de la Extensión"
+      placeholder: "Transparent Top Bar"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descripción"
+      placeholder: "Describe la funcionalidad de la extensión..."
+    validations:
+      required: true
+  - type: input
+    id: github_url
+    attributes:
+      label: "Enlace al Repositorio de GitHub (Opcional)"
+      placeholder: "https://github.com/usuario/mi-extension"
+  - type: input
+    id: zip_url
+    attributes:
+      label: "Archivo .ZIP de la Extensión"
+      description: "Arrastra el archivo ZIP empaquetado aquí"
+      placeholder: "Arrastra el archivo .zip aquí..."
+    validations:
+      required: true
+  - type: input
+    id: icon_url
+    attributes:
+      label: "Icono (PNG)"
+      description: "Arrastra una imagen PNG cuadrada (mínimo 128x128)"
+      placeholder: "Arrastra el icono PNG aquí..."
+    validations:
+      required: true
+  - type: textarea
+    id: demo_urls
+    attributes:
+      label: "Capturas de Pantalla (Demos)"
+      placeholder: "Arrastra imágenes demo1.png, demo2.png..."
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### ⚙️ Configuración del Agente OpenCode / Proveedor de IA (Opcional)
+  - type: dropdown
+    id: ai_provider
+    attributes:
+      label: "Proveedor de IA para Auditoría"
+      options:
+        - "Por defecto (Groq Llama 3.3 70B del repositorio)"
+        - "Groq"
+        - "OpenAI"
+        - "OpenRouter"
+        - "DeepSeek"
+        - "Anthropic"
+  - type: input
+    id: ai_api_key
+    attributes:
+      label: "API Key de tu Proveedor (Opcional)"
+      placeholder: "gsk_... / sk-..."
+  - type: input
+    id: ai_model
+    attributes:
+      label: "Modelo de IA Personalizado (Opcional)"
+      placeholder: "llama-3.3-70b-versatile"

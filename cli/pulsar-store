@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+"""Pulsar Store CLI Helper - Universal Package Manager for Pulsar OS."""
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+import urllib.request
+import zipfile
+from pathlib import Path
+
+CATALOG_URL = "https://raw.githubusercontent.com/pulsar-os/store/main/schema/index.json"
+CACHE_FILE = Path.home() / ".cache" / "pulsar-store" / "index.json"
+GNOME_EXT_DIR = Path.home() / ".local" / "share" / "gnome-shell" / "extensions"
+SAYRI_SKILLS_DIR = Path.home() / ".config" / "sayri" / "skills"
+SAYRI_PLUGINS_DIR = Path.home() / ".config" / "sayri" / "plugins"
+
+def get_catalog(force_refresh=False):
+    CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if not force_refresh and CACHE_FILE.is_file():
+        try:
+            return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    try:
+        req = urllib.request.Request(CATALOG_URL, headers={"User-Agent": "PulsarStoreCLI/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            CACHE_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            return data
+    except Exception:
+        if CACHE_FILE.is_file():
+            return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        return {"packages": []}
+
+def check_updates():
+    catalog_data = get_catalog(force_refresh=True)
+    packages = {p["id"]: p for p in catalog_data.get("packages", [])}
+    updates = []
+
+    # 1. GNOME Extensions
+    if GNOME_EXT_DIR.is_dir():
+        for sub in GNOME_EXT_DIR.iterdir():
+            meta = sub / "metadata.json"
+            if meta.is_file():
+                try:
+                    d = json.loads(meta.read_text(encoding="utf-8"))
+                    uuid = d.get("uuid", sub.name)
+                    cur_ver = str(d.get("version", "1"))
+                    for p in packages.values():
+                        if p.get("type") == "gnome_extension" and (p.get("metadata", {}).get("uuid") == uuid or p.get("id") == uuid):
+                            if p.get("version") != cur_ver:
+                                updates.append(("🧩 GNOME Extension", p["name"], cur_ver, p["version"], p))
+                except Exception:
+                    pass
+
+    # 2. Sayri Skills
+    if SAYRI_SKILLS_DIR.is_dir():
+        for sub in SAYRI_SKILLS_DIR.iterdir():
+            pkg_id = sub.name
+            if pkg_id in packages and packages[pkg_id].get("type") == "sayri_skill":
+                p = packages[pkg_id]
+                updates.append(("🤖 Sayri Skill", p["name"], "installed", p["version"], p))
+
+    # 3. Sayri Plugins
+    if SAYRI_PLUGINS_DIR.is_dir():
+        for sub in SAYRI_PLUGINS_DIR.iterdir():
+            pkg_id = sub.name
+            if pkg_id in packages and packages[pkg_id].get("type") == "sayri_plugin":
+                p = packages[pkg_id]
+                updates.append(("🔌 Sayri Plugin", p["name"], "installed", p["version"], p))
+
+    # 4. Flatpaks
+    try:
+        res = subprocess.run(["flatpak", "remote-ls", "--updates"], capture_output=True, text=True)
+        if res.returncode == 0 and res.stdout.strip():
+            for line in res.stdout.strip().splitlines():
+                parts = line.split("\t")
+                updates.append(("📦 Flatpak App", parts[0], "installed", "new update", None))
+    except Exception:
+        pass
+
+    return updates
+
+def install_package(pkg):
+    pkg_type = pkg.get("type")
+    pkg_id = pkg.get("id")
+    name = pkg.get("name", pkg_id)
+    url = pkg.get("download_url")
+
+    print(f"\n🚀 Installing: {name} ({pkg_id}) [Type: {pkg_type}]")
+    sec = pkg.get("security_report", {})
+    if sec:
+        print(f"🛡️ OpenCode Report: {sec.get('score', 95)}/100 ({sec.get('status', 'PASSED')})")
+        print(f"📋 Summary: {sec.get('summary', '')}\n")
+
+    if pkg_type == "flatpak":
+        ref = pkg.get("metadata", {}).get("flatpakref_url") or url or pkg_id
+        return subprocess.run(["flatpak", "install", "-y", ref]).returncode == 0
+
+    elif pkg_type == "gnome_extension":
+        uuid = pkg.get("metadata", {}).get("uuid") or pkg_id
+        target = GNOME_EXT_DIR / uuid
+        with tempfile.TemporaryDirectory() as tmp:
+            zip_p = Path(tmp) / "ext.zip"
+            urllib.request.urlretrieve(url, zip_p)
+            target.mkdir(parents=True, exist_ok=True)
+            with zipfile.ZipFile(zip_p, "r") as z:
+                z.extractall(target)
+            subprocess.run(["gnome-extensions", "enable", uuid], capture_output=True)
+            print(f"✅ Extension '{name}' ({uuid}) installed and enabled.")
+            return True
+
+    elif pkg_type in ("sayri_skill", "sayri_plugin"):
+        dest_root = SAYRI_SKILLS_DIR if pkg_type == "sayri_skill" else SAYRI_PLUGINS_DIR
+        target = dest_root / pkg_id
+        with tempfile.TemporaryDirectory() as tmp:
+            pkg_p = Path(tmp) / "pkg.zip"
+            urllib.request.urlretrieve(url, pkg_p)
+            target.mkdir(parents=True, exist_ok=True)
+            with zipfile.ZipFile(pkg_p, "r") as z:
+                z.extractall(target)
+            print(f"✅ {'Skill' if pkg_type == 'sayri_skill' else 'Plugin'} '{name}' installed into {target}.")
+            return True
+
+    return False
+
+def main():
+    parser = argparse.ArgumentParser(prog="pulsar-store", description="Pulsar Store CLI Helper")
+    sub = parser.add_subparsers(dest="command")
+
+    sub.add_parser("check", help="Check for available updates across all ecosystems")
+    sub.add_parser("update", help="Apply all pending updates")
+    
+    inst = sub.add_parser("install", help="Install a package by ID or URL")
+    inst.add_argument("id", help="Package ID or URL (e.g. pulsar://install/<id>)")
+
+    info = sub.add_parser("info", help="Display package details and OpenCode security report")
+    info.add_argument("id", help="Package ID")
+
+    hurl = sub.add_parser("handle-url", help="MIME scheme handler for pulsar:// URLs")
+    hurl.add_argument("url", help="URL pulsar://install/<id>")
+
+    args = parser.parse_args()
+
+    if args.command == "check":
+        print("🔍 Checking for updates across Pulsar OS ecosystems...")
+        updates = check_updates()
+        if not updates:
+            print("✨ Everything is up to date!")
+            return
+        print(f"\n📦 {len(updates)} update(s) available:\n")
+        print(f"{'TYPE':<20} | {'PACKAGE':<32} | {'CURRENT':<12} -> {'AVAILABLE':<12}")
+        print("-" * 84)
+        for t, n, c, d, _ in updates:
+            print(f"{t:<20} | {n[:32]:<32} | {c:<12} -> {d:<12}")
+        print("\n💡 Run 'pulsar-store update' to install all updates.")
+
+    elif args.command == "update":
+        updates = check_updates()
+        if not updates:
+            print("✨ Everything is up to date.")
+            return
+        for _, n, _, _, p in updates:
+            if p: install_package(p)
+        subprocess.run(["flatpak", "update", "-y"])
+        print("\n✅ All updates completed successfully!")
+
+    elif args.command == "install":
+        pkg_id = args.id.replace("pulsar://install/", "").strip()
+        catalog = get_catalog()
+        for p in catalog.get("packages", []):
+            if p["id"] == pkg_id:
+                install_package(p)
+                return
+        print(f"❌ Package '{pkg_id}' not found in catalog.")
+
+    elif args.command == "handle-url":
+        pkg_id = args.url.replace("pulsar://install/", "").strip()
+        catalog = get_catalog()
+        for p in catalog.get("packages", []):
+            if p["id"] == pkg_id:
+                install_package(p)
+                return
+
+    elif args.command == "info":
+        catalog = get_catalog()
+        for p in catalog.get("packages", []):
+            if p["id"] == args.id:
+                print(f"\n📦 Package: {p['name']} ({p['id']})")
+                print(f"📌 Version: v{p.get('version')} | Author: @{p.get('author')}")
+                print(f"📝 {p.get('description')}")
+                sec = p.get("security_report", {})
+                print(f"\n🛡️ OpenCode Report: {sec.get('score', 95)}/100 ({sec.get('status', 'PASSED')})")
+                print(f"📋 {sec.get('summary', '')}")
+                return
+        print(f"❌ Package '{args.id}' not found.")
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,95 @@
+name: "🤖 Publicar Habilidad de Sayri (Skill)"
+description: "Envía una habilidad con SKILL.md, dependencias y scripts para el asistente Sayri"
+title: "[Skill]: "
+labels: ["nueva-skill", "sayri"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🤖 Publicación de Skill para Sayri (Estilo OpenClaw / ClawHub)
+        Sube el archivo ZIP con el archivo `SKILL.md`, `requirements.txt` (si aplica) y la carpeta `scripts/`.
+  - type: input
+    id: id
+    attributes:
+      label: "Skill ID"
+      description: "Identificador único en minúsculas y guiones (ej. discord-voice-agent, web-browser-tool)"
+      placeholder: "mi-skill-id"
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: "Nombre de la Habilidad"
+      placeholder: "Discord Voice Agent"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descripción"
+      placeholder: "Explica qué capacidades añade al asistente Sayri y qué herramientas expone..."
+    validations:
+      required: true
+  - type: dropdown
+    id: sandbox
+    attributes:
+      label: "Nivel de Sandbox Requerido"
+      options:
+        - "LEVEL_0_NO_EXEC (Solo conversación / Cero comandos)"
+        - "LEVEL_1_READONLY (Lectura de archivos aislada)"
+        - "LEVEL_2_ISOLATED_DEV (Entorno de desarrollo aislado bwrap)"
+        - "LEVEL_3_HOST_USER (Acceso a comandos de usuario estándar)"
+    validations:
+      required: true
+  - type: input
+    id: github_url
+    attributes:
+      label: "Enlace al Repositorio de GitHub (Opcional)"
+      placeholder: "https://github.com/usuario/mi-skill"
+  - type: input
+    id: zip_url
+    attributes:
+      label: "Archivo ZIP / Tarball de la Skill"
+      description: "Arrastra el archivo comprimido (.zip o .tar.gz)"
+      placeholder: "Arrastra el archivo comprimido aquí..."
+    validations:
+      required: true
+  - type: input
+    id: icon_url
+    attributes:
+      label: "Icono (PNG)"
+      description: "Arrastra una imagen PNG cuadrada (mínimo 128x128)"
+      placeholder: "Arrastra el icono PNG aquí..."
+    validations:
+      required: true
+  - type: textarea
+    id: demo_urls
+    attributes:
+      label: "Capturas de Pantalla (Opcional)"
+      placeholder: "Arrastra imágenes demo1.png..."
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### ⚙️ Configuración del Agente OpenCode / Proveedor de IA (Opcional)
+  - type: dropdown
+    id: ai_provider
+    attributes:
+      label: "Proveedor de IA para Auditoría"
+      options:
+        - "Por defecto (Groq Llama 3.3 70B del repositorio)"
+        - "Groq"
+        - "OpenAI"
+        - "OpenRouter"
+        - "DeepSeek"
+        - "Anthropic"
+  - type: input
+    id: ai_api_key
+    attributes:
+      label: "API Key de tu Proveedor (Opcional)"
+      placeholder: "gsk_... / sk-..."
+  - type: input
+    id: ai_model
+    attributes:
+      label: "Modelo de IA Personalizado (Opcional)"
+      placeholder: "llama-3.3-70b-versatile"

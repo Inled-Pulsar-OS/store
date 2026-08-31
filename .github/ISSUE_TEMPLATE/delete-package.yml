@@ -1,0 +1,12 @@
+name: "🗑️ Eliminar Paquete"
+description: "Solicita la eliminación de un paquete del catálogo (solo autores o admins)"
+title: "delete: "
+labels: ["eliminar-paquete"]
+body:
+  - type: input
+    id: id
+    attributes:
+      label: "Package ID / UUID a eliminar"
+      placeholder: "mi-paquete-id"
+    validations:
+      required: true

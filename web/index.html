@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulsar Store | Unified Ecosystem of Apps, Extensions & Sayri AI</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Ambient Chroma Glow -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo-group">
+        <div class="logo-orb">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="url(#logo-grad)" stroke-width="2.5"/>
+            <path d="M6 12C9 7 15 7 18 12" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M6 12C9 17 15 17 18 12" stroke="#ec4899" stroke-width="2.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="logo-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#a855f7"/>
+                <stop offset="1" stop-color="#ec4899"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-title">Pulsar <b>Store</b></span>
+      </div>
+
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Search applications, GNOME extensions, Sayri skills...">
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-cli-modal" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 17l6-6-6-6"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          CLI Helper
+        </button>
+        <a href="https://github.com/pulsar-os/store/issues/new/choose" target="_blank" class="btn btn-outline">
+          Submit Package ↗
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="badge-pill">🛡️ Verified with OpenCode (Groq Llama 3.3 70B) + VirusTotal</div>
+      <h1>The software hub for <span class="gradient-text">Pulsar OS</span></h1>
+      <p>Discover and install Flatpak apps, GNOME Shell extensions, and AI Skills/Plugins for the Sayri assistant.</p>
+      
+      <!-- Category Tabs -->
+      <div class="filter-tabs">
+        <button class="tab-btn active" data-type="all">All Packages</button>
+        <button class="tab-btn" data-type="flatpak">📦 Flatpak Apps</button>
+        <button class="tab-btn" data-type="gnome_extension">🧩 GNOME Extensions</button>
+        <button class="tab-btn" data-type="sayri_skill">🤖 Sayri Skills</button>
+        <button class="tab-btn" data-type="sayri_plugin">🔌 Sayri Plugins</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Catalog Grid -->
+  <main class="container">
+    <div id="packages-grid" class="packages-grid">
+      <div class="loading-spinner">Loading catalog...</div>
+    </div>
+  </main>
+
+  <!-- Package Detail Modal -->
+  <div id="package-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+      <div id="modal-content">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CLI Helper Modal -->
+  <div id="cli-modal" class="modal-backdrop hidden">
+    <div class="modal-card cli-modal-card">
+      <button class="modal-close" id="cli-modal-close-btn">&times;</button>
+      <div class="cli-modal-header">
+        <div class="cli-icon">⚡</div>
+        <h2>Pulsar Store CLI Helper</h2>
+        <p>Manage, install, and update Flatpaks, GNOME extensions, and Sayri AI skills in a single command.</p>
+      </div>
+
+      <div class="cli-install-box">
+        <span class="cli-label">Quick 1-line installation for Pulsar OS / Linux:</span>
+        <div class="code-copy-row">
+          <code>curl -fsSL https://raw.githubusercontent.com/pulsar-os/store/main/cli/install.sh | bash</code>
+          <button class="btn btn-sm btn-copy" onclick="copyCode(this, 'curl -fsSL https://raw.githubusercontent.com/pulsar-os/store/main/cli/install.sh | bash')">Copy</button>
+        </div>
+      </div>
+
+      <div class="cli-features-grid">
+        <div class="feature-item">
+          <span class="f-icon">🔍</span>
+          <b>pulsar-store check</b>
+          <span>Check updates across all 4 ecosystems</span>
+        </div>
+        <div class="feature-item">
+          <span class="f-icon">🔄</span>
+          <b>pulsar-store update</b>
+          <span>Update everything in one command</span>
+        </div>
+        <div class="feature-item">
+          <span class="f-icon">🛡️</span>
+          <b>pulsar-store audit</b>
+          <span>Audit local code with OpenCode AI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <span>Pulsar Store © 2026 • Designed for <b>Pulsar OS Pear Edition</b></span>
+      <div class="footer-links">
+        <a href="https://github.com/pulsar-os/store" target="_blank">GitHub</a>
+        <a href="https://pulsaros.org" target="_blank">Pulsar OS</a>
+        <a href="schema/index.json" target="_blank">JSON API</a>
+        <a href="CATALOG.md" target="_blank">CATALOG.md</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+name: "Validate & Publish Package (Pulsar Store)"
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  validate:
+    if: startsWith(github.event.issue.title, '[App]') || startsWith(github.event.issue.title, '[Extension]') || startsWith(github.event.issue.title, '[Skill]') || startsWith(github.event.issue.title, '[Plugin]') || startsWith(github.event.issue.title, 'update:') || startsWith(github.event.issue.title, 'edit:') || startsWith(github.event.issue.title, 'delete:')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run OpenCode AI & VirusTotal Audit Pipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          VT_API_KEY: ${{ secrets.VT_API_KEY || secrets.VIRUSTOTAL_API_KEY }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+          ISSUE_LABELS: ${{ toJson(github.event.issue.labels) }}
+          REPOSITORY: ${{ github.repository }}
+          ADMIN_USER: "jaimegh-es"
+        run: |
+          node scripts/audit.js
+          node scripts/build-catalog.js
+
+      - name: Commit & Push Changes to Storefront
+        if: success()
+        run: |
+          git config --global user.name "pulsar-store-bot[bot]"
+          git config --global user.email "pulsar-store-bot@users.noreply.github.com"
+          git add schema/index.json CATALOG.md assets/ packages/
+          git commit -m "Auto-publish package from Issue #${{ github.event.issue.number }}" || echo "No changes to commit"
+          git push

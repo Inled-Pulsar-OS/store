@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "updated_at": 1756641600,
+  "packages": [
+    {
+      "id": "sayri-skill-discord-support",
+      "type": "sayri_skill",
+      "name": "Discord Voice & Support Agent",
+      "description": "Autonomous AI support subagent for Discord servers with zero host terminal execution permissions.",
+      "version": "1.0.0",
+      "author": "jaimegh-es",
+      "download_url": "https://raw.githubusercontent.com/pulsar-os/store/main/packages/skills/sayri-skill-discord-support.zip",
+      "icon_url": "https://raw.githubusercontent.com/pulsar-os/store/main/assets/icons/sayri-skill-discord-support.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/pulsar-os/sayri",
+      "promo_url": "",
+      "security_report": {
+        "score": 98,
+        "status": "PASSED",
+        "audited_by": "OpenCode (llama-3.3-70b-versatile) + VirusTotal",
+        "summary": "Clean skill with sandboxed Level 0 isolation. No unauthorized network or disk access detected.",
+        "virustotal_detections": 0,
+        "timestamp": 1756641600
+      },
+      "metadata": {
+        "sandbox_level": "LEVEL_0_NO_EXEC"
+      }
+    },
+    {
+      "id": "org.gnome.extension.transparent-topbar",
+      "type": "gnome_extension",
+      "name": "Transparent Top Bar",
+      "description": "Make the GNOME Shell top panel transparent when no windows are maximized.",
+      "version": "34.0",
+      "author": "jaimegh-es",
+      "download_url": "https://raw.githubusercontent.com/pulsar-os/store/main/packages/extensions/org.gnome.extension.transparent-topbar.zip",
+      "icon_url": "https://raw.githubusercontent.com/pulsar-os/store/main/assets/icons/transparent-topbar.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/extensions-gnome/store",
+      "promo_url": "",
+      "security_report": {
+        "score": 96,
+        "status": "PASSED",
+        "audited_by": "OpenCode (GJS Llama 3.3 70B) + VirusTotal",
+        "summary": "Verified against modern ESM GNOME 45-48 review guidelines. 0 malicious detections.",
+        "virustotal_detections": 0,
+        "timestamp": 1756641600
+      },
+      "metadata": {
+        "uuid": "transparent-topbar@pulsar.org",
+        "shell_versions": ["45", "46", "47", "48"]
+      }
+    },
+    {
+      "id": "com.brave.Browser",
+      "type": "flatpak",
+      "name": "Brave Web Browser",
+      "description": "Privacy-oriented browser that automatically blocks online advertisements and website trackers.",
+      "version": "1.70.0",
+      "author": "Brave Software",
+      "download_url": "https://dl.flathub.org/repo/appstream/com.brave.Browser.flatpakref",
+      "icon_url": "https://raw.githubusercontent.com/pulsar-os/store/main/assets/icons/brave.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/flathub/com.brave.Browser",
+      "promo_url": "https://brave.com",
+      "security_report": {
+        "score": 100,
+        "status": "PASSED",
+        "audited_by": "OpenCode + VirusTotal",
+        "summary": "Flathub verified Flatpak build with isolated sandbox permissions.",
+        "virustotal_detections": 0,
+        "timestamp": 1756641600
+      },
+      "metadata": {
+        "sandbox_level": "FLATPAK_ISOLATED"
+      }
+    }
+  ]
+}

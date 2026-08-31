@@ -1,0 +1,19 @@
+name: "🔄 Actualizar Paquete Existente"
+description: "Envía una nueva versión de un paquete ya existente en Pulsar Store"
+title: "update: "
+labels: ["actualizacion-zip"]
+body:
+  - type: input
+    id: id
+    attributes:
+      label: "Package ID / UUID"
+      placeholder: "org.mi-app.id / mi-skill-id"
+    validations:
+      required: true
+  - type: input
+    id: zip_url
+    attributes:
+      label: "Nuevo Archivo ZIP / Flatpak"
+      placeholder: "Arrastra el archivo actualizado aquí..."
+    validations:
+      required: true

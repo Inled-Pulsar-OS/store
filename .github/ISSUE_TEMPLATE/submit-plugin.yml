@@ -1,0 +1,78 @@
+name: "🔌 Publicar Plugin / Gateway de Sayri"
+description: "Envía un plugin fuera de proceso (Discord, Telegram, MCP) con plugin.yaml para Sayri"
+title: "[Plugin]: "
+labels: ["nuevo-plugin", "sayri-gateway"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🔌 Publicación de Plugin / Gateway para Sayri
+        Sube el archivo ZIP con el manifiesto `plugin.yaml` y el código fuente.
+  - type: input
+    id: id
+    attributes:
+      label: "Plugin ID"
+      placeholder: "org.pulsar.gateway.discord"
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: "Nombre del Plugin"
+      placeholder: "Discord Gateway"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descripción y Capacidades Requeridas"
+      placeholder: "Describe qué canales conecta y los permisos de red/IPC declarados en plugin.yaml..."
+    validations:
+      required: true
+  - type: input
+    id: github_url
+    attributes:
+      label: "Enlace al Repositorio de GitHub"
+      placeholder: "https://github.com/usuario/sayri-discord-plugin"
+    validations:
+      required: true
+  - type: input
+    id: zip_url
+    attributes:
+      label: "Archivo ZIP / Tarball del Plugin"
+      placeholder: "Arrastra el archivo comprimido aquí..."
+    validations:
+      required: true
+  - type: input
+    id: icon_url
+    attributes:
+      label: "Icono (PNG)"
+      placeholder: "Arrastra el icono PNG aquí..."
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### ⚙️ Configuración del Agente OpenCode / Proveedor de IA (Opcional)
+  - type: dropdown
+    id: ai_provider
+    attributes:
+      label: "Proveedor de IA para Auditoría"
+      options:
+        - "Por defecto (Groq Llama 3.3 70B del repositorio)"
+        - "Groq"
+        - "OpenAI"
+        - "OpenRouter"
+        - "DeepSeek"
+        - "Anthropic"
+  - type: input
+    id: ai_api_key
+    attributes:
+      label: "API Key de tu Proveedor (Opcional)"
+      placeholder: "gsk_... / sk-..."
+  - type: input
+    id: ai_model
+    attributes:
+      label: "Modelo de IA Personalizado (Opcional)"
+      placeholder: "llama-3.3-70b-versatile"
