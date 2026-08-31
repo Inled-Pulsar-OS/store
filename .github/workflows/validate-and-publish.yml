@@ -3,10 +3,18 @@ name: "Validate & Publish Package (Pulsar Store)"
 on:
   issues:
     types: [opened, edited]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to process'
+        required: true
+        type: string
 
 jobs:
   validate:
-    if: startsWith(github.event.issue.title, '[App]') || startsWith(github.event.issue.title, '[Extension]') || startsWith(github.event.issue.title, '[Skill]') || startsWith(github.event.issue.title, '[Plugin]') || startsWith(github.event.issue.title, 'update:') || startsWith(github.event.issue.title, 'edit:') || startsWith(github.event.issue.title, 'delete:')
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.issue.title, '[App]') || startsWith(github.event.issue.title, '[Extension]') || startsWith(github.event.issue.title, '[Skill]') || startsWith(github.event.issue.title, '[Plugin]') || startsWith(github.event.issue.title, 'update:') || startsWith(github.event.issue.title, 'edit:') || startsWith(github.event.issue.title, 'delete:')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -25,6 +33,24 @@ jobs:
         run: |
           npm install
 
+      - name: Fetch issue data (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUM=${{ inputs.issue_number }}
+          echo "Fetching issue #${ISSUE_NUM}..."
+          gh issue view $ISSUE_NUM --repo ${{ github.repository }} --json title,body,user,labels > /tmp/issue.json
+          TITLE=$(cat /tmp/issue.json | jq -r '.title')
+          BODY=$(cat /tmp/issue.json | jq -r '.body')
+          USER=$(cat /tmp/issue.json | jq -r '.user.login')
+          LABELS=$(cat /tmp/issue.json | jq -c '[.labels[] | {name: .name}]')
+          echo "ISSUE_TITLE=$TITLE" >> $GITHUB_ENV
+          echo "ISSUE_BODY=$BODY" >> $GITHUB_ENV
+          echo "ISSUE_USER=$USER" >> $GITHUB_ENV
+          echo "ISSUE_LABELS=$LABELS" >> $GITHUB_ENV
+          echo "ISSUE_NUMBER=$ISSUE_NUM" >> $GITHUB_ENV
+
       - name: Run OpenCode AI & VirusTotal Audit Pipeline
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -33,11 +59,11 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           VT_API_KEY: ${{ secrets.VT_API_KEY || secrets.VIRUSTOTAL_API_KEY }}
           VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY || secrets.VT_API_KEY }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
-          ISSUE_USER: ${{ github.event.issue.user.login }}
-          ISSUE_LABELS: ${{ toJson(github.event.issue.labels) }}
+          ISSUE_BODY: ${{ github.event.issue.body || env.ISSUE_BODY }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || env.ISSUE_NUMBER }}
+          ISSUE_TITLE: ${{ github.event.issue.title || env.ISSUE_TITLE }}
+          ISSUE_USER: ${{ github.event.issue.user.login || env.ISSUE_USER }}
+          ISSUE_LABELS: ${{ github.event.issue.labels && toJson(github.event.issue.labels) || env.ISSUE_LABELS }}
           REPOSITORY: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
