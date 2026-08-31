@@ -1,0 +1,36 @@
+name: "Admin: Delete Package from Store"
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_id:
+        description: "Package ID to delete (e.g. org.videolan.VLC or sayri-skill-discord-support)"
+        required: true
+        type: string
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Purge package from catalog
+        run: |
+          npm install
+          node scripts/delete-package.js "${{ github.event.inputs.package_id }}"
+
+      - name: Commit & Push Changes
+        run: |
+          git config --global user.name "pulsar-store-bot[bot]"
+          git config --global user.email "pulsar-store-bot@users.noreply.github.com"
+          git add schema/index.json CATALOG.md assets/
+          git commit -m "chore(store): admin delete package '${{ github.event.inputs.package_id }}'" || echo "No changes to commit"
+          git push

@@ -211,22 +211,29 @@ async function run() {
     if (mode === 'delete') {
         if (!pkgId) await failAudit('prep', 'Package ID is required for deletion.');
         if (!targetPkg) await failAudit('prep', `Package ${pkgId} not found in catalog.`);
-        if (issueUser !== ADMIN_USER && targetPkg.author !== issueUser) {
-            await failAudit('prep', `Unauthorized: You do not own package ${pkgId}.`);
+        const adminUser = process.env.ADMIN_USER || "jaimegh-es";
+        if (issueUser.toLowerCase() !== adminUser.toLowerCase() && targetPkg.author !== issueUser) {
+            await failAudit('prep', `Unauthorized: Only administrator @${adminUser} or package author @${targetPkg.author} can unpublish this package.`);
         }
         
-        await updateStep('prep', 'success', `Deleting package ${pkgId}...`);
+        await updateStep('prep', 'success', `Deleting package '${targetPkg.name}' (${pkgId})...`);
         db.packages = db.packages.filter(e => e.id !== pkgId);
+        db.updated_at = Math.floor(Date.now() / 1000);
         fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
 
-        const archiveFile = path.join('packages', pkgType === 'flatpak' ? 'apps' : (pkgType === 'gnome_extension' ? 'extensions' : (pkgType === 'sayri_skill' ? 'skills' : 'plugins')), `${pkgId}.zip`);
-        if (fs.existsSync(archiveFile)) fs.unlinkSync(archiveFile);
         const iconFile = path.join('assets/icons', `${pkgId}.png`);
         if (fs.existsSync(iconFile)) fs.unlinkSync(iconFile);
         const demosDir = path.join('assets/demos', pkgId);
         if (fs.existsSync(demosDir)) fs.rmSync(demosDir, { recursive: true, force: true });
 
-        await updateStep('publish', 'success', `Package ${pkgId} successfully deleted from catalog.`);
+        // Rebuild catalog and dist
+        try {
+            const { execSync } = require('child_process');
+            execSync('node scripts/build-catalog.js', { stdio: 'inherit' });
+            execSync('node scripts/build-dist.js', { stdio: 'inherit' });
+        } catch (e) {}
+
+        await updateStep('publish', 'success', `🗑️ Package '${targetPkg.name}' (${pkgId}) successfully deleted and unpublished from Pulsar Store by @${issueUser}.`);
         process.exit(0);
     }
 

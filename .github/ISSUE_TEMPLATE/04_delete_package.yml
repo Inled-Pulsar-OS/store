@@ -1,0 +1,26 @@
+name: "🗑️ Unpublish / Delete Package Request"
+description: "Request removal of a package from the Pulsar Store (Admin or Package Author only)."
+title: "[Delete]: "
+labels: ["delete-package"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🗑️ Pulsar Store Package Removal
+        Only the original package author or repository administrators (`jaimegh-es`) can remove packages from the catalog.
+  - type: input
+    id: id
+    attributes:
+      label: "Package ID"
+      description: "The unique identifier of the package to delete (e.g. sayri-skill-discord-support or com.brave.Browser)."
+      placeholder: "e.g. sayri-skill-discord-support"
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: "Reason for Removal"
+      description: "Why is this package being unpublished?"
+      placeholder: "Deprecated, author request, security issue..."
+    validations:
+      required: true
