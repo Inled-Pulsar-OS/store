@@ -1,6 +1,6 @@
 /**
  * Pulsar Store — Frontend Application Controller
- * Clean, accessible, classic software hub logic.
+ * Styled & architected in harmony with os.inled.es.
  */
 
 let allPackages = [];
@@ -32,22 +32,46 @@ const typeMeta = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  init();
+  initTheme();
+  setupEventListeners();
+  loadCatalog();
+  handleUrlHash();
 });
 
-async function init() {
-  setupEventListeners();
-  await loadCatalog();
-  handleUrlHash();
+// ── Theme Management (Matches os.inled.es Theme System) ───────────────────
+function initTheme() {
+  const savedTheme = localStorage.getItem('pulsar-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+
+  applyTheme(isDark);
+
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const nowDark = !document.documentElement.classList.contains('dark');
+      applyTheme(nowDark);
+      localStorage.setItem('pulsar-theme', nowDark ? 'dark' : 'light');
+    });
+  }
 }
 
-// ── Event Listeners & Shortcuts ──────────────────────────────────────────
+function applyTheme(isDark) {
+  document.documentElement.classList.toggle('dark', isDark);
+  const sun = document.querySelector('.sun-icon');
+  const moon = document.querySelector('.moon-icon');
+  if (sun && moon) {
+    sun.classList.toggle('hidden', isDark);
+    moon.classList.toggle('hidden', !isDark);
+  }
+}
+
+// ── Event Listeners & Hotkeys ─────────────────────────────────────────────
 function setupEventListeners() {
   const searchInput = document.getElementById('search-input');
   const searchClear = document.getElementById('search-clear');
   const sortSelect = document.getElementById('sort-select');
 
-  // Search input
   searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value.trim().toLowerCase();
     searchClear.classList.toggle('hidden', searchQuery.length === 0);
@@ -62,20 +86,14 @@ function setupEventListeners() {
     renderPackages();
   });
 
-  // Keyboard shortcut (Ctrl+K or / to search, Esc to clear/close modals)
   window.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
       searchInput.focus();
       searchInput.select();
     } else if (e.key === 'Escape') {
-      if (!document.getElementById('package-modal').classList.contains('hidden')) {
-        closeModal('package-modal');
-      } else if (!document.getElementById('cli-modal').classList.contains('hidden')) {
-        closeModal('cli-modal');
-      } else if (!document.getElementById('submit-modal').classList.contains('hidden')) {
-        closeModal('submit-modal');
-      } else if (searchInput === document.activeElement && searchInput.value) {
+      closeAllModals();
+      if (searchInput === document.activeElement && searchInput.value) {
         searchInput.value = '';
         searchQuery = '';
         searchClear.classList.add('hidden');
@@ -84,33 +102,30 @@ function setupEventListeners() {
     }
   });
 
-  // Sort select
   sortSelect.addEventListener('change', (e) => {
     currentSort = e.target.value;
     renderPackages();
   });
 
-  // Tab buttons
-  document.querySelectorAll('.seg-btn').forEach(btn => {
+  document.querySelectorAll('.pill-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       setFilter(btn.getAttribute('data-type'));
     });
   });
 
-  // Modals close buttons
+  // Modal close buttons
   document.getElementById('modal-close-btn').addEventListener('click', () => closeModal('package-modal'));
   document.getElementById('cli-modal-close-btn').addEventListener('click', () => closeModal('cli-modal'));
   document.getElementById('submit-modal-close-btn').addEventListener('click', () => closeModal('submit-modal'));
 
-  // Modals backdrop clicks
-  ['package-modal', 'cli-modal', 'submit-modal'].forEach(modalId => {
-    const el = document.getElementById(modalId);
-    el.addEventListener('click', (e) => {
-      if (e.target === el) closeModal(modalId);
+  // Backdrop clicks for <dialog>
+  ['package-modal', 'cli-modal', 'submit-modal'].forEach(id => {
+    const dialog = document.getElementById(id);
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) closeModal(id);
     });
   });
 
-  // Open helper modals
   document.getElementById('btn-open-cli').addEventListener('click', () => openModal('cli-modal'));
   document.getElementById('btn-open-submit').addEventListener('click', () => openModal('submit-modal'));
 
@@ -130,9 +145,9 @@ async function loadCatalog() {
   } catch (err) {
     console.error("Failed to load catalog index:", err);
     grid.innerHTML = `
-      <div class="empty-state">
-        <h3>Unable to load software repository</h3>
-        <p>Could not retrieve <code>schema/index.json</code> (${err.message}).</p>
+      <div style="grid-column: 1 / -1; text-align: center; padding: 48px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;">
+        <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 8px;">Unable to load repository index</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Could not fetch <code>schema/index.json</code> (${escapeHtml(err.message)}).</p>
       </div>
     `;
   }
@@ -150,10 +165,10 @@ function updateTabCounts() {
   }
 }
 
-// ── Filtering & Rendering ────────────────────────────────────────────────
+// ── Filter & Render ───────────────────────────────────────────────────────
 function setFilter(type) {
   currentFilter = type;
-  document.querySelectorAll('.seg-btn').forEach(btn => {
+  document.querySelectorAll('.pill-tab').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-type') === type);
   });
 
@@ -173,7 +188,6 @@ function renderPackages() {
   const grid = document.getElementById('packages-grid');
   const countLabel = document.getElementById('catalog-count-label');
 
-  // Filter
   let filtered = allPackages.filter(pkg => {
     const matchesType = currentFilter === 'all' || pkg.type === currentFilter;
     const matchesSearch = !searchQuery ||
@@ -184,14 +198,12 @@ function renderPackages() {
     return matchesType && matchesSearch;
   });
 
-  // Sort
   filtered.sort((a, b) => {
     if (currentSort === 'name') {
       return a.name.localeCompare(b.name);
     } else if (currentSort === 'version') {
       return (b.version || '').localeCompare(a.version || '');
     } else {
-      // verified / default
       const scoreA = a.security_report?.score || 0;
       const scoreB = b.security_report?.score || 0;
       return scoreB - scoreA;
@@ -202,9 +214,9 @@ function renderPackages() {
 
   if (filtered.length === 0) {
     grid.innerHTML = `
-      <div class="empty-state">
-        <h3>No matching packages found</h3>
-        <p>Try adjusting your search query or switching category filters.</p>
+      <div style="grid-column: 1 / -1; text-align: center; padding: 48px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;">
+        <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 8px;">No packages found</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Try searching for another keyword or selecting a different category.</p>
       </div>
     `;
     return;
@@ -214,12 +226,12 @@ function renderPackages() {
     const meta = typeMeta[pkg.type] || { label: pkg.type, category: 'Software', iconSvg: '' };
     const score = pkg.security_report?.score || 95;
     const isVerified = (pkg.security_report?.status === 'PASSED') || score >= 90;
-    const sandboxTag = pkg.metadata?.sandbox_level ? `<span class="tag-pill">🔒 ${escapeHtml(pkg.metadata.sandbox_level)}</span>` : '';
+    const sandboxTag = pkg.metadata?.sandbox_level ? `<span class="badge-tag">🔒 ${escapeHtml(pkg.metadata.sandbox_level)}</span>` : '';
 
     return `
       <article class="pkg-card" data-id="${escapeHtml(pkg.id)}">
         <div class="card-top">
-          <div class="card-icon-box">
+          <div class="card-icon-frame">
             ${pkg.icon_url 
               ? `<img src="${escapeHtml(pkg.icon_url)}" class="card-icon" alt="${escapeHtml(pkg.name)}" onerror="this.outerHTML='${meta.iconSvg.replace(/"/g, '&quot;')}'">`
               : meta.iconSvg
@@ -227,27 +239,27 @@ function renderPackages() {
           </div>
           <div class="card-info">
             <div class="card-title-row">
-              <h2 class="card-title" onclick="openDetailModal('${escapeHtml(pkg.id)}')">${escapeHtml(pkg.name)}</h2>
-              <span class="version-tag">v${escapeHtml(pkg.version || '1.0')}</span>
+              <h3 class="card-title" onclick="openDetailModal('${escapeHtml(pkg.id)}')">${escapeHtml(pkg.name)}</h3>
+              <span class="version-pill">v${escapeHtml(pkg.version || '1.0')}</span>
             </div>
-            <div class="card-author">by @${escapeHtml(pkg.author || 'Pulsar Maintainers')}</div>
-            <p class="card-desc">${escapeHtml(pkg.description || 'No description provided.')}</p>
+            <div class="card-author">by @${escapeHtml(pkg.author || 'Pulsar')}</div>
+            <p class="card-desc">${escapeHtml(pkg.description || '')}</p>
           </div>
         </div>
 
-        <div class="card-tags-row">
-          <span class="tag-pill">${escapeHtml(meta.label)}</span>
-          ${isVerified ? `<span class="tag-pill tag-verified">✓ Verified (${score}/100)</span>` : ''}
+        <div class="card-badges-row">
+          <span class="badge-tag">${escapeHtml(meta.label)}</span>
+          ${isVerified ? `<span class="badge-tag badge-verified">✓ Verified (${score}/100)</span>` : ''}
           ${sandboxTag}
         </div>
 
         <div class="card-bottom">
-          <span class="card-id-code" title="${escapeHtml(pkg.id)}">${escapeHtml(pkg.id)}</span>
-          <div class="card-btn-group">
-            <button class="btn btn-secondary" onclick="openDetailModal('${escapeHtml(pkg.id)}')">
+          <span class="card-id-label" title="${escapeHtml(pkg.id)}">${escapeHtml(pkg.id)}</span>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="openDetailModal('${escapeHtml(pkg.id)}')">
               Details
             </button>
-            <a href="pulsar://install/${escapeHtml(pkg.id)}" class="btn btn-primary">
+            <a href="pulsar://install/${escapeHtml(pkg.id)}" class="btn btn-primary btn-sm">
               Install
             </a>
           </div>
@@ -267,109 +279,125 @@ function openDetailModal(pkgId) {
   const content = document.getElementById('modal-content');
 
   content.innerHTML = `
-    <div class="modal-header-hero">
-      <div class="card-icon-box" style="width: 64px; height: 64px;">
+    <div style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px;">
+      <div class="card-icon-frame" style="width: 64px; height: 64px;">
         ${pkg.icon_url 
-          ? `<img src="${escapeHtml(pkg.icon_url)}" class="modal-hero-icon" alt="${escapeHtml(pkg.name)}" onerror="this.outerHTML='${meta.iconSvg.replace(/"/g, '&quot;')}'">`
+          ? `<img src="${escapeHtml(pkg.icon_url)}" style="width: 100%; height: 100%; object-fit: cover;" alt="${escapeHtml(pkg.name)}" onerror="this.outerHTML='${meta.iconSvg.replace(/"/g, '&quot;')}'">`
           : meta.iconSvg
         }
       </div>
       <div>
-        <h2 class="modal-hero-title">${escapeHtml(pkg.name)}</h2>
-        <div class="modal-hero-author">Author: @${escapeHtml(pkg.author || 'Pulsar')} • Version: v${escapeHtml(pkg.version || '1.0')}</div>
-        <div class="card-tags-row">
-          <span class="tag-pill">${escapeHtml(meta.label)}</span>
-          <span class="tag-pill tag-verified">✓ OpenCode Verified (${score}/100)</span>
-          ${pkg.metadata?.sandbox_level ? `<span class="tag-pill">🔒 ${escapeHtml(pkg.metadata.sandbox_level)}</span>` : ''}
+        <h3 style="font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; margin-bottom: 2px;">${escapeHtml(pkg.name)}</h3>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Author: @${escapeHtml(pkg.author || 'Pulsar')} • Version: v${escapeHtml(pkg.version || '1.0')}</div>
+        <div class="card-badges-row">
+          <span class="badge-tag">${escapeHtml(meta.label)}</span>
+          <span class="badge-tag badge-verified">✓ OpenCode Verified (${score}/100)</span>
+          ${pkg.metadata?.sandbox_level ? `<span class="badge-tag">🔒 ${escapeHtml(pkg.metadata.sandbox_level)}</span>` : ''}
         </div>
       </div>
     </div>
 
-    <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 18px;">
       ${escapeHtml(pkg.description || '')}
     </p>
 
     <!-- Terminal Install Box -->
-    <div class="spec-card">
-      <div class="spec-card-title">Terminal Installation Command</div>
+    <div class="code-card">
+      <div class="code-card-label">Terminal Installation Command</div>
       <div class="code-box">
         <code>pulsar-store install ${escapeHtml(pkg.id)}</code>
         <button class="btn-copy" onclick="copyCode(this, 'pulsar-store install ${escapeHtml(pkg.id)}')">Copy</button>
       </div>
     </div>
 
-    <!-- Specifications Table -->
-    <div class="spec-card">
-      <div class="spec-card-title">Technical Specifications</div>
-      <table class="spec-table">
+    <!-- Technical Specs Table -->
+    <div class="code-card" style="margin-top: 14px;">
+      <div class="code-card-label">Package Specifications</div>
+      <table class="specs-table">
         <tbody>
           <tr>
             <th>Package ID</th>
             <td><code>${escapeHtml(pkg.id)}</code></td>
           </tr>
           <tr>
-            <th>Type / Ecosystem</th>
+            <th>Ecosystem</th>
             <td>${escapeHtml(meta.label)} (${escapeHtml(meta.category)})</td>
           </tr>
           <tr>
-            <th>Sandbox Isolation</th>
-            <td>${escapeHtml(pkg.metadata?.sandbox_level || 'Default Container / User Host')}</td>
+            <th>Sandbox Level</th>
+            <td>${escapeHtml(pkg.metadata?.sandbox_level || 'Container Isolated')}</td>
           </tr>
           ${pkg.metadata?.shell_versions ? `
           <tr>
-            <th>GNOME Shell Compatibility</th>
+            <th>GNOME Shell</th>
             <td>${escapeHtml(pkg.metadata.shell_versions.join(', '))}</td>
           </tr>` : ''}
           <tr>
-            <th>Audited By</th>
-            <td>${escapeHtml(pkg.security_report?.audited_by || 'OpenCode Static Analysis')}</td>
+            <th>Security Audit</th>
+            <td>${escapeHtml(pkg.security_report?.audited_by || 'OpenCode Automated Audit')}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <!-- Security Audit Details -->
-    <div class="spec-card" style="border-left: 3px solid var(--status-green);">
-      <div class="spec-card-title" style="color: var(--status-green);">Security &amp; Sandboxing Report</div>
-      <p style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.45; margin-bottom: 6px;">
-        ${escapeHtml(pkg.security_report?.summary || 'Clean source code verified with 0 malicious patterns detected.')}
+    <div class="code-card" style="margin-top: 14px; border-left: 3px solid var(--status-green);">
+      <div class="code-card-label" style="color: var(--status-green);">OpenCode Security Report</div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;">
+        ${escapeHtml(pkg.security_report?.summary || 'Verified with zero malicious patterns.')}
       </p>
-      <span style="font-size: 11px; color: var(--text-muted);">VirusTotal Detections: 0/72 engines clean</span>
+      <span style="font-size: 0.75rem; color: var(--text-muted);">VirusTotal Scan: 0/72 engines clean</span>
     </div>
 
     <!-- Action Buttons -->
-    <div style="display: flex; gap: 10px; margin-top: 18px;">
-      <a href="pulsar://install/${escapeHtml(pkg.id)}" class="btn btn-primary" style="flex: 1; justify-content: center; padding: 8px 16px;">
+    <div style="display: flex; gap: 12px; margin-top: 24px;">
+      <a href="pulsar://install/${escapeHtml(pkg.id)}" class="btn btn-primary" style="flex: 1;">
         Install with Pulsar OS
       </a>
-      ${pkg.github_url ? `<a href="${escapeHtml(pkg.github_url)}" target="_blank" class="btn btn-secondary">Source Code ↗</a>` : ''}
+      ${pkg.github_url ? `<a href="${escapeHtml(pkg.github_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Source Code ↗</a>` : ''}
     </div>
   `;
 
   openModal('package-modal');
 }
 
-// ── Modals & Clipboard Helpers ───────────────────────────────────────────
+// ── Modals & Clipboard ────────────────────────────────────────────────────
 function openModal(id) {
-  document.getElementById(id).classList.remove('hidden');
+  const modal = document.getElementById(id);
+  if (modal) {
+    if (typeof modal.showModal === 'function') {
+      modal.showModal();
+    } else {
+      modal.setAttribute('open', '');
+    }
+  }
 }
 
 function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
+  const modal = document.getElementById(id);
+  if (modal) {
+    if (typeof modal.close === 'function') {
+      modal.close();
+    } else {
+      modal.removeAttribute('open');
+    }
+  }
+}
+
+function closeAllModals() {
+  ['package-modal', 'cli-modal', 'submit-modal'].forEach(closeModal);
 }
 
 function copyCode(btn, text) {
   navigator.clipboard.writeText(text).then(() => {
-    const originalText = btn.textContent;
+    const orig = btn.textContent;
     btn.textContent = 'Copied!';
-    btn.style.color = '#10b981';
+    btn.style.color = 'var(--status-green)';
     setTimeout(() => {
-      btn.textContent = originalText;
+      btn.textContent = orig;
       btn.style.color = '';
     }, 1500);
-  }).catch(err => {
-    console.error('Failed to copy text: ', err);
-  });
+  }).catch(err => console.error(err));
 }
 
 function handleUrlHash() {
@@ -378,8 +406,7 @@ function handleUrlHash() {
   if (['all', 'flatpak', 'gnome_extension', 'sayri_skill', 'sayri_plugin'].includes(hash)) {
     setFilter(hash);
   } else if (hash.startsWith('pkg=')) {
-    const pkgId = hash.replace('pkg=', '');
-    openDetailModal(pkgId);
+    openDetailModal(hash.replace('pkg=', ''));
   }
 }
 

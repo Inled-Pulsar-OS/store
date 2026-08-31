@@ -3,137 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pulsar Store | Applications, Extensions & Sayri Skills</title>
+  <title>Pulsar Store — Applications, Extensions & Sayri AI Skills</title>
+  
+  <!-- Fonts: Space Grotesk for display and Inter for body text (Identical to os.inled.es) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='M12 3v18'/><path d='M3 12h18'/></svg>">
+  <link rel="icon" type="image/png" href="https://hosted.inled.es/pulsar-logo-simple-sf.png">
 </head>
 <body>
 
-  <!-- Top Navigation Bar (Classic App Store Style) -->
-  <header class="app-header">
+  <!-- Floating Header (Identical to os.inled.es) -->
+  <header class="site-header">
     <div class="header-container">
-      <div class="brand-group" onclick="setFilter('all')">
-        <div class="brand-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-            <line x1="8" y1="21" x2="16" y2="21"/>
-            <line x1="12" y1="17" x2="12" y2="21"/>
-          </svg>
-        </div>
-        <div class="brand-meta">
-          <span class="brand-name">Pulsar <b>Store</b></span>
-          <span class="brand-subtitle">Official Software Repository</span>
-        </div>
-      </div>
+      <a href="#" class="logo-container" onclick="setFilter('all'); return false;">
+        <img src="https://hosted.inled.es/pulsar-logo-simple-sf.png" alt="Pulsar OS Logo" class="logo-img">
+        <span class="logo-text">Pulsar <b>Store</b></span>
+      </a>
 
-      <!-- Search Box with Shortcut Badge -->
-      <div class="search-wrapper">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="text" id="search-input" placeholder="Search packages, skills, extensions..." autocomplete="off">
-        <button id="search-clear" class="search-clear-btn hidden" title="Clear search">×</button>
-        <div class="search-kbd-hint"><kbd>Ctrl</kbd> <kbd>K</kbd></div>
-      </div>
-
-      <!-- Action Links -->
-      <nav class="header-nav">
-        <button id="btn-open-cli" class="nav-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          CLI Tool
-        </button>
-        <button id="btn-open-submit" class="nav-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Submit
-        </button>
+      <!-- Desktop Nav Links -->
+      <nav class="nav-menu">
+        <a href="https://os.inled.es" target="_blank" rel="noopener noreferrer" class="nav-link">Pulsar OS ↗</a>
+        <button id="btn-open-cli" class="nav-link nav-btn-link">CLI Helper</button>
+        <button id="btn-open-submit" class="nav-link nav-btn-link">Submit Package</button>
         <a href="schema/index.json" target="_blank" class="nav-link">JSON API</a>
-        <a href="https://github.com/Inled-Pulsar-OS/store" target="_blank" class="nav-link github-link">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          GitHub
-        </a>
       </nav>
+
+      <!-- Right Header Actions -->
+      <div class="header-actions">
+        <!-- Theme Switcher (Light / Dark) -->
+        <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- GitHub Org Link -->
+        <a href="https://github.com/Inled-Pulsar-OS/store" target="_blank" rel="noopener noreferrer" class="btn-icon" aria-label="GitHub Repository" title="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </a>
+
+        <!-- Install CLI Button -->
+        <button onclick="openModal('cli-modal')" class="btn btn-primary btn-sm">
+          Get CLI
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- Segmented Filter Bar -->
-  <section class="toolbar-section">
-    <div class="toolbar-container">
-      <div class="segmented-control" id="category-tabs" role="tablist">
-        <button class="seg-btn active" data-type="all" role="tab">All Software <span class="count-badge" id="count-all">0</span></button>
-        <button class="seg-btn" data-type="flatpak" role="tab">Desktop Apps <span class="count-badge" id="count-flatpak">0</span></button>
-        <button class="seg-btn" data-type="gnome_extension" role="tab">GNOME Extensions <span class="count-badge" id="count-gnome_extension">0</span></button>
-        <button class="seg-btn" data-type="sayri_skill" role="tab">Sayri Skills <span class="count-badge" id="count-sayri_skill">0</span></button>
-        <button class="seg-btn" data-type="sayri_plugin" role="tab">Gateways &amp; Plugins <span class="count-badge" id="count-sayri_plugin">0</span></button>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-badge">
+        <span>Verified Software Repository</span>
+      </div>
+      <h1 class="hero-title">
+        The ecosystem store for <span class="accent-text">Pulsar OS</span>
+      </h1>
+      <p class="hero-desc">
+        Explore and install sandboxed Flatpak applications, GNOME Shell extensions, and Sayri AI subagent skills.
+      </p>
+
+      <!-- Centered Interactive Search Bar -->
+      <div class="hero-search-box">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search software, skills, extensions..." autocomplete="off">
+        <button id="search-clear" class="search-clear-btn hidden" title="Clear (Esc)">✕</button>
+        <div class="search-kbd-badge"><kbd>Ctrl</kbd> <kbd>K</kbd></div>
       </div>
 
-      <div class="sort-control">
-        <label for="sort-select">Sort:</label>
-        <select id="sort-select">
-          <option value="verified">Verified First</option>
-          <option value="name">Name (A-Z)</option>
-          <option value="version">Version</option>
-        </select>
+      <!-- Segmented Pill Categories -->
+      <div class="categories-nav" id="category-tabs" role="tablist">
+        <button class="pill-tab active" data-type="all" role="tab">All Software <span class="tab-count" id="count-all">0</span></button>
+        <button class="pill-tab" data-type="flatpak" role="tab">Flatpak Apps <span class="tab-count" id="count-flatpak">0</span></button>
+        <button class="pill-tab" data-type="gnome_extension" role="tab">GNOME Extensions <span class="tab-count" id="count-gnome_extension">0</span></button>
+        <button class="pill-tab" data-type="sayri_skill" role="tab">Sayri Skills <span class="tab-count" id="count-sayri_skill">0</span></button>
+        <button class="pill-tab" data-type="sayri_plugin" role="tab">Gateways &amp; Plugins <span class="tab-count" id="count-sayri_plugin">0</span></button>
       </div>
     </div>
   </section>
 
-  <!-- Main Content Catalog -->
-  <main class="main-container">
-    <div class="catalog-header">
-      <h1 class="catalog-title" id="catalog-title">All Software Packages</h1>
-      <span class="catalog-count" id="catalog-count-label">Loading repository index…</span>
-    </div>
+  <!-- Software Catalog Grid -->
+  <main class="catalog-section">
+    <div class="container">
+      <div class="catalog-top-bar">
+        <div>
+          <h2 class="section-heading" id="catalog-title">All Software Packages</h2>
+          <p class="section-subheading" id="catalog-count-label">Loading software catalog index…</p>
+        </div>
 
-    <!-- Package Cards Grid -->
-    <div id="packages-grid" class="packages-grid">
-      <!-- Injected via JavaScript -->
-    </div>
-  </main>
-
-  <!-- Detail Modal Dialog -->
-  <div id="package-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
-    <div class="modal-window">
-      <div class="modal-top-bar">
-        <span class="modal-dialog-title">Package Specifications</span>
-        <button class="modal-close-btn" id="modal-close-btn" title="Close (Esc)">✕</button>
+        <div class="sort-wrapper">
+          <label for="sort-select">Sort by:</label>
+          <select id="sort-select" class="sort-dropdown">
+            <option value="verified">Verified First</option>
+            <option value="name">Name (A-Z)</option>
+            <option value="version">Version</option>
+          </select>
+        </div>
       </div>
-      <div id="modal-content" class="modal-scroll-area">
+
+      <!-- Grid Cards -->
+      <div id="packages-grid" class="packages-grid">
         <!-- Injected via JavaScript -->
       </div>
     </div>
-  </div>
+  </main>
+
+  <!-- Package Specifications Detail Modal -->
+  <dialog id="package-modal" class="custom-dialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <span class="dialog-tag">Package Specifications</span>
+        <button class="dialog-close" id="modal-close-btn" title="Close (Esc)">✕</button>
+      </div>
+      <div id="modal-content" class="dialog-body">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </dialog>
 
   <!-- CLI Helper Modal -->
-  <div id="cli-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
-    <div class="modal-window cli-modal-window">
-      <div class="modal-top-bar">
-        <span class="modal-dialog-title">Pulsar Store CLI Helper</span>
-        <button class="modal-close-btn" id="cli-modal-close-btn" title="Close (Esc)">✕</button>
+  <dialog id="cli-modal" class="custom-dialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <span class="dialog-tag">Pulsar Store CLI Helper</span>
+        <button class="dialog-close" id="cli-modal-close-btn" title="Close (Esc)">✕</button>
       </div>
-      <div class="modal-scroll-area">
-        <div class="cli-intro">
-          <p>The <code>pulsar-store</code> command-line utility manages Flatpak applications, GNOME Shell extensions, and Sayri AI subagent skills directly from your Linux terminal.</p>
-        </div>
+      <div class="dialog-body">
+        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95rem;">
+          The <code>pulsar-store</code> command-line utility manages Flatpak applications, GNOME Shell extensions, and Sayri AI subagent skills directly from your terminal.
+        </p>
 
-        <div class="spec-card">
-          <div class="spec-card-title">Installation Command</div>
-          <p class="spec-card-desc">Run this single line in your terminal to install the CLI on Pulsar OS or Arch Linux:</p>
+        <div class="code-card">
+          <div class="code-card-label">Quick 1-Line Installation (Pulsar OS / Arch Linux):</div>
           <div class="code-box">
             <code>curl -fsSL https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/install.sh | bash</code>
             <button class="btn-copy" onclick="copyCode(this, 'curl -fsSL https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/install.sh | bash')">Copy</button>
           </div>
         </div>
 
-        <div class="spec-card">
-          <div class="spec-card-title">Command Reference</div>
-          <table class="cli-table">
-            <thead>
-              <tr>
-                <th>Command</th>
-                <th>Description</th>
-              </tr>
-            </thead>
+        <div class="code-card" style="margin-top: 16px;">
+          <div class="code-card-label">Command Reference:</div>
+          <table class="specs-table">
             <tbody>
               <tr>
                 <td><code>pulsar-store search &lt;query&gt;</code></td>
@@ -145,46 +173,46 @@
               </tr>
               <tr>
                 <td><code>pulsar-store check</code></td>
-                <td>Check available updates for installed packages.</td>
+                <td>Check available updates for installed software.</td>
               </tr>
               <tr>
                 <td><code>pulsar-store update</code></td>
-                <td>Upgrade all installed extensions, flatpaks, and skills.</td>
+                <td>Upgrade all extensions, flatpaks, and skills.</td>
               </tr>
               <tr>
                 <td><code>pulsar-store audit &lt;path&gt;</code></td>
-                <td>Run local automated static security check on skill/extension.</td>
+                <td>Run local OpenCode automated security check.</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- Submit Package Modal -->
-  <div id="submit-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
-    <div class="modal-window">
-      <div class="modal-top-bar">
-        <span class="modal-dialog-title">Submit Software to Pulsar Store</span>
-        <button class="modal-close-btn" id="submit-modal-close-btn" title="Close (Esc)">✕</button>
+  <dialog id="submit-modal" class="custom-dialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <span class="dialog-tag">Submit Software</span>
+        <button class="dialog-close" id="submit-modal-close-btn" title="Close (Esc)">✕</button>
       </div>
-      <div class="modal-scroll-area">
-        <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 13.5px; line-height: 1.5;">
-          All submissions are reviewed automatically via <b>OpenCode</b> static security auditing and VirusTotal malware checks before publishing.
+      <div class="dialog-body">
+        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95rem;">
+          All packages submitted to the Pulsar Store undergo automated static analysis via <b>OpenCode</b> and VirusTotal malware verification before publishing.
         </p>
 
-        <div class="spec-card">
-          <div class="spec-card-title">Method 1: GitHub Issue Template (Recommended)</div>
-          <p class="spec-card-desc">Submit your extension, flatpak, or Sayri skill through the official issue-ops workflow:</p>
-          <a href="https://github.com/Inled-Pulsar-OS/store/issues/new/choose" target="_blank" class="btn btn-primary" style="display: inline-flex; margin-top: 6px;">
-            Open GitHub Submission Form ↗
+        <div class="code-card">
+          <div class="code-card-label">Method 1: GitHub Issue Template (Recommended)</div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Submit extensions or skills through the issue-ops workflow:</p>
+          <a href="https://github.com/Inled-Pulsar-OS/store/issues/new/choose" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+            Open Submission Form ↗
           </a>
         </div>
 
-        <div class="spec-card" style="margin-top: 14px;">
-          <div class="spec-card-title">Method 2: Pull Request JSON Definition</div>
-          <p class="spec-card-desc">Add your package manifest under <code>packages/&lt;type&gt;/&lt;id&gt;.json</code> and submit a pull request:</p>
+        <div class="code-card" style="margin-top: 16px;">
+          <div class="code-card-label">Method 2: Pull Request Manifest</div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">Clone the repository and add your package JSON to <code>packages/&lt;type&gt;/&lt;id&gt;.json</code>:</p>
           <div class="code-box">
             <code>git clone https://github.com/Inled-Pulsar-OS/store.git</code>
             <button class="btn-copy" onclick="copyCode(this, 'git clone https://github.com/Inled-Pulsar-OS/store.git')">Copy</button>
@@ -192,21 +220,28 @@
         </div>
       </div>
     </div>
-  </div>
+  </dialog>
 
-  <!-- Understated Footer -->
-  <footer class="app-footer">
-    <div class="footer-container">
+  <!-- Site Footer (Identical to os.inled.es) -->
+  <footer class="site-footer">
+    <div class="container footer-container">
       <div class="footer-left">
-        <span><b>Pulsar Store</b> — Official Software and Extensions Repository</span>
-        <span class="footer-sub">All packages verified with OpenCode static analysis and sandboxed execution policies.</span>
+        <a href="https://os.inled.es" target="_blank" class="footer-logo">
+          <img src="https://hosted.inled.es/pulsar-logo-simple-sf.png" alt="Pulsar OS Logo" class="logo-img-small">
+          <span>Pulsar <b>Store</b></span>
+        </a>
       </div>
-      <div class="footer-links">
-        <a href="https://github.com/Inled-Pulsar-OS/store" target="_blank">Repository</a>
-        <a href="schema/index.json" target="_blank">JSON Index</a>
-        <a href="CATALOG.md" target="_blank">Catalog Doc</a>
-        <a href="https://pulsaros.org" target="_blank">Pulsar OS</a>
-      </div>
+      <nav class="footer-right" aria-label="Footer navigation">
+        <a href="https://github.com/Inled-Pulsar-OS" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub Organization</a>
+        <a href="https://github.com/Inled-Pulsar-OS/store" target="_blank" rel="noopener noreferrer" class="footer-link">Store Repository</a>
+        <a href="https://os.inled.es" target="_blank" rel="noopener noreferrer" class="footer-link">Pulsar OS</a>
+        <a href="schema/index.json" target="_blank" class="footer-link">JSON API</a>
+      </nav>
+    </div>
+    <div class="container">
+      <p class="footer-disclaimer">
+        Pulsar Store © 2026 • Official software and extensions hub for Pulsar OS. All packages audited and sandboxed.
+      </p>
     </div>
   </footer>
 
