@@ -243,6 +243,25 @@
     </div>
   </footer>
 
+  <!-- SKILL.md Modal Viewer -->
+  <div id="skill-md-modal" class="modal-overlay hidden" onclick="closeSkillModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.2rem;">📄</span>
+          <h3 id="modal-skill-title" style="margin:0; font-size:1.1rem;">SKILL.md</h3>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary btn-sm" id="modal-copy-btn" onclick="copyModalSkillContent()">Copy</button>
+          <button class="btn btn-secondary btn-sm" onclick="closeSkillModal()">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <pre class="skill-md-box" style="margin-bottom:0;"><code id="modal-skill-code"></code></pre>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

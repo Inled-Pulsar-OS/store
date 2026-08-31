@@ -262,12 +262,79 @@ def uninstall_package(pkg_id):
         print(f"⚠️ Package '{pkg_id}' was not found among installed software.")
     return removed
 
+CLI_REMOTE_URL = "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/pulsar-store"
+
+def self_update_cli():
+    """Checks and updates the pulsar-store CLI itself to the latest version from upstream repository."""
+    print("🔄 Checking for Pulsar Store CLI updates...")
+    try:
+        req = urllib.request.Request(CLI_REMOTE_URL, headers={"User-Agent": "PulsarStoreCLI/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            remote_code = resp.read()
+            if not remote_code.startswith(b"#!/usr/bin/env python3"):
+                print("❌ Invalid remote CLI script received.")
+                return False
+    except Exception as e:
+        print(f"⚠️ Could not check for CLI updates: {e}")
+        return False
+
+    cur_file = Path(__file__).resolve()
+    try:
+        cur_code = cur_file.read_bytes()
+    except Exception:
+        cur_code = b""
+
+    # Compare SHA256 hashes
+    remote_hash = hashlib.sha256(remote_code).hexdigest()
+    cur_hash = hashlib.sha256(cur_code).hexdigest() if cur_code else ""
+
+    if remote_hash == cur_hash:
+        print("✨ Pulsar Store CLI is already on the latest version.")
+        return True
+
+    print("🚀 Newer version of Pulsar Store CLI detected! Updating...")
+    targets = [
+        Path("/usr/bin/pulsar-store"),
+        Path.home() / ".local" / "bin" / "pulsar-store",
+    ]
+    if cur_file not in targets:
+        targets.append(cur_file)
+
+    updated_any = False
+    for t in targets:
+        try:
+            t.parent.mkdir(parents=True, exist_ok=True)
+            t.write_bytes(remote_code)
+            t.chmod(0o755)
+            print(f"✅ Updated: {t}")
+            updated_any = True
+        except PermissionError:
+            try:
+                with tempfile.NamedTemporaryFile(delete=False) as tmp_f:
+                    tmp_f.write(remote_code)
+                    tmp_name = tmp_f.name
+                subprocess.run(["pkexec", "cp", tmp_name, str(t)], check=True)
+                subprocess.run(["pkexec", "chmod", "+x", str(t)], check=True)
+                os.unlink(tmp_name)
+                print(f"✅ Updated (root): {t}")
+                updated_any = True
+            except Exception as exc:
+                print(f"⚠️ Could not update {t}: {exc}")
+        except Exception as e:
+            print(f"⚠️ Could not update {t}: {e}")
+
+    if updated_any:
+        print("🎉 Pulsar Store CLI self-update complete!")
+        return True
+    return False
+
 def main():
     parser = argparse.ArgumentParser(prog="pulsar-store", description="Pulsar Store CLI Helper")
     sub = parser.add_subparsers(dest="command")
 
     sub.add_parser("check", help="Check for available updates across all ecosystems")
-    sub.add_parser("update", help="Apply all pending updates")
+    sub.add_parser("update", help="Apply all pending updates (including CLI self-update)")
+    sub.add_parser("self-update", help="Update the pulsar-store CLI to the latest version")
     
     inst = sub.add_parser("install", help="Install a package by ID or URL")
     inst.add_argument("id", help="Package ID or URL (e.g. pulsar://install/<id>)")
@@ -291,7 +358,11 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command in ("list", "search"):
+    if args.command == "self-update":
+        self_update_cli()
+        return
+
+    elif args.command in ("list", "search"):
         q = getattr(args, "query", "").lower() if args.command == "search" else ""
         catalog = get_catalog()
         pkgs = catalog.get("packages", [])
@@ -319,6 +390,7 @@ def main():
         print("\n💡 Run 'pulsar-store update' to install all updates.")
 
     elif args.command == "update":
+        self_update_cli()
         updates = check_updates()
         if not updates:
             print("✨ Everything is up to date.")

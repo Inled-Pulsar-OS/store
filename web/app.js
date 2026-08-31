@@ -316,6 +316,7 @@ function renderGrid() {
         <div class="card-bottom">
           <span class="card-tag">by @${escapeHtml(pkg.author || 'Pulsar')}</span>
           <div class="card-actions" onclick="event.stopPropagation()">
+            ${pkg.skill_md ? `<button class="btn btn-secondary btn-sm" onclick="openSkillModal('${escapeHtml(pkg.id)}')">📄 SKILL.md</button>` : ''}
             <button class="btn btn-secondary btn-sm" onclick="showPackageDetail('${escapeHtml(pkg.id)}')">
               Details
             </button>
@@ -356,6 +357,35 @@ function copyCode(btn, text) {
       btn.style.color = '';
     }, 1500);
   }).catch(err => console.error(err));
+}
+
+let currentModalSkill = '';
+function openSkillModal(pkgId) {
+  const pkg = allPackages.find(p => p.id === pkgId);
+  if (!pkg || !pkg.skill_md) return;
+  const modal = document.getElementById('skill-md-modal');
+  const title = document.getElementById('modal-skill-title');
+  const code = document.getElementById('modal-skill-code');
+  if (modal && title && code) {
+    title.textContent = `${pkg.name} — SKILL.md`;
+    code.textContent = pkg.skill_md;
+    currentModalSkill = pkg.skill_md;
+    modal.classList.remove('hidden');
+  }
+}
+
+function copyModalSkillContent() {
+  const btn = document.getElementById('modal-copy-btn');
+  if (currentModalSkill && btn) {
+    copyCode(btn, currentModalSkill);
+  }
+}
+
+function closeSkillModal(e) {
+  if (!e || e.target.id === 'skill-md-modal' || (e.target.closest && e.target.closest('button'))) {
+    const modal = document.getElementById('skill-md-modal');
+    if (modal) modal.classList.add('hidden');
+  }
 }
 
 function escapeHtml(str) {
