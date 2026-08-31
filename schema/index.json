@@ -24,12 +24,7 @@
       },
       "metadata": {
         "uuid": "transparent-topbar@pulsar.org",
-        "shell_versions": [
-          "45",
-          "46",
-          "47",
-          "48"
-        ]
+        "shell_versions": ["45", "46", "47", "48"]
       }
     },
     {
@@ -54,12 +49,7 @@
       },
       "metadata": {
         "uuid": "dash-to-dock@micxgx.gmail.com",
-        "shell_versions": [
-          "45",
-          "46",
-          "47",
-          "48"
-        ]
+        "shell_versions": ["45", "46", "47", "48"]
       }
     },
     {
@@ -166,24 +156,15 @@
       "id": "sayri-gateway-telegram",
       "type": "sayri_skill",
       "name": "Telegram Bot Gateway",
-<<<<<<< Updated upstream
-      "description": "",
-      "version": "1.0.0",
-=======
       "description": "Bridges Sayri subagents with Telegram private chats and group channels with Desktop OTP pairing. Each user authorizes via PIN on first message — no hardcoded usernames.",
       "version": "1.1.0",
->>>>>>> Stashed changes
       "author": "jaimegh-es",
       "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/sayri-gateway-telegram.zip",
       "icon_url": "assets/icons/sayri-gateway-telegram.png",
       "demo_urls": [],
-      "github_url": "",
+      "github_url": "https://github.com/Inled-Pulsar-OS/store",
       "promo_url": "",
-<<<<<<< Updated upstream
-      "skill_md": "",
-=======
       "skill_md": "{\n  \"id\": \"sayri-gateway-telegram\",\n  \"name\": \"Telegram Bot Gateway\",\n  \"version\": \"1.1.0\",\n  \"entrypoint\": \"gateway.py\",\n  \"sandbox_level\": \"LEVEL_1_READONLY\",\n  \"required_secrets\": [\"TELEGRAM_BOT_TOKEN\"],\n  \"authorization\": {\n    \"mode\": \"pairing_otp\",\n    \"allowed_users\": [],\n    \"pairing_pin_required\": true\n  }\n}",
->>>>>>> Stashed changes
       "security_report": {
         "score": 90,
         "status": "PASSED",

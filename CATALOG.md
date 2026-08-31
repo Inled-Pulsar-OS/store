@@ -10,11 +10,7 @@ Unified repository of Flatpak applications, GNOME Shell extensions, and Sayri AI
 | **📦 Flatpak App** | **VLC Media Player** (`org.videolan.VLC`)<br>_The ultimate open source multimedia player that plays most multimedia files_ | `v3.0.21` | ![Shield](https://img.shields.io/badge/Security-100%2F100-brightgreen) | [`📲 Install`](pulsar://install/org.videolan.VLC) |
 | **🤖 Sayri Skill** | **Web Search Tool** (`sayri-skill-web-search`)<br>_Autonomous web search and public API query assistant skill for Sayri._ | `v1.2.0` | ![Shield](https://img.shields.io/badge/Security-95%2F100-brightgreen) | [`📲 Install`](pulsar://install/sayri-skill-web-search) |
 | **🤖 Sayri Skill** | **Discord Voice & Support Agent** (`sayri-skill-discord-support`)<br>_Autonomous AI support subagent for Discord servers with zero host terminal _ | `v1.0.0` | ![Shield](https://img.shields.io/badge/Security-95%2F100-brightgreen) | [`📲 Install`](pulsar://install/sayri-skill-discord-support) |
-<<<<<<< Updated upstream
-| **🤖 Sayri Skill** | **Telegram Bot Gateway** (`sayri-gateway-telegram`)<br>__ | `v1.0.0` | ![Shield](https://img.shields.io/badge/Security-90%2F100-brightgreen) | [`📲 Install`](pulsar://install/sayri-gateway-telegram) |
-=======
-| **🔌 Sayri Plugin / Gateway** | **Telegram Bot Gateway** (`sayri-gateway-telegram`)<br>_Bridges Sayri subagents with Telegram private chats and group channels with Desktop OTP pairing._ | `v1.1.0` | ![Shield](https://img.shields.io/badge/Security-97%2F100-brightgreen) | [`📲 Install`](pulsar://install/sayri-gateway-telegram) |
->>>>>>> Stashed changes
+| **🤖 Sayri Skill** | **Telegram Bot Gateway** (`sayri-gateway-telegram`)<br>_Bridges Sayri subagents with Telegram private chats and group channels with_ | `v1.1.0` | ![Shield](https://img.shields.io/badge/Security-90%2F100-brightgreen) | [`📲 Install`](pulsar://install/sayri-gateway-telegram) |
 
 ---
 *Generated automatically by Pulsar Store Pipeline with OpenCode & VirusTotal security auditing.*
