@@ -42,14 +42,16 @@ jobs:
           echo "Fetching issue #${ISSUE_NUM}..."
           gh issue view $ISSUE_NUM --repo ${{ github.repository }} --json title,body,author,labels > /tmp/issue.json
           TITLE=$(cat /tmp/issue.json | jq -r '.title')
-          BODY=$(cat /tmp/issue.json | jq -r '.body')
           USER=$(cat /tmp/issue.json | jq -r '.author.login')
           LABELS=$(cat /tmp/issue.json | jq -c '[.labels[] | {name: .name}]')
           echo "ISSUE_TITLE=$TITLE" >> $GITHUB_ENV
-          echo "ISSUE_BODY=$BODY" >> $GITHUB_ENV
           echo "ISSUE_USER=$USER" >> $GITHUB_ENV
           echo "ISSUE_LABELS=$LABELS" >> $GITHUB_ENV
           echo "ISSUE_NUMBER=$ISSUE_NUM" >> $GITHUB_ENV
+          # Use delimiter syntax for multi-line body
+          echo "ISSUE_BODY<<EOF" >> $GITHUB_ENV
+          cat /tmp/issue.json | jq -r '.body' >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Run OpenCode AI & VirusTotal Audit Pipeline
         env:
