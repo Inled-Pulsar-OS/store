@@ -24,7 +24,12 @@
       },
       "metadata": {
         "uuid": "transparent-topbar@pulsar.org",
-        "shell_versions": ["45", "46", "47", "48"]
+        "shell_versions": [
+          "45",
+          "46",
+          "47",
+          "48"
+        ]
       }
     },
     {
@@ -49,7 +54,12 @@
       },
       "metadata": {
         "uuid": "dash-to-dock@micxgx.gmail.com",
-        "shell_versions": ["45", "46", "47", "48"]
+        "shell_versions": [
+          "45",
+          "46",
+          "47",
+          "48"
+        ]
       }
     },
     {
@@ -154,28 +164,28 @@
     },
     {
       "id": "sayri-gateway-telegram",
-      "type": "sayri_plugin",
+      "type": "sayri_skill",
       "name": "Telegram Bot Gateway",
-      "description": "Bridges Sayri subagents with Telegram private chats and group channels with OTP pairing and user whitelisting.",
+      "description": "",
       "version": "1.0.0",
       "author": "jaimegh-es",
       "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/sayri-gateway-telegram.zip",
-      "icon_url": "assets/icons/telegram-gateway.png",
+      "icon_url": "assets/icons/sayri-gateway-telegram.png",
       "demo_urls": [],
-      "github_url": "https://github.com/Inled-Pulsar-OS/store",
+      "github_url": "",
       "promo_url": "",
-      "skill_md": "{\n  \"id\": \"sayri-gateway-telegram\",\n  \"name\": \"Telegram Bot Gateway\",\n  \"version\": \"1.0.0\",\n  \"entrypoint\": \"gateway.py\",\n  \"sandbox_level\": \"LEVEL_1_READONLY\",\n  \"required_secrets\": [\"TELEGRAM_BOT_TOKEN\"],\n  \"authorization\": {\n    \"mode\": \"pairing_otp\",\n    \"allowed_users\": [\"@jaime\"],\n    \"pairing_pin_required\": true\n  }\n}",
+      "skill_md": "",
       "security_report": {
-        "score": 97,
+        "score": 90,
         "status": "PASSED",
-        "audited_by": "OpenCode (Llama 3.3 70B) + VirusTotal",
-        "summary": "Clean IPC socket client adhering to LEVEL_1_READONLY sandbox and zero plaintext credentials.",
+        "audited_by": "OpenCode (openai/gpt-oss-20b) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (openai/gpt-oss-20b - Score: 90/100):\nThe code implements a Telegram gateway with OTP pairing and local IPC communication, using only standard libraries and no eval or hidden telemetry. It follows sandbox constraints, avoids destructive commands, and securely handles the bot token via environment variables.",
         "virustotal_detections": 0,
-        "timestamp": 1788183541184
+        "timestamp": 1788188792394
       },
       "metadata": {
         "shell_versions": [],
-        "sandbox_level": "LEVEL_1_READONLY"
+        "sandbox_level": "LEVEL_0_NO_EXEC"
       }
     }
   ]
