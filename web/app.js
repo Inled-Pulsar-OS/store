@@ -286,7 +286,7 @@ function renderGrid() {
     const meta = typeMeta[pkg.type] || { label: pkg.type };
 
     return `
-      <article class="pkg-card" onclick="showPackageDetail('${escapeHtml(pkg.id)}')">
+      <article class="pkg-card" onclick="window.location.hash='pkg=${escapeHtml(pkg.id)}'">
         <div class="card-top">
           <div class="card-icon-frame">
             ${pkg.icon_url 
@@ -304,7 +304,7 @@ function renderGrid() {
         <div class="card-bottom">
           <span class="card-tag">by @${escapeHtml(pkg.author || 'Pulsar')}</span>
           <div class="card-actions" onclick="event.stopPropagation()">
-            <button class="btn btn-secondary btn-sm" onclick="showPackageDetail('${escapeHtml(pkg.id)}')">
+            <button class="btn btn-secondary btn-sm" onclick="window.location.hash='pkg=${escapeHtml(pkg.id)}'">
               Details
             </button>
             <button class="btn btn-primary btn-sm" onclick="handleInstall(event, '${escapeHtml(pkg.id)}', this)">
