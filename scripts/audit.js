@@ -452,14 +452,27 @@ Strict Rules:
         candidateProviders.push({
             apiKey: formData.ai_api_key,
             baseUrl: formData.ai_base_url || 'https://api.groq.com/openai/v1',
-            models: [formData.ai_model || 'llama-3.1-8b-instant']
+            models: [formData.ai_model || 'llama-3.3-70b-versatile']
         });
     }
     if (process.env.GROQ_API_KEY) {
+        let groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it', 'deepseek-r1-distill-llama-70b'];
+        try {
+            const listRes = await axios.get('https://api.groq.com/openai/v1/models', {
+                headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` }
+            });
+            const fetched = (listRes.data?.data || []).map(m => m.id).filter(id => !id.includes('whisper') && !id.includes('guard'));
+            if (fetched.length > 0) {
+                console.log(`[Groq API] Discovered active models: ${fetched.slice(0, 6).join(', ')}`);
+                groqModels = fetched;
+            }
+        } catch (e) {
+            console.warn("[Groq API] Model list notice:", e.message);
+        }
         candidateProviders.push({
             apiKey: process.env.GROQ_API_KEY,
             baseUrl: 'https://api.groq.com/openai/v1',
-            models: ['llama-3.1-8b-instant', 'llama-3.1-70b-versatile', 'llama3-70b-8192', 'mixtral-8x7b-32768']
+            models: groqModels
         });
     }
     if (process.env.NVIDIA_API_KEY) {
@@ -541,7 +554,7 @@ Strict Rules:
         security_report: {
             score: safetyScore,
             status: "PASSED",
-            audited_by: `OpenCode (${aiModel}) + VirusTotal`,
+            audited_by: `OpenCode (${successfulModel}) + VirusTotal`,
             summary: aiVerdict,
             virustotal_detections: vtResult.malicious,
             timestamp: Date.now()
