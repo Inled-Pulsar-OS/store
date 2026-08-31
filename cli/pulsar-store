@@ -146,7 +146,12 @@ def main():
     inst = sub.add_parser("install", help="Install a package by ID or URL")
     inst.add_argument("id", help="Package ID or URL (e.g. pulsar://install/<id>)")
 
-    info = sub.add_parser("info", help="Display package details and OpenCode security report")
+    search_p = sub.add_parser("search", help="Search software packages in catalog")
+    search_p.add_argument("query", nargs="?", default="", help="Keyword to search for")
+
+    list_p = sub.add_parser("list", help="List all software packages in catalog")
+
+    info = sub.add_parser("info", help="Show package details and security audit")
     info.add_argument("id", help="Package ID")
 
     hurl = sub.add_parser("handle-url", help="MIME scheme handler for pulsar:// URLs")
@@ -154,7 +159,21 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command == "check":
+    if args.command in ("list", "search"):
+        q = getattr(args, "query", "").lower() if args.command == "search" else ""
+        catalog = get_catalog()
+        pkgs = catalog.get("packages", [])
+        if q:
+            pkgs = [p for p in pkgs if q in p["name"].lower() or q in p["description"].lower() or q in p["id"].lower()]
+        
+        print(f"\n📦 Pulsar Store Catalog ({len(pkgs)} packages found):\n")
+        print(f"{'ID':<34} | {'TYPE':<16} | {'VERSION':<10} | {'NAME'}")
+        print("-" * 88)
+        for p in pkgs:
+            print(f"{p['id']:<34} | {p.get('type',''):<16} | v{p.get('version','1.0'):<9} | {p.get('name','')}")
+        print("\n💡 Run 'pulsar-store info <id>' or 'pulsar-store install <id>' to inspect and install.")
+
+    elif args.command == "check":
         print("🔍 Checking for updates across Pulsar OS ecosystems...")
         updates = check_updates()
         if not updates:
