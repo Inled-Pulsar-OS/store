@@ -36,6 +36,13 @@ function initTheme() {
       localStorage.setItem('pulsar-theme', nowDark ? 'dark' : 'light');
     });
   }
+
+  // Automatic live detection of OS dark/light mode
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('pulsar-theme')) {
+      applyTheme(e.matches);
+    }
+  });
 }
 
 function applyTheme(isDark) {
