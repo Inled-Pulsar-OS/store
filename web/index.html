@@ -24,13 +24,14 @@
 
       <!-- Navigation Links -->
       <nav class="nav-menu">
-        <button class="nav-link active" onclick="showCatalogView('all')">All</button>
-        <button class="nav-link" onclick="showCatalogView('flatpak')">Apps</button>
-        <button class="nav-link" onclick="showCatalogView('gnome_extension')">Extensions</button>
-        <button class="nav-link" onclick="showCatalogView('sayri_skill')">Sayri Skills</button>
-        <button class="nav-link" onclick="showStaticView('cli-view')">CLI Tool</button>
-        <button class="nav-link" onclick="showStaticView('submit-view')">Submit</button>
-        <button class="nav-link" onclick="showStaticView('skill-guide-view')">SKILL.md</button>
+        <a href="#all" class="nav-link" data-route="all">All</a>
+        <a href="#sayri_plugin" class="nav-link" data-route="sayri_plugin">Gateways & Plugins</a>
+        <a href="#sayri_skill" class="nav-link" data-route="sayri_skill">Sayri Skills</a>
+        <a href="#gnome_extension" class="nav-link" data-route="gnome_extension">Extensions</a>
+        <a href="#flatpak" class="nav-link" data-route="flatpak">Apps</a>
+        <a href="#cli" class="nav-link" data-route="cli">CLI Tool</a>
+        <a href="#submit" class="nav-link" data-route="submit">Submit</a>
+        <a href="#skill" class="nav-link" data-route="skill">SKILL.md</a>
       </nav>
 
       <!-- Right Header Actions (Discord, Telegram, GitHub, Theme) -->

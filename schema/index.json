@@ -4,7 +4,7 @@
   "packages": [
     {
       "id": "sayri-gateway-telegram",
-      "type": "sayri_skill",
+      "type": "sayri_plugin",
       "name": "Telegram Bot Gateway",
       "description": "Bridges Sayri subagents with Telegram private chats and group channels with Desktop OTP pairing. Each user authorizes via PIN on first message — no hardcoded usernames.",
       "version": "1.1.0",

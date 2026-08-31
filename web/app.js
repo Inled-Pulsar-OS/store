@@ -117,27 +117,24 @@ function updateTabCounts() {
 }
 
 // ── View Switching & Routing ──────────────────────────────────────────────
+// ── View Switching & Single-Click URL Hash Routing ────────────────────────
 function showCatalogView(type = 'all') {
-  currentFilter = type;
-  document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
-  document.getElementById('catalog-view').classList.remove('hidden');
+  window.location.hash = (type === 'all' ? 'all' : type);
+}
 
-  document.querySelectorAll('.pill-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-type') === type);
-  });
+function showStaticView(route) {
+  window.location.hash = route;
+}
 
+function updateNavActiveState(activeRoute) {
   document.querySelectorAll('.nav-menu .nav-link').forEach(link => {
-    const linkText = link.textContent.toLowerCase();
-    const isAct = (type === 'all' && linkText === 'all') ||
-                  (type === 'flatpak' && linkText.includes('apps')) ||
-                  (type === 'gnome_extension' && linkText.includes('ext')) ||
-                  (type === 'sayri_skill' && linkText.includes('skill'));
-    link.classList.toggle('active', isAct);
+    const route = link.getAttribute('data-route');
+    link.classList.toggle('active', route === activeRoute);
   });
-
-  window.location.hash = type === 'all' ? '' : type;
-  window.scrollTo(0, 0);
-  renderGrid();
+  document.querySelectorAll('.pill-btn').forEach(btn => {
+    const type = btn.getAttribute('data-type');
+    btn.classList.toggle('active', type === activeRoute);
+  });
 }
 
 function showPackageDetail(pkgId) {
@@ -146,7 +143,7 @@ function showPackageDetail(pkgId) {
 
   document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
   document.getElementById('package-view').classList.remove('hidden');
-  window.location.hash = `pkg=${pkg.id}`;
+  updateNavActiveState('');
   window.scrollTo(0, 0);
 
   const meta = typeMeta[pkg.type] || { label: pkg.type, category: 'Software' };
@@ -210,15 +207,6 @@ function showPackageDetail(pkgId) {
         </table>
       </div>
 
-      ${pkg.skill_md ? `
-      <div>
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-          <h3 class="detail-section-heading" style="margin: 0;">Skill Specification (SKILL.md)</h3>
-          <button class="btn-copy" onclick="copyCode(this, ${JSON.stringify(pkg.skill_md)})">Copy SKILL.md</button>
-        </div>
-        <pre class="skill-md-box"><code>${escapeHtml(pkg.skill_md)}</code></pre>
-      </div>` : ''}
-
       <!-- Automated Double-Layer Security Status (OpenCode AI + VirusTotal) -->
       <div class="security-highlight-box">
         <div class="security-box-title">
@@ -231,37 +219,6 @@ function showPackageDetail(pkgId) {
       </div>
     </article>
   `;
-}
-
-function showStaticView(viewId) {
-  document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
-  const view = document.getElementById(viewId);
-  if (view) {
-    view.classList.remove('hidden');
-    if (viewId === 'cli-view') window.location.hash = 'cli';
-    else if (viewId === 'submit-view') window.location.hash = 'submit';
-    else if (viewId === 'skill-guide-view') {
-      window.location.hash = 'skill';
-      loadStoreSkillGuide();
-    }
-    window.scrollTo(0, 0);
-  }
-}
-
-async function loadStoreSkillGuide() {
-  const codeEl = document.getElementById('store-skill-code');
-  if (!codeEl) return;
-  try {
-    const res = await fetch('SKILL.md');
-    if (res.ok) {
-      codeEl.textContent = await res.text();
-    } else {
-      const res2 = await fetch('AI_AGENTS_SUBMISSION_GUIDE.md');
-      if (res2.ok) codeEl.textContent = await res2.text();
-    }
-  } catch (err) {
-    console.error("Could not fetch SKILL.md:", err);
-  }
 }
 
 // ── Install Button Handler with Perfectly Circular Spinner & Feedback ─────
@@ -362,20 +319,43 @@ function renderGrid() {
 
 // ── Hash Routing ──────────────────────────────────────────────────────────
 function handleHash() {
-  const hash = window.location.hash.replace('#', '');
-  if (!hash || hash === 'all') {
-    showCatalogView('all');
-  } else if (['flatpak', 'gnome_extension', 'sayri_skill', 'sayri_plugin'].includes(hash)) {
-    showCatalogView(hash);
-  } else if (hash.startsWith('pkg=')) {
-    showPackageDetail(hash.replace('pkg=', ''));
-  } else if (hash === 'cli') {
-    showStaticView('cli-view');
-  } else if (hash === 'submit') {
-    showStaticView('submit-view');
-  } else if (hash === 'skill') {
-    showStaticView('skill-guide-view');
+  const hash = window.location.hash.replace('#', '') || 'all';
+
+  document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
+
+  if (hash.startsWith('pkg=')) {
+    const pkgId = hash.replace('pkg=', '');
+    showPackageDetail(pkgId);
+    return;
   }
+
+  if (hash === 'cli') {
+    document.getElementById('cli-view')?.classList.remove('hidden');
+    updateNavActiveState('cli');
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  if (hash === 'submit') {
+    document.getElementById('submit-view')?.classList.remove('hidden');
+    updateNavActiveState('submit');
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  if (hash === 'skill') {
+    document.getElementById('skill-guide-view')?.classList.remove('hidden');
+    updateNavActiveState('skill');
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Catalog filter view
+  currentFilter = hash;
+  document.getElementById('catalog-view')?.classList.remove('hidden');
+  updateNavActiveState(hash);
+  window.scrollTo(0, 0);
+  renderGrid();
 }
 
 // ── Copy Command ──────────────────────────────────────────────────────────
