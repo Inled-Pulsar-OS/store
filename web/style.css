@@ -1,55 +1,53 @@
 /*
-  PULSAR STORE — DESIGN SYSTEM CLONED FROM OS.INLED.ES
-  Matches the Star Labs/Novacustom warm light theme and deep Pulsar OS dark theme.
-  No AI slop gradients. High clarity, beautiful typography, accessible contrast.
+  PULSAR STORE — CLEAN DESIGN SYSTEM CLONED FROM OS.INLED.ES
+  Simple, fast, accessible, zero AI-slop. Full dedicated detail pages.
 */
 
 :root {
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
-  --max-width: 1200px;
-  --transition-speed: 0.25s;
+  --max-width: 1160px;
+  --transition-speed: 0.2s;
 
-  /* Theme Color Mapping (Warm Light Theme by default) */
-  --bg-color: #f6f4ee; /* Warm cream background */
-  --bg-card: #ffffff;  /* Pure white cards */
+  /* Warm Cream Light Theme */
+  --bg-color: #f6f4ee;
+  --bg-card: #ffffff;
   --bg-card-hover: #fcfbfa;
-  --bg-input: #ffffff;
-  --text-primary: #111111; /* Elegant off-black */
-  --text-secondary: #5b5952; /* Warm gray */
+  --bg-inset: #edeae2;
+  --text-primary: #111111;
+  --text-secondary: #5b5952;
   --text-muted: #8c897e;
-  --border-color: #e9e6dc; /* Subtle border */
+  --border-color: #e9e6dc;
   --border-focus: #c9c6bb;
-  
+
   --accent-purple: #966ce8;
   --accent-blue: #676ff8;
-  --accent-btn-bg: #676ff8; /* Flat blue button */
+  --accent-btn-bg: #676ff8;
   --accent-btn-text: #ffffff;
   --accent-sec-bg: #ffffff;
   --accent-sec-text: #111111;
   --accent-sec-border: #e9e6dc;
 
   --status-green: #059669;
-  --status-green-bg: rgba(5, 150, 105, 0.10);
-  --status-green-border: rgba(5, 150, 105, 0.25);
+  --status-green-bg: rgba(5, 150, 105, 0.08);
 }
 
-/* Dark Theme (Pulsar OS Deep Theme) */
+/* Deep Pulsar Dark Theme */
 html.dark {
-  --bg-color: #0d0b15; /* Deep purple-black */
-  --bg-card: #171424;  /* Dark purple card */
+  --bg-color: #0d0b15;
+  --bg-card: #171424;
   --bg-card-hover: #1e1b2e;
-  --bg-input: #12101b;
-  --text-primary: #f5f4f9; /* Off-white */
-  --text-secondary: #9c99b5; /* Purple-gray */
+  --bg-inset: #110e1b;
+  --text-primary: #f5f4f9;
+  --text-secondary: #9c99b5;
   --text-muted: #6e6a88;
-  --border-color: #25213b; /* Dark border */
+  --border-color: #25213b;
   --border-focus: #3b355a;
 
   --accent-purple: #966ce8;
   --accent-blue: #676ff8;
-  --accent-btn-bg: #966ce8; /* Flat purple button */
+  --accent-btn-bg: #966ce8;
   --accent-btn-text: #ffffff;
   --accent-sec-bg: #171424;
   --accent-sec-text: #f5f4f9;
@@ -57,10 +55,9 @@ html.dark {
 
   --status-green: #10b981;
   --status-green-bg: rgba(16, 185, 129, 0.12);
-  --status-green-border: rgba(16, 185, 129, 0.3);
 }
 
-/* Reset */
+/* Base Reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -68,8 +65,8 @@ html.dark {
 }
 
 html {
-  scroll-behavior: smooth;
   font-size: 16px;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -105,7 +102,7 @@ button, input, select {
 }
 
 /* ==========================================================================
-   Header (Floating Rounded Bar inspired by os.inled.es)
+   Header (Floating Pill Navbar from os.inled.es)
    ========================================================================== */
 .site-header {
   position: sticky;
@@ -114,10 +111,10 @@ button, input, select {
   max-width: var(--max-width);
   width: calc(100% - 32px);
   margin: 0 auto;
-  height: 68px;
+  height: 66px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 100px; /* Pill-shaped floating header */
+  border-radius: 100px;
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -126,7 +123,7 @@ button, input, select {
 }
 
 html.dark .site-header {
-  background: rgba(23, 20, 36, 0.85);
+  background: rgba(23, 20, 36, 0.90);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
@@ -137,7 +134,7 @@ html.dark .site-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
 }
 
 .logo-container {
@@ -167,7 +164,7 @@ html.dark .site-header {
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 18px;
 }
 
 .nav-link {
@@ -178,22 +175,23 @@ html.dark .site-header {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 6px 4px;
   transition: color var(--transition-speed) ease;
 }
-.nav-link:hover {
+.nav-link:hover, .nav-link.active {
   color: var(--text-primary);
+  font-weight: 600;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .btn-icon {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -212,7 +210,7 @@ html.dark .site-header {
 }
 
 /* ==========================================================================
-   Buttons (Flat Pill Buttons as in os.inled.es)
+   Buttons
    ========================================================================== */
 .btn {
   display: inline-flex;
@@ -223,7 +221,7 @@ html.dark .site-header {
   font-size: 0.9rem;
   font-weight: 600;
   padding: 10px 22px;
-  border-radius: 100px; /* Pill shape */
+  border-radius: 100px;
   cursor: pointer;
   transition: all var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid transparent;
@@ -231,8 +229,8 @@ html.dark .site-header {
 }
 
 .btn-sm {
-  padding: 7px 16px;
-  font-size: 0.85rem;
+  padding: 6px 16px;
+  font-size: 0.82rem;
 }
 
 .btn-primary {
@@ -243,7 +241,6 @@ html.dark .site-header {
   filter: brightness(1.08);
   transform: translateY(-1px);
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(103, 111, 248, 0.25);
 }
 
 .btn-secondary {
@@ -259,10 +256,10 @@ html.dark .site-header {
 }
 
 /* ==========================================================================
-   Hero Section
+   Hero Section & Search
    ========================================================================== */
 .hero-section {
-  padding: 60px 0 40px 0;
+  padding: 50px 0 30px 0;
   text-align: center;
 }
 
@@ -272,28 +269,13 @@ html.dark .site-header {
   align-items: center;
 }
 
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(150, 108, 232, 0.10);
-  border: 1px solid rgba(150, 108, 232, 0.25);
-  padding: 5px 16px;
-  border-radius: 100px;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 0.8rem;
-  color: var(--accent-purple);
-  margin-bottom: 18px;
-}
-
 .hero-title {
   font-family: var(--font-display);
-  font-size: 2.75rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -1.2px;
+  letter-spacing: -1px;
   color: var(--text-primary);
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .accent-text {
@@ -301,206 +283,130 @@ html.dark .site-header {
 }
 
 .hero-desc {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--text-secondary);
-  max-width: 620px;
-  margin-bottom: 28px;
+  max-width: 580px;
+  margin-bottom: 24px;
 }
 
-/* Search Box */
-.hero-search-box {
+.search-box {
   width: 100%;
-  max-width: 540px;
+  max-width: 480px;
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
-.hero-search-box .search-icon {
+.search-box .search-icon {
   position: absolute;
-  left: 18px;
+  left: 16px;
   color: var(--text-muted);
   pointer-events: none;
 }
 
-.hero-search-box input {
+.search-box input {
   width: 100%;
-  background: var(--bg-input);
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 100px;
-  padding: 14px 72px 14px 48px;
+  padding: 12px 42px 12px 44px;
   font-size: 0.95rem;
   color: var(--text-primary);
   outline: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-  transition: all var(--transition-speed) ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  transition: border-color var(--transition-speed) ease;
 }
-
-.hero-search-box input:focus {
+.search-box input:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
 .search-clear-btn {
   position: absolute;
-  right: 56px;
+  right: 16px;
   background: none;
   border: none;
   color: var(--text-muted);
   font-size: 1rem;
   cursor: pointer;
 }
-.search-clear-btn:hover {
-  color: var(--text-primary);
-}
 
-.search-kbd-badge {
-  position: absolute;
-  right: 14px;
-  display: flex;
-  gap: 3px;
-  pointer-events: none;
-}
-.search-kbd-badge kbd {
-  font-family: var(--font-body);
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 2px 5px;
-  background: rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  color: var(--text-muted);
-}
-html.dark .search-kbd-badge kbd {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-/* Category Tabs */
-.categories-nav {
+.filter-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
 }
 
-.pill-tab {
+.pill-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 100px;
-  padding: 7px 16px;
+  padding: 6px 16px;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-speed) ease;
 }
-.pill-tab:hover {
+.pill-btn:hover {
   color: var(--text-primary);
   border-color: var(--border-focus);
-  background: var(--bg-card-hover);
 }
-.pill-tab.active {
+.pill-btn.active {
   background: var(--accent-btn-bg);
   border-color: transparent;
   color: var(--accent-btn-text);
-  box-shadow: 0 4px 12px rgba(103, 111, 248, 0.25);
 }
 
-.tab-count {
+.pill-count {
   font-size: 0.75rem;
   padding: 1px 6px;
   border-radius: 100px;
   background: rgba(0, 0, 0, 0.08);
 }
-.pill-tab.active .tab-count {
+.pill-btn.active .pill-count {
   background: rgba(255, 255, 255, 0.25);
   color: #ffffff;
 }
 
 /* ==========================================================================
-   Software Catalog Section & Cards (os.inled.es Flavour Card Style)
+   Catalog Grid & Cards (Clean Flavour Card Style)
    ========================================================================== */
 .catalog-section {
-  padding: 30px 0 80px 0;
+  padding: 10px 0 80px 0;
   flex: 1;
 }
 
-.catalog-top-bar {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 12px;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.section-heading {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--text-primary);
-}
-
-.section-subheading {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.sort-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.sort-dropdown {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 100px;
-  padding: 5px 12px;
-  font-size: 0.85rem;
-  color: var(--text-primary);
-  outline: none;
-  cursor: pointer;
-}
-
-/* Grid Cards */
 .packages-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
 }
 
 .pkg-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 24px; /* Rounded card as in os.inled.es */
-  padding: 24px;
+  border-radius: 20px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 18px;
-  text-decoration: none;
-  color: var(--text-primary);
+  gap: 16px;
+  cursor: pointer;
   transition: all var(--transition-speed) ease;
 }
-
 .pkg-card:hover {
   border-color: var(--border-focus);
   background-color: var(--bg-card-hover);
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
 }
 html.dark .pkg-card:hover {
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
 }
 
 .card-top {
@@ -510,10 +416,10 @@ html.dark .pkg-card:hover {
 }
 
 .card-icon-frame {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: var(--bg-color);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--bg-inset);
   border: 1px solid var(--border-color);
   overflow: hidden;
   display: flex;
@@ -529,8 +435,8 @@ html.dark .pkg-card:hover {
 }
 
 .card-icon-fallback {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   color: var(--accent-purple);
 }
 
@@ -539,79 +445,32 @@ html.dark .pkg-card:hover {
   min-width: 0;
 }
 
-.card-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 2px;
-}
-
 .card-title {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.3px;
   color: var(--text-primary);
-  cursor: pointer;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.card-title:hover {
-  color: var(--accent-purple);
-}
 
-.version-pill {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 1px 5px;
-  color: var(--text-muted);
-}
-html.dark .version-pill {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.card-author {
+.card-meta-line {
   font-size: 0.8rem;
   color: var(--text-muted);
   margin-bottom: 6px;
 }
 
 .card-desc {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* Badges */
-.card-badges-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-
-.badge-tag {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 100px;
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-}
-
-.badge-verified {
-  background: var(--status-green-bg);
-  border-color: var(--status-green-border);
-  color: var(--status-green);
 }
 
 .card-bottom {
@@ -619,17 +478,13 @@ html.dark .version-pill {
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--border-color);
-  padding-top: 14px;
-  gap: 8px;
+  padding-top: 12px;
 }
 
-.card-id-label {
-  font-family: var(--font-mono);
+.card-tag {
   font-size: 0.75rem;
-  color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .card-actions {
@@ -638,139 +493,184 @@ html.dark .version-pill {
 }
 
 /* ==========================================================================
-   Dialogs / Modals (os.inled.es Dialog Style)
+   Full Dedicated Package Detail View (No popups)
    ========================================================================== */
-.custom-dialog {
-  border: none;
-  background: transparent;
-  padding: 20px;
-  max-width: 580px;
-  width: 100%;
-  margin: auto;
+.package-detail-container {
+  padding: 30px 24px 80px 24px;
+  flex: 1;
 }
 
-.custom-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.dialog-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 28px;
-  padding: 28px;
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-}
-
-.dialog-header {
-  display: flex;
+.back-link-btn {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 12px;
-}
-
-.dialog-tag {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--accent-purple);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.dialog-close {
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
   background: none;
   border: none;
-  color: var(--text-muted);
-  font-size: 1.1rem;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 50%;
+  margin-bottom: 24px;
+  padding: 6px 0;
+  transition: color var(--transition-speed) ease;
 }
-.dialog-close:hover {
+.back-link-btn:hover {
   color: var(--text-primary);
-  background: var(--bg-color);
 }
 
-.dialog-body {
-  overflow-y: auto;
-  max-height: 75vh;
+.detail-header-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 36px;
+  margin-bottom: 28px;
 }
 
-.code-card {
-  background: var(--bg-color);
+.detail-hero-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.detail-large-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-color);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.detail-title {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.detail-meta-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.detail-lead {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+/* Code Snippet Box */
+.code-box-wrapper {
+  background-color: var(--bg-inset);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 16px;
+  margin-bottom: 24px;
 }
 
-.code-card-label {
-  font-size: 0.85rem;
+.code-label {
+  font-size: 0.82rem;
   font-weight: 600;
+  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
-.code-box {
+.code-snippet {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--bg-card);
+  background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  padding: 8px 12px;
-  gap: 10px;
+  padding: 10px 14px;
+  gap: 12px;
 }
 
-.code-box code {
+.code-snippet code {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   color: var(--accent-purple);
   overflow-x: auto;
   white-space: nowrap;
 }
 
 .btn-copy {
-  background: var(--bg-color);
+  background: var(--bg-inset);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 4px 10px;
   font-size: 0.75rem;
   font-weight: 600;
+  color: var(--text-primary);
   cursor: pointer;
+  flex-shrink: 0;
 }
 .btn-copy:hover {
   background: var(--bg-card-hover);
-  color: var(--accent-purple);
+  color: var(--accent-blue);
+}
+
+/* Specifications Table */
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
 }
 
 .specs-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
-  margin-top: 10px;
+  font-size: 0.9rem;
+  margin-bottom: 24px;
 }
 .specs-table th, .specs-table td {
-  padding: 8px 10px;
+  padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 .specs-table th {
   color: var(--text-muted);
-  width: 35%;
+  width: 30%;
   font-weight: 500;
 }
 
+.security-report-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--status-green);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 28px;
+}
+
+.security-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--status-green);
+  margin-bottom: 6px;
+}
+
+.security-card-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
 /* ==========================================================================
-   Footer (Identical to os.inled.es)
+   Footer (os.inled.es Style)
    ========================================================================== */
 .site-footer {
   background-color: var(--bg-card);
   border-top: 1px solid var(--border-color);
-  padding: 60px 0 40px 0;
+  padding: 50px 0 36px 0;
   margin-top: auto;
 }
 
@@ -779,8 +679,8 @@ html.dark .version-pill {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 32px;
-  margin-bottom: 32px;
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
 .footer-logo {
@@ -788,7 +688,7 @@ html.dark .version-pill {
   align-items: center;
   gap: 10px;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
   text-decoration: none;
@@ -802,11 +702,11 @@ html.dark .version-pill {
 .footer-right {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 20px;
 }
 
 .footer-link {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-secondary);
   text-decoration: none;
   transition: color var(--transition-speed) ease;
@@ -820,14 +720,13 @@ html.dark .version-pill {
   color: var(--text-muted);
   text-align: center;
   border-top: 1px solid var(--border-color);
-  padding-top: 24px;
+  padding-top: 20px;
 }
 
 .hidden {
   display: none !important;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .site-header {
     border-radius: 20px;
@@ -839,5 +738,11 @@ html.dark .version-pill {
   }
   .packages-grid {
     grid-template-columns: 1fr;
+  }
+  .detail-header-card {
+    padding: 24px;
+  }
+  .detail-hero-row {
+    flex-direction: column;
   }
 }
