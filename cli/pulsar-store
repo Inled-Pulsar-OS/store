@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -170,7 +171,7 @@ def run_gui_install(pkg):
 
     import threading
 
-    app = Gtk.Application(application_id=f"es.inled.pulsar.store.installer.{int(time.time()*1000)}")
+    app = Gtk.Application(application_id=f"es.inled.pulsar.store.installer{int(time.time())}")
 
     def on_activate(app):
         win = Gtk.Window(application=app)
