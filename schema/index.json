@@ -3,30 +3,6 @@
   "updated_at": 1756641600,
   "packages": [
     {
-      "id": "sayri-skill-discord-support",
-      "type": "sayri_skill",
-      "name": "Discord Voice & Support Agent",
-      "description": "Autonomous AI support subagent for Discord servers with zero host terminal execution permissions.",
-      "version": "1.0.0",
-      "author": "jaimegh-es",
-      "download_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/packages/skills/sayri-skill-discord-support.zip",
-      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/sayri-skill-discord-support.png",
-      "demo_urls": [],
-      "github_url": "https://github.com/pulsar-os/sayri",
-      "promo_url": "",
-      "security_report": {
-        "score": 98,
-        "status": "PASSED",
-        "audited_by": "OpenCode (llama-3.3-70b-versatile) + VirusTotal",
-        "summary": "Clean skill with sandboxed Level 0 isolation. No unauthorized network or disk access detected.",
-        "virustotal_detections": 0,
-        "timestamp": 1756641600
-      },
-      "metadata": {
-        "sandbox_level": "LEVEL_0_NO_EXEC"
-      }
-    },
-    {
       "id": "org.gnome.extension.transparent-topbar",
       "type": "gnome_extension",
       "name": "Transparent Top Bar",
@@ -103,6 +79,31 @@
       "metadata": {
         "shell_versions": [],
         "sandbox_level": "LEVEL_1_READONLY"
+      }
+    },
+    {
+      "id": "sayri-skill-discord-support",
+      "type": "sayri_skill",
+      "name": "Discord Voice & Support Agent",
+      "description": "Autonomous AI support subagent for Discord servers with zero host terminal execution permissions.",
+      "version": "1.0.0",
+      "author": "jaimegh-es",
+      "download_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/packages/skills/sayri-skill-discord-support.zip",
+      "icon_url": "assets/icons/sayri-skill-discord-support.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/Inled-Pulsar-OS/store",
+      "promo_url": "",
+      "security_report": {
+        "score": 95,
+        "status": "PASSED",
+        "audited_by": "OpenCode (llama-3.3-70b-versatile) + VirusTotal",
+        "summary": "Clean source code verified against security policies.",
+        "virustotal_detections": 0,
+        "timestamp": 1788183253699
+      },
+      "metadata": {
+        "shell_versions": [],
+        "sandbox_level": "LEVEL_0_NO_EXEC (Isolated / No host execution)"
       }
     }
   ]
