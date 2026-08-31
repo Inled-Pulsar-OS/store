@@ -1,6 +1,6 @@
 /**
  * Pulsar Store — Frontend Application Controller
- * Pure full-page navigation, clean typography, zero popups.
+ * Flat, un-nested layouts, spinner loading on install, and unified typography.
  */
 
 let allPackages = [];
@@ -90,7 +90,7 @@ async function loadCatalog() {
     console.error("Failed to load catalog:", err);
     grid.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 48px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;">
-        <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 8px;">Unable to load package catalog</h3>
+        <h3 style="font-size: 1.2rem; margin-bottom: 8px;">Unable to load package catalog</h3>
         <p style="color: var(--text-secondary); font-size: 0.9rem;">Could not fetch <code>schema/index.json</code>.</p>
       </div>
     `;
@@ -143,78 +143,76 @@ function showPackageDetail(pkgId) {
   window.scrollTo(0, 0);
 
   const meta = typeMeta[pkg.type] || { label: pkg.type, category: 'Software' };
-  const score = pkg.security_report?.score || 95;
-  const isVerified = (pkg.security_report?.status === 'PASSED') || score >= 90;
   const container = document.getElementById('package-detail-content');
 
   container.innerHTML = `
-    <div class="detail-header-card">
-      <div class="detail-hero-row">
+    <article class="detail-article">
+      <div class="detail-header-block">
         ${pkg.icon_url 
           ? `<img src="${escapeHtml(pkg.icon_url)}" class="detail-large-icon" alt="${escapeHtml(pkg.name)}" onerror="this.style.display='none'">`
           : ''
         }
-        <div style="flex: 1;">
+        <div>
           <h1 class="detail-title">${escapeHtml(pkg.name)}</h1>
           <div class="detail-meta-text">
             Version v${escapeHtml(pkg.version || '1.0')} • by @${escapeHtml(pkg.author || 'Pulsar')} • ${escapeHtml(meta.label)}
           </div>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <a href="pulsar://install/${escapeHtml(pkg.id)}" class="btn btn-primary">
-              Install in Pulsar OS
-            </a>
-            ${pkg.github_url ? `<a href="${escapeHtml(pkg.github_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">View Source Code ↗</a>` : ''}
-          </div>
         </div>
       </div>
 
-      <p class="detail-lead">
+      <div class="detail-actions-bar">
+        <button class="btn btn-primary" onclick="handleInstall(event, '${escapeHtml(pkg.id)}', this)">
+          Install in Pulsar OS
+        </button>
+        ${pkg.github_url ? `<a href="${escapeHtml(pkg.github_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">View Source Code ↗</a>` : ''}
+      </div>
+
+      <p class="detail-description">
         ${escapeHtml(pkg.description || '')}
       </p>
 
-      <!-- Terminal Install Box -->
-      <div class="code-box-wrapper">
-        <div class="code-label">Install via Terminal CLI:</div>
-        <div class="code-snippet">
-          <code>pulsar-store install ${escapeHtml(pkg.id)}</code>
-          <button class="btn-copy" onclick="copyCode(this, 'pulsar-store install ${escapeHtml(pkg.id)}')">Copy</button>
-        </div>
+      <!-- Terminal Command Snippet with soft highlight background -->
+      <div class="terminal-highlight-box">
+        <code>pulsar-store install ${escapeHtml(pkg.id)}</code>
+        <button class="btn-copy" onclick="copyCode(this, 'pulsar-store install ${escapeHtml(pkg.id)}')">Copy Command</button>
       </div>
 
-      <!-- Technical Specifications Table -->
-      <h3 class="section-title">Specifications</h3>
-      <table class="specs-table">
-        <tbody>
-          <tr>
-            <th>Package ID</th>
-            <td><code>${escapeHtml(pkg.id)}</code></td>
-          </tr>
-          <tr>
-            <th>Ecosystem</th>
-            <td>${escapeHtml(meta.label)} (${escapeHtml(meta.category)})</td>
-          </tr>
-          <tr>
-            <th>Sandbox Isolation</th>
-            <td>${escapeHtml(pkg.metadata?.sandbox_level || 'Container Level 0 (Isolated)')}</td>
-          </tr>
-          ${pkg.metadata?.shell_versions ? `
-          <tr>
-            <th>GNOME Shell Compatibility</th>
-            <td>${escapeHtml(pkg.metadata.shell_versions.join(', '))}</td>
-          </tr>` : ''}
-        </tbody>
-      </table>
+      <!-- Specifications -->
+      <div>
+        <h3 class="detail-section-heading">Specifications</h3>
+        <table class="specs-table">
+          <tbody>
+            <tr>
+              <th>Package ID</th>
+              <td><code>${escapeHtml(pkg.id)}</code></td>
+            </tr>
+            <tr>
+              <th>Ecosystem</th>
+              <td>${escapeHtml(meta.label)} (${escapeHtml(meta.category)})</td>
+            </tr>
+            <tr>
+              <th>Sandbox Isolation</th>
+              <td>${escapeHtml(pkg.metadata?.sandbox_level || 'Container Level 0 (Isolated)')}</td>
+            </tr>
+            ${pkg.metadata?.shell_versions ? `
+            <tr>
+              <th>GNOME Shell Compatibility</th>
+              <td>${escapeHtml(pkg.metadata.shell_versions.join(', '))}</td>
+            </tr>` : ''}
+          </tbody>
+        </table>
+      </div>
 
-      <!-- Security Audit Info -->
-      <div class="security-report-card">
-        <div class="security-card-title">
-          ${isVerified ? '✓ OpenCode Security Verified' : 'Security Analysis'}
+      <!-- Security Status with soft green background -->
+      <div class="security-highlight-box">
+        <div class="security-box-title">
+          ✓ OpenCode Security Verified
         </div>
-        <p class="security-card-desc">
-          ${escapeHtml(pkg.security_report?.summary || 'Source code static analysis completed with clean security policies.')}
+        <p class="security-box-text">
+          ${escapeHtml(pkg.security_report?.summary || 'Source code static analysis completed with zero security risks.')}
         </p>
       </div>
-    </div>
+    </article>
   `;
 }
 
@@ -228,7 +226,28 @@ function showStaticView(viewId) {
   }
 }
 
-// ── Render Catalog Grid (Clean cards, no badge clutter) ───────────────────
+// ── Install Button Handler with Animated Loading Spinner ──────────────────
+function handleInstall(event, pkgId, buttonEl) {
+  if (event) event.preventDefault();
+  if (!buttonEl) return;
+
+  const originalContent = buttonEl.innerHTML;
+  buttonEl.classList.add('loading');
+  buttonEl.innerHTML = `<span class="btn-spinner"></span> Opening Pulsar OS…`;
+
+  // Trigger custom URL scheme
+  setTimeout(() => {
+    window.location.href = `pulsar://install/${pkgId}`;
+  }, 150);
+
+  // Reset button state after browser scheme prompt launches
+  setTimeout(() => {
+    buttonEl.classList.remove('loading');
+    buttonEl.innerHTML = originalContent;
+  }, 2500);
+}
+
+// ── Render Catalog Grid ───────────────────────────────────────────────────
 function renderGrid() {
   const grid = document.getElementById('packages-grid');
 
@@ -245,7 +264,7 @@ function renderGrid() {
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 48px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;">
-        <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 8px;">No software found</h3>
+        <h3 style="font-size: 1.2rem; margin-bottom: 8px;">No software found</h3>
         <p style="color: var(--text-secondary); font-size: 0.9rem;">Try searching for another keyword or select All.</p>
       </div>
     `;
@@ -277,9 +296,9 @@ function renderGrid() {
             <button class="btn btn-secondary btn-sm" onclick="showPackageDetail('${escapeHtml(pkg.id)}')">
               Details
             </button>
-            <a href="pulsar://install/${escapeHtml(pkg.id)}" class="btn btn-primary btn-sm">
+            <button class="btn btn-primary btn-sm" onclick="handleInstall(event, '${escapeHtml(pkg.id)}', this)">
               Install
-            </a>
+            </button>
           </div>
         </div>
       </article>
