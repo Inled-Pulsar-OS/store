@@ -136,6 +136,46 @@ def install_package(pkg):
 
     return False
 
+def uninstall_package(pkg_id):
+    """Uninstalls a package by ID across Flatpaks, GNOME Extensions, and Sayri Skills/Plugins."""
+    print(f"\n🗑️ Removing package: {pkg_id}...")
+    removed = False
+
+    # 1. Check Sayri Skills & Plugins
+    for base in [SAYRI_SKILLS_DIR, SAYRI_PLUGINS_DIR]:
+        target = base / pkg_id
+        if target.is_dir():
+            try:
+                shutil.rmtree(target)
+                print(f"✅ Removed Sayri package from {target}")
+                removed = True
+            except Exception as e:
+                print(f"❌ Error deleting {target}: {e}")
+
+    # 2. Check GNOME Extensions
+    ext_target = GNOME_EXT_DIR / pkg_id
+    if ext_target.is_dir():
+        try:
+            subprocess.run(["gnome-extensions", "disable", pkg_id], capture_output=True)
+            shutil.rmtree(ext_target)
+            print(f"✅ Removed GNOME Extension from {ext_target}")
+            removed = True
+        except Exception as e:
+            print(f"❌ Error deleting {ext_target}: {e}")
+
+    # 3. Check Flatpak
+    try:
+        res = subprocess.run(["flatpak", "uninstall", "-y", pkg_id], capture_output=True, text=True)
+        if res.returncode == 0:
+            print(f"✅ Flatpak application '{pkg_id}' uninstalled.")
+            removed = True
+    except Exception:
+        pass
+
+    if not removed:
+        print(f"⚠️ Package '{pkg_id}' was not found among installed software.")
+    return removed
+
 def main():
     parser = argparse.ArgumentParser(prog="pulsar-store", description="Pulsar Store CLI Helper")
     sub = parser.add_subparsers(dest="command")
@@ -145,6 +185,12 @@ def main():
     
     inst = sub.add_parser("install", help="Install a package by ID or URL")
     inst.add_argument("id", help="Package ID or URL (e.g. pulsar://install/<id>)")
+
+    rem = sub.add_parser("remove", help="Uninstall/remove an installed package")
+    rem.add_argument("id", help="Package ID to uninstall")
+
+    uninst = sub.add_parser("uninstall", help="Alias for remove")
+    uninst.add_argument("id", help="Package ID to uninstall")
 
     search_p = sub.add_parser("search", help="Search software packages in catalog")
     search_p.add_argument("query", nargs="?", default="", help="Keyword to search for")
@@ -195,6 +241,10 @@ def main():
             if p: install_package(p)
         subprocess.run(["flatpak", "update", "-y"])
         print("\n✅ All updates completed successfully!")
+
+    elif args.command in ("remove", "uninstall"):
+        pkg_id = args.id.strip()
+        uninstall_package(pkg_id)
 
     elif args.command == "install":
         pkg_id = args.id.replace("pulsar://install/", "").strip()
