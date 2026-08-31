@@ -43,6 +43,7 @@ jobs:
         run: |
           node scripts/audit.js
           node scripts/build-catalog.js
+          node scripts/build-dist.js
 
       - name: Commit & Push Changes to Storefront
         if: success()

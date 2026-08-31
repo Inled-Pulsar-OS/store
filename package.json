@@ -4,6 +4,7 @@
   "description": "Unified Storefront, CLI & Security Shield for Apps, GNOME Extensions, Sayri Skills & Plugins",
   "main": "scripts/audit.js",
   "scripts": {
+    "build": "node scripts/build-dist.js",
     "audit": "node scripts/audit.js",
     "build-catalog": "node scripts/build-catalog.js"
   },
