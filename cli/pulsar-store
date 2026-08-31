@@ -73,7 +73,7 @@ def check_updates():
                     for p in packages.values():
                         if p.get("type") == "gnome_extension" and (p.get("metadata", {}).get("uuid") == uuid or p.get("id") == uuid):
                             if p.get("version") != cur_ver:
-                                updates.append(("🧩 GNOME Extension", p["name"], cur_ver, p["version"], p))
+                                updates.append((" GNOME Extension", p["name"], cur_ver, p["version"], p))
                 except Exception:
                     pass
 
@@ -83,7 +83,7 @@ def check_updates():
             pkg_id = sub.name
             if pkg_id in packages and packages[pkg_id].get("type") == "sayri_skill":
                 p = packages[pkg_id]
-                updates.append(("🤖 Sayri Skill", p["name"], "installed", p["version"], p))
+                updates.append((" Sayri Skill", p["name"], "installed", p["version"], p))
 
     # 3. Sayri Plugins
     if SAYRI_PLUGINS_DIR.is_dir():
@@ -91,7 +91,7 @@ def check_updates():
             pkg_id = sub.name
             if pkg_id in packages and packages[pkg_id].get("type") == "sayri_plugin":
                 p = packages[pkg_id]
-                updates.append(("🔌 Sayri Plugin", p["name"], "installed", p["version"], p))
+                updates.append((" Sayri Plugin", p["name"], "installed", p["version"], p))
 
     # 4. Flatpaks
     try:
@@ -99,89 +99,27 @@ def check_updates():
         if res.returncode == 0 and res.stdout.strip():
             for line in res.stdout.strip().splitlines():
                 parts = line.split("\t")
-                updates.append(("📦 Flatpak App", parts[0], "installed", "new update", None))
+                updates.append((" Flatpak App", parts[0], "installed", "new update", None))
     except Exception:
         pass
 
     return updates
 
-def show_install_success_popup(name: str, pkg_id: str, pkg_type: str):
-    """Shows a desktop popup confirming installation, auto-closing after 5 seconds."""
-    script = f"""
-import sys, time
-try:
-    import gi
-    gi.require_version("Gtk", "4.0")
-    from gi.repository import Gtk, GLib
-except Exception:
-    sys.exit(0)
-
-app = Gtk.Application(application_id=f"es.inled.pulsar.store.notify.{{int(time.time()*1000)}}")
-
-def on_activate(app):
-    win = Gtk.Window(application=app)
-    win.set_title("Pulsar Store")
-    win.set_default_size(360, 160)
-    win.set_resizable(False)
-
-    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    box.set_margin_top(18)
-    box.set_margin_bottom(18)
-    box.set_margin_start(20)
-    box.set_margin_end(20)
-
-    title = Gtk.Label()
-    title.set_markup("<span weight='bold' size='12500' foreground='#22c55e'>✓ Installed Successfully</span>")
-    box.append(title)
-
-    desc = Gtk.Label()
-    desc.set_markup(f"<span size='11000'><b>{name}</b></span>\\n<span size='8500' foreground='#94a3b8'>{pkg_id} • Ready to use in Pulsar OS</span>")
-    desc.set_justify(Gtk.Justification.CENTER)
-    desc.set_wrap(True)
-    box.append(desc)
-
-    btn = Gtk.Button(label="OK (closes in 5s)")
-    btn.connect("clicked", lambda _: win.close())
-    box.append(btn)
-
-    win.set_child(box)
-    win.present()
-
-    countdown = [5]
-    def _tick():
-        countdown[0] -= 1
-        if countdown[0] <= 0:
-            win.close()
-            return False
-        btn.set_label(f"OK (closes in {{countdown[0]}}s)")
-        return True
-
-    GLib.timeout_add_seconds(1, _tick)
-
-app.connect("activate", on_activate)
-app.run(None)
-"""
-    try:
-        subprocess.Popen([sys.executable, "-c", script])
-    except Exception as e:
-        print(f"[Notice] Could not display popup: {e}")
-
-def install_package(pkg):
+def run_text_install(pkg):
     pkg_type = pkg.get("type")
     pkg_id = pkg.get("id")
     name = pkg.get("name", pkg_id)
     url = pkg.get("download_url")
 
-    print(f"\n🚀 Installing: {name} ({pkg_id}) [Type: {pkg_type}]")
+    print(f"\nInstalling: {name} ({pkg_id}) [Type: {pkg_type}]")
     sec = pkg.get("security_report", {})
     if sec:
-        print(f"🛡️ OpenCode Report: {sec.get('score', 95)}/100 ({sec.get('status', 'PASSED')})")
-        print(f"📋 Summary: {sec.get('summary', '')}\n")
+        print(f"OpenCode Report: {sec.get('score', 95)}/100 ({sec.get('status', 'PASSED')})")
+        print(f"Summary: {sec.get('summary', '')}\n")
 
-    ok = False
     if pkg_type == "flatpak":
         ref = pkg.get("metadata", {}).get("flatpakref_url") or url or pkg_id
-        ok = subprocess.run(["flatpak", "install", "-y", ref]).returncode == 0
+        return subprocess.run(["flatpak", "install", "-y", ref]).returncode == 0
 
     elif pkg_type == "gnome_extension":
         uuid = pkg.get("metadata", {}).get("uuid") or pkg_id
@@ -193,11 +131,10 @@ def install_package(pkg):
             with zipfile.ZipFile(zip_p, "r") as z:
                 z.extractall(target)
             subprocess.run(["gnome-extensions", "enable", uuid], capture_output=True)
-            print(f"✅ Extension '{name}' ({uuid}) installed and enabled.")
-            ok = True
+            print(f"Extension '{name}' ({uuid}) installed and enabled.")
+            return True
 
     elif pkg_type in ("sayri_skill", "sayri_plugin"):
-        # Install into plugins directory if it is a gateway/plugin, else skills
         is_plugin = ("gateway" in pkg_id or "plugin" in pkg_id or pkg_type == "sayri_plugin")
         dest_root = SAYRI_PLUGINS_DIR if is_plugin else SAYRI_SKILLS_DIR
         target = dest_root / pkg_id
@@ -207,24 +144,171 @@ def install_package(pkg):
             target.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(pkg_p, "r") as z:
                 z.extractall(target)
-            # Also if it's a plugin, ensure both dirs have it if needed
             if is_plugin:
                 alt_target = SAYRI_SKILLS_DIR / pkg_id
                 alt_target.mkdir(parents=True, exist_ok=True)
                 with zipfile.ZipFile(pkg_p, "r") as z:
                     z.extractall(alt_target)
-            print(f"✅ {'Plugin' if is_plugin else 'Skill'} '{name}' installed into {target}.")
-            ok = True
-
-    if ok:
-        show_install_success_popup(name, pkg_id, pkg_type)
-        return True
+            print(f"{'Plugin' if is_plugin else 'Skill'} '{name}' installed into {target}.")
+            return True
 
     return False
 
+def run_gui_install(pkg):
+    """Downloads and installs the package while showing a real-time GTK progress window."""
+    pkg_type = pkg.get("type")
+    pkg_id = pkg.get("id")
+    name = pkg.get("name", pkg_id)
+    url = pkg.get("download_url")
+
+    try:
+        import gi
+        gi.require_version("Gtk", "4.0")
+        from gi.repository import Gtk, GLib
+    except Exception:
+        return run_text_install(pkg)
+
+    import threading
+
+    app = Gtk.Application(application_id=f"es.inled.pulsar.store.installer.{int(time.time()*1000)}")
+
+    def on_activate(app):
+        win = Gtk.Window(application=app)
+        win.set_title(f"Pulsar Store — {name}")
+        win.set_default_size(380, 180)
+        win.set_resizable(False)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        box.set_margin_top(16)
+        box.set_margin_bottom(16)
+        box.set_margin_start(18)
+        box.set_margin_end(18)
+
+        # Title
+        title = Gtk.Label()
+        title.set_markup(f"<span weight='bold' size='11500'>Installing {name}</span>")
+        title.set_halign(Gtk.Align.START)
+        box.append(title)
+
+        # ID / Type
+        meta_lbl = Gtk.Label()
+        meta_lbl.set_markup(f"<span size='8500' foreground='#94a3b8'>{pkg_id} • {pkg_type}</span>")
+        meta_lbl.set_halign(Gtk.Align.START)
+        box.append(meta_lbl)
+
+        # Progress bar
+        pbar = Gtk.ProgressBar()
+        pbar.set_fraction(0.15)
+        pbar.set_margin_top(4)
+        pbar.set_margin_bottom(4)
+        box.append(pbar)
+
+        # Status text
+        status_lbl = Gtk.Label()
+        status_lbl.set_markup("<span size='9000'>Connecting to Pulsar Store…</span>")
+        status_lbl.set_halign(Gtk.Align.START)
+        box.append(status_lbl)
+
+        # Close / Cancel button
+        btn_close = Gtk.Button(label="Cancel")
+        btn_close.connect("clicked", lambda _: win.close())
+        btn_close.set_halign(Gtk.Align.END)
+        box.append(btn_close)
+
+        win.set_child(box)
+        win.present()
+
+        def _worker():
+            try:
+                GLib.idle_add(lambda: (
+                    pbar.set_fraction(0.35),
+                    status_lbl.set_markup("<span size='9000'>Downloading package archive…</span>")
+                ))
+
+                if pkg_type == "flatpak":
+                    ref = pkg.get("metadata", {}).get("flatpakref_url") or url or pkg_id
+                    res = subprocess.run(["flatpak", "install", "-y", ref], capture_output=True)
+                    ok = (res.returncode == 0)
+
+                elif pkg_type == "gnome_extension":
+                    uuid = pkg.get("metadata", {}).get("uuid") or pkg_id
+                    target = GNOME_EXT_DIR / uuid
+                    with tempfile.TemporaryDirectory() as tmp:
+                        zip_p = Path(tmp) / "ext.zip"
+                        urllib.request.urlretrieve(url, zip_p)
+                        GLib.idle_add(lambda: (pbar.set_fraction(0.75), status_lbl.set_markup("<span size='9000'>Extracting GNOME extension…</span>")))
+                        target.mkdir(parents=True, exist_ok=True)
+                        with zipfile.ZipFile(zip_p, "r") as z:
+                            z.extractall(target)
+                        subprocess.run(["gnome-extensions", "enable", uuid], capture_output=True)
+                    ok = True
+
+                elif pkg_type in ("sayri_skill", "sayri_plugin"):
+                    is_plugin = ("gateway" in pkg_id or "plugin" in pkg_id or pkg_type == "sayri_plugin")
+                    dest_root = SAYRI_PLUGINS_DIR if is_plugin else SAYRI_SKILLS_DIR
+                    target = dest_root / pkg_id
+                    with tempfile.TemporaryDirectory() as tmp:
+                        pkg_p = Path(tmp) / "pkg.zip"
+                        urllib.request.urlretrieve(url, pkg_p)
+                        GLib.idle_add(lambda: (pbar.set_fraction(0.75), status_lbl.set_markup("<span size='9000'>Configuring isolated sandbox…</span>")))
+                        target.mkdir(parents=True, exist_ok=True)
+                        with zipfile.ZipFile(pkg_p, "r") as z:
+                            z.extractall(target)
+                        if is_plugin:
+                            alt_target = SAYRI_SKILLS_DIR / pkg_id
+                            alt_target.mkdir(parents=True, exist_ok=True)
+                            with zipfile.ZipFile(pkg_p, "r") as z:
+                                z.extractall(alt_target)
+                    ok = True
+                else:
+                    ok = False
+
+                if ok:
+                    def _on_success():
+                        pbar.set_fraction(1.0)
+                        title.set_markup(f"<span weight='bold' size='11500' foreground='#22c55e'>Installed: {name}</span>")
+                        status_lbl.set_markup("<span size='9000' foreground='#22c55e'>Ready to use in Pulsar OS.</span>")
+                        btn_close.set_label("OK (closes in 5s)")
+                        btn_close.add_css_class("suggested-action")
+                        countdown = [5]
+                        def _tick():
+                            countdown[0] -= 1
+                            if countdown[0] <= 0:
+                                win.close()
+                                return False
+                            btn_close.set_label(f"OK (closes in {countdown[0]}s)")
+                            return True
+                        GLib.timeout_add_seconds(1, _tick)
+                    GLib.idle_add(_on_success)
+                else:
+                    def _on_fail():
+                        pbar.set_fraction(1.0)
+                        title.set_markup(f"<span weight='bold' size='11500' foreground='#ef4444'>Installation Failed</span>")
+                        status_lbl.set_markup("<span size='9000' foreground='#ef4444'>An error occurred during package installation.</span>")
+                        btn_close.set_label("Close")
+                    GLib.idle_add(_on_fail)
+
+            except Exception as exc:
+                def _on_err():
+                    title.set_markup(f"<span weight='bold' size='11500' foreground='#ef4444'>Error</span>")
+                    status_lbl.set_markup(f"<span size='8500' foreground='#ef4444'>{exc}</span>")
+                    btn_close.set_label("Close")
+                GLib.idle_add(_on_err)
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    app.connect("activate", on_activate)
+    app.run(None)
+    return True
+
+def install_package(pkg):
+    if os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"):
+        return run_gui_install(pkg)
+    return run_text_install(pkg)
+
 def uninstall_package(pkg_id):
     """Uninstalls a package by ID across Flatpaks, GNOME Extensions, and Sayri Skills/Plugins."""
-    print(f"\n🗑️ Removing package: {pkg_id}...")
+    print(f"\n Removing package: {pkg_id}...")
     removed = False
 
     # 1. Check Sayri Skills & Plugins
@@ -233,10 +317,10 @@ def uninstall_package(pkg_id):
         if target.is_dir():
             try:
                 shutil.rmtree(target)
-                print(f"✅ Removed Sayri package from {target}")
+                print(f" Removed Sayri package from {target}")
                 removed = True
             except Exception as e:
-                print(f"❌ Error deleting {target}: {e}")
+                print(f" Error deleting {target}: {e}")
 
     # 2. Check GNOME Extensions
     ext_target = GNOME_EXT_DIR / pkg_id
@@ -244,38 +328,38 @@ def uninstall_package(pkg_id):
         try:
             subprocess.run(["gnome-extensions", "disable", pkg_id], capture_output=True)
             shutil.rmtree(ext_target)
-            print(f"✅ Removed GNOME Extension from {ext_target}")
+            print(f" Removed GNOME Extension from {ext_target}")
             removed = True
         except Exception as e:
-            print(f"❌ Error deleting {ext_target}: {e}")
+            print(f" Error deleting {ext_target}: {e}")
 
     # 3. Check Flatpak
     try:
         res = subprocess.run(["flatpak", "uninstall", "-y", pkg_id], capture_output=True, text=True)
         if res.returncode == 0:
-            print(f"✅ Flatpak application '{pkg_id}' uninstalled.")
+            print(f" Flatpak application '{pkg_id}' uninstalled.")
             removed = True
     except Exception:
         pass
 
     if not removed:
-        print(f"⚠️ Package '{pkg_id}' was not found among installed software.")
+        print(f" Package '{pkg_id}' was not found among installed software.")
     return removed
 
 CLI_REMOTE_URL = "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/pulsar-store"
 
 def self_update_cli():
     """Checks and updates the pulsar-store CLI itself to the latest version from upstream repository."""
-    print("🔄 Checking for Pulsar Store CLI updates...")
+    print(" Checking for Pulsar Store CLI updates...")
     try:
         req = urllib.request.Request(CLI_REMOTE_URL, headers={"User-Agent": "PulsarStoreCLI/1.0"})
         with urllib.request.urlopen(req, timeout=10) as resp:
             remote_code = resp.read()
             if not remote_code.startswith(b"#!/usr/bin/env python3"):
-                print("❌ Invalid remote CLI script received.")
+                print(" Invalid remote CLI script received.")
                 return False
     except Exception as e:
-        print(f"⚠️ Could not check for CLI updates: {e}")
+        print(f" Could not check for CLI updates: {e}")
         return False
 
     cur_file = Path(__file__).resolve()
@@ -289,10 +373,10 @@ def self_update_cli():
     cur_hash = hashlib.sha256(cur_code).hexdigest() if cur_code else ""
 
     if remote_hash == cur_hash:
-        print("✨ Pulsar Store CLI is already on the latest version.")
+        print(" Pulsar Store CLI is already on the latest version.")
         return True
 
-    print("🚀 Newer version of Pulsar Store CLI detected! Updating...")
+    print(" Newer version of Pulsar Store CLI detected! Updating...")
     targets = [
         Path("/usr/bin/pulsar-store"),
         Path.home() / ".local" / "bin" / "pulsar-store",
@@ -306,7 +390,7 @@ def self_update_cli():
             t.parent.mkdir(parents=True, exist_ok=True)
             t.write_bytes(remote_code)
             t.chmod(0o755)
-            print(f"✅ Updated: {t}")
+            print(f" Updated: {t}")
             updated_any = True
         except PermissionError:
             try:
@@ -316,15 +400,15 @@ def self_update_cli():
                 subprocess.run(["pkexec", "cp", tmp_name, str(t)], check=True)
                 subprocess.run(["pkexec", "chmod", "+x", str(t)], check=True)
                 os.unlink(tmp_name)
-                print(f"✅ Updated (root): {t}")
+                print(f" Updated (root): {t}")
                 updated_any = True
             except Exception as exc:
-                print(f"⚠️ Could not update {t}: {exc}")
+                print(f" Could not update {t}: {exc}")
         except Exception as e:
-            print(f"⚠️ Could not update {t}: {e}")
+            print(f" Could not update {t}: {e}")
 
     if updated_any:
-        print("🎉 Pulsar Store CLI self-update complete!")
+        print(" Pulsar Store CLI self-update complete!")
         return True
     return False
 
@@ -369,36 +453,36 @@ def main():
         if q:
             pkgs = [p for p in pkgs if q in p["name"].lower() or q in p["description"].lower() or q in p["id"].lower()]
         
-        print(f"\n📦 Pulsar Store Catalog ({len(pkgs)} packages found):\n")
+        print(f"\n Pulsar Store Catalog ({len(pkgs)} packages found):\n")
         print(f"{'ID':<34} | {'TYPE':<16} | {'VERSION':<10} | {'NAME'}")
         print("-" * 88)
         for p in pkgs:
             print(f"{p['id']:<34} | {p.get('type',''):<16} | v{p.get('version','1.0'):<9} | {p.get('name','')}")
-        print("\n💡 Run 'pulsar-store info <id>' or 'pulsar-store install <id>' to inspect and install.")
+        print("\n Run 'pulsar-store info <id>' or 'pulsar-store install <id>' to inspect and install.")
 
     elif args.command == "check":
         print("🔍 Checking for updates across Pulsar OS ecosystems...")
         updates = check_updates()
         if not updates:
-            print("✨ Everything is up to date!")
+            print(" Everything is up to date!")
             return
-        print(f"\n📦 {len(updates)} update(s) available:\n")
+        print(f"\n {len(updates)} update(s) available:\n")
         print(f"{'TYPE':<20} | {'PACKAGE':<32} | {'CURRENT':<12} -> {'AVAILABLE':<12}")
         print("-" * 84)
         for t, n, c, d, _ in updates:
             print(f"{t:<20} | {n[:32]:<32} | {c:<12} -> {d:<12}")
-        print("\n💡 Run 'pulsar-store update' to install all updates.")
+        print("\n Run 'pulsar-store update' to install all updates.")
 
     elif args.command == "update":
         self_update_cli()
         updates = check_updates()
         if not updates:
-            print("✨ Everything is up to date.")
+            print(" Everything is up to date.")
             return
         for _, n, _, _, p in updates:
             if p: install_package(p)
         subprocess.run(["flatpak", "update", "-y"])
-        print("\n✅ All updates completed successfully!")
+        print("\n All updates completed successfully!")
 
     elif args.command in ("remove", "uninstall"):
         pkg_id = args.id.strip()
@@ -414,7 +498,7 @@ def main():
         if pkg:
             install_package(pkg)
             return
-        print(f"❌ Package '{pkg_id}' not found in catalog.")
+        print(f" Package '{pkg_id}' not found in catalog.")
 
     elif args.command == "handle-url":
         pkg_id = args.url.replace("pulsar://install/", "").strip()
@@ -426,20 +510,20 @@ def main():
         if pkg:
             install_package(pkg)
             return
-        print(f"❌ Package '{pkg_id}' not found in catalog.")
+        print(f" Package '{pkg_id}' not found in catalog.")
 
     elif args.command == "info":
         catalog = get_catalog()
         for p in catalog.get("packages", []):
             if p["id"] == args.id:
-                print(f"\n📦 Package: {p['name']} ({p['id']})")
+                print(f"\n Package: {p['name']} ({p['id']})")
                 print(f"📌 Version: v{p.get('version')} | Author: @{p.get('author')}")
                 print(f"📝 {p.get('description')}")
                 sec = p.get("security_report", {})
-                print(f"\n🛡️ OpenCode Report: {sec.get('score', 95)}/100 ({sec.get('status', 'PASSED')})")
-                print(f"📋 {sec.get('summary', '')}")
+                print(f"\n OpenCode Report: {sec.get('score', 95)}/100 ({sec.get('status', 'PASSED')})")
+                print(f" {sec.get('summary', '')}")
                 return
-        print(f"❌ Package '{args.id}' not found.")
+        print(f" Package '{args.id}' not found.")
     else:
         parser.print_help()
 

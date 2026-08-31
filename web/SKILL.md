@@ -1,10 +1,10 @@
-# 🤖 AI Agent Submission Guide — Pulsar Store
+#  AI Agent Submission Guide — Pulsar Store
 
 > **Purpose**: This document teaches AI coding agents how to autonomously submit, update, and manage packages on the Pulsar Store (https://store-os.inled.es) via the GitHub Issue-based automated pipeline.
 
 ---
 
-## 📖 Table of Contents
+##  Table of Contents
 
 1. [How the Store Works](#how-the-store-works)
 2. [Package Types & Structures](#package-types--structures)
@@ -376,7 +376,7 @@ zip -r ../sayri-gateway-myplatform.zip . \
 
 ---
 
-## 📋 Quick Reference
+##  Quick Reference
 
 | Action | Issue Title Format | Template |
 |---|---|---|
@@ -389,14 +389,14 @@ zip -r ../sayri-gateway-myplatform.zip . \
 
 | Field | Required | Description |
 |---|---|---|
-| ID | ✅ | Unique package identifier |
-| Name | ✅ | Human-readable name |
-| Description | ✅ | What the package does |
-| ZIP Archive URL | ✅ | Direct HTTPS link to .zip |
-| Icon URL | ✅ | Square PNG or SVG (128x128+) |
-| Source Repository | ❌ | GitHub URL |
-| Sandbox Level | ✅ | Security isolation level |
-| AI Provider | ❌ | Custom LLM for audit |
+| ID |  | Unique package identifier |
+| Name |  | Human-readable name |
+| Description |  | What the package does |
+| ZIP Archive URL |  | Direct HTTPS link to .zip |
+| Icon URL |  | Square PNG or SVG (128x128+) |
+| Source Repository |  | GitHub URL |
+| Sandbox Level |  | Security isolation level |
+| AI Provider |  | Custom LLM for audit |
 
 ---
 
