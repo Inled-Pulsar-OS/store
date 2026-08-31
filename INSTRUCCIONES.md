@@ -1,5 +1,8 @@
 # 📖 Developer Submission & Packaging Guidelines
 
+## 🤖 For AI Agents
+See **[AI_AGENTS_SUBMISSION_GUIDE.md](AI_AGENTS_SUBMISSION_GUIDE.md)** for comprehensive documentation on how AI coding agents can autonomously submit, update, and manage packages via the GitHub Issue-based pipeline.
+
 ## 1. Sayri Skills (`sayri_skill`)
 Package format: `.zip` containing:
 - `SKILL.md`: Frontmatter YAML metadata + prompt instructions.
@@ -8,8 +11,8 @@ Package format: `.zip` containing:
 
 ## 2. Sayri Plugins (`sayri_plugin`)
 Package format: `.zip` containing:
-- `plugin.yaml`: Manifest declaring capabilities, network domains, and IPC sockets.
-- Source code daemon executed out-of-process in a `bwrap` sandbox.
+- `manifest.json`: Plugin manifest declaring capabilities, sandbox level, required secrets, and authorization config.
+- `gateway.py`: Source code daemon executed out-of-process in a `bwrap` sandbox.
 
 ## 3. GNOME Extensions (`gnome_extension`)
 Package format: `.zip` containing:
