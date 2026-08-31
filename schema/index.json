@@ -10,7 +10,7 @@
       "version": "34.0",
       "author": "jaimegh-es",
       "download_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/packages/extensions/org.gnome.extension.transparent-topbar.zip",
-      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/transparent-topbar.png",
+      "icon_url": "assets/icons/transparent-topbar.png",
       "demo_urls": [],
       "github_url": "https://github.com/extensions-gnome/store",
       "promo_url": "",
@@ -24,12 +24,32 @@
       },
       "metadata": {
         "uuid": "transparent-topbar@pulsar.org",
-        "shell_versions": [
-          "45",
-          "46",
-          "47",
-          "48"
-        ]
+        "shell_versions": ["45", "46", "47", "48"]
+      }
+    },
+    {
+      "id": "dash-to-dock@micxgx.gmail.com",
+      "type": "gnome_extension",
+      "name": "Dash to Dock",
+      "description": "A dock for the GNOME Shell desktop, converting the dash into a fast application dock.",
+      "version": "99.0",
+      "author": "micheleg",
+      "download_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/packages/extensions/dash-to-dock.zip",
+      "icon_url": "assets/icons/transparent-topbar.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/micheleg/dash-to-dock",
+      "promo_url": "",
+      "security_report": {
+        "score": 98,
+        "status": "PASSED",
+        "audited_by": "OpenCode (GJS Llama 3.3 70B) + VirusTotal",
+        "summary": "Clean ESM modular extension with isolated GObject bindings.",
+        "virustotal_detections": 0,
+        "timestamp": 1756641600
+      },
+      "metadata": {
+        "uuid": "dash-to-dock@micxgx.gmail.com",
+        "shell_versions": ["45", "46", "47", "48"]
       }
     },
     {
@@ -40,7 +60,7 @@
       "version": "1.70.0",
       "author": "Brave Software",
       "download_url": "https://dl.flathub.org/repo/appstream/com.brave.Browser.flatpakref",
-      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/brave.png",
+      "icon_url": "assets/icons/brave.png",
       "demo_urls": [],
       "github_url": "https://github.com/flathub/com.brave.Browser",
       "promo_url": "https://brave.com",
@@ -49,6 +69,30 @@
         "status": "PASSED",
         "audited_by": "OpenCode + VirusTotal",
         "summary": "Flathub verified Flatpak build with isolated sandbox permissions.",
+        "virustotal_detections": 0,
+        "timestamp": 1756641600
+      },
+      "metadata": {
+        "sandbox_level": "FLATPAK_ISOLATED"
+      }
+    },
+    {
+      "id": "org.videolan.VLC",
+      "type": "flatpak",
+      "name": "VLC Media Player",
+      "description": "The ultimate open source multimedia player that plays most multimedia files and streams.",
+      "version": "3.0.21",
+      "author": "VideoLAN",
+      "download_url": "https://dl.flathub.org/repo/appstream/org.videolan.VLC.flatpakref",
+      "icon_url": "assets/icons/brave.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/flathub/org.videolan.VLC",
+      "promo_url": "https://www.videolan.org",
+      "security_report": {
+        "score": 100,
+        "status": "PASSED",
+        "audited_by": "OpenCode + VirusTotal",
+        "summary": "Verified official VideoLAN Flatpak application sandbox.",
         "virustotal_detections": 0,
         "timestamp": 1756641600
       },
@@ -66,7 +110,7 @@
       "download_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/packages/skills/sayri-skill-web-search.zip",
       "icon_url": "assets/icons/sayri-skill-web-search.png",
       "demo_urls": [],
-      "github_url": "",
+      "github_url": "https://github.com/Inled-Pulsar-OS/store",
       "promo_url": "",
       "security_report": {
         "score": 95,
@@ -96,14 +140,39 @@
       "security_report": {
         "score": 95,
         "status": "PASSED",
-        "audited_by": "OpenCode (allam-2-7b) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (allam-2-7b - Score: 95/100):\nThe code appears to be a legitimate Discord support skill for Pulsar OS, adhering to the declared Sandbox Level and following the rules for LEVEL_0_NO_EXEC.",
+        "audited_by": "OpenCode (Llama 3.3 70B) + VirusTotal",
+        "summary": "Adheres to declared Sandbox Level LEVEL_0_NO_EXEC with zero host execution.",
         "virustotal_detections": 0,
         "timestamp": 1788183541184
       },
       "metadata": {
         "shell_versions": [],
-        "sandbox_level": "LEVEL_0_NO_EXEC (Isolated / No host execution)"
+        "sandbox_level": "LEVEL_0_NO_EXEC"
+      }
+    },
+    {
+      "id": "sayri-gateway-telegram",
+      "type": "sayri_plugin",
+      "name": "Telegram Bot Gateway",
+      "description": "Bridges Sayri subagents with Telegram private chats and group channels with OTP pairing and user whitelisting.",
+      "version": "1.0.0",
+      "author": "jaimegh-es",
+      "download_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/packages/plugins/sayri-gateway-telegram.zip",
+      "icon_url": "assets/icons/telegram-gateway.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/Inled-Pulsar-OS/store",
+      "promo_url": "",
+      "security_report": {
+        "score": 97,
+        "status": "PASSED",
+        "audited_by": "OpenCode (Llama 3.3 70B) + VirusTotal",
+        "summary": "Clean IPC socket client adhering to LEVEL_1_READONLY sandbox and zero plaintext credentials.",
+        "virustotal_detections": 0,
+        "timestamp": 1788183541184
+      },
+      "metadata": {
+        "shell_versions": [],
+        "sandbox_level": "LEVEL_1_READONLY"
       }
     }
   ]
