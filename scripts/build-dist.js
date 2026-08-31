@@ -35,11 +35,13 @@ fs.mkdirSync(distDir, { recursive: true });
     }
 });
 
-// Copy CATALOG.md
-const catalogPath = path.join(rootDir, 'CATALOG.md');
-if (fs.existsSync(catalogPath)) {
-    fs.copyFileSync(catalogPath, path.join(distDir, 'CATALOG.md'));
-    console.log("✓ Copied CATALOG.md");
-}
+// Copy CATALOG.md and SKILL.md
+['CATALOG.md', 'SKILL.md', 'AI_AGENTS_SUBMISSION_GUIDE.md'].forEach(file => {
+    const p = path.join(rootDir, file);
+    if (fs.existsSync(p)) {
+        fs.copyFileSync(p, path.join(distDir, file));
+        console.log(`✓ Copied ${file}`);
+    }
+});
 
 console.log(`\n🎉 Build complete! Production artifacts ready in: ${distDir}\n`);

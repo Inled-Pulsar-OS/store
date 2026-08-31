@@ -30,6 +30,7 @@
         <button class="nav-link" onclick="showCatalogView('sayri_skill')">Sayri Skills</button>
         <button class="nav-link" onclick="showStaticView('cli-view')">CLI Tool</button>
         <button class="nav-link" onclick="showStaticView('submit-view')">Submit</button>
+        <button class="nav-link" onclick="showStaticView('skill-guide-view')">SKILL.md</button>
       </nav>
 
       <!-- Right Header Actions (Discord, Telegram, GitHub, Theme) -->
@@ -219,6 +220,38 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       VIEW 5: SKILL.md AI AGENT SUBMISSION GUIDE
+       ========================================================================= -->
+  <div id="skill-guide-view" class="app-view hidden">
+    <div class="container package-detail-container">
+      <button class="back-link-btn" onclick="showCatalogView()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Store
+      </button>
+
+      <article class="detail-article">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <h1 class="detail-title">🤖 AI Agent Submission Guide (`SKILL.md`)</h1>
+            <p class="detail-lead">Specification and instructions for AI coding assistants (Antigravity, Cursor, Claude, etc.) on how to autonomously submit and publish packages to Pulsar Store via GitHub Issues.</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary btn-sm" onclick="copyCode(this, document.getElementById('store-skill-code').textContent)">Copy SKILL.md</button>
+            <a href="SKILL.md" target="_blank" class="btn btn-primary btn-sm">Raw SKILL.md ↗</a>
+          </div>
+        </div>
+
+        <div>
+          <pre class="skill-md-box" style="max-height: 650px;"><code id="store-skill-code">Loading SKILL.md…</code></pre>
+        </div>
+      </article>
+    </div>
+  </div>
+
   <!-- Site Footer (from os.inled.es) -->
   <footer class="site-footer">
     <div class="container footer-container">
@@ -242,25 +275,6 @@
       </p>
     </div>
   </footer>
-
-  <!-- SKILL.md Modal Viewer -->
-  <div id="skill-md-modal" class="modal-overlay hidden" onclick="closeSkillModal(event)">
-    <div class="modal-card" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:1.2rem;">📄</span>
-          <h3 id="modal-skill-title" style="margin:0; font-size:1.1rem;">SKILL.md</h3>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-secondary btn-sm" id="modal-copy-btn" onclick="copyModalSkillContent()">Copy</button>
-          <button class="btn btn-secondary btn-sm" onclick="closeSkillModal()">✕</button>
-        </div>
-      </div>
-      <div class="modal-body">
-        <pre class="skill-md-box" style="margin-bottom:0;"><code id="modal-skill-code"></code></pre>
-      </div>
-    </div>
-  </div>
 
   <script src="app.js"></script>
 </body>
