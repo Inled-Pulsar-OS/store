@@ -454,7 +454,7 @@ Strict Rules:
         description: formData.description || "",
         version: version,
         author: issueUser,
-        download_url: `https://raw.githubusercontent.com/${process.env.REPOSITORY || 'pulsar-os/store'}/main/${finalArchivePath}`,
+        download_url: `https://raw.githubusercontent.com/${process.env.REPOSITORY || 'Inled-Pulsar-OS/store'}/main/${finalArchivePath}`,
         icon_url: `assets/icons/${pkgId}.png`,
         demo_urls: demoPaths,
         github_url: formData.github_url || "",

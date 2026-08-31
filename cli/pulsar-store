@@ -14,7 +14,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-CATALOG_URL = "https://raw.githubusercontent.com/pulsar-os/store/main/schema/index.json"
+CATALOG_URL = "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/schema/index.json"
 CACHE_FILE = Path.home() / ".cache" / "pulsar-store" / "index.json"
 GNOME_EXT_DIR = Path.home() / ".local" / "share" / "gnome-shell" / "extensions"
 SAYRI_SKILLS_DIR = Path.home() / ".config" / "sayri" / "skills"

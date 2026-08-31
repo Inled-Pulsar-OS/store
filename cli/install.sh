@@ -9,7 +9,7 @@ if [ ! -w "/usr/local/bin" ]; then
     mkdir -p "$HOME/.local/bin"
 fi
 
-curl -fsSL https://raw.githubusercontent.com/pulsar-os/store/main/cli/pulsar-store -o "$TARGET_BIN"
+curl -fsSL https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/pulsar-store -o "$TARGET_BIN"
 chmod +x "$TARGET_BIN"
 
 # Register pulsar:// MIME scheme handler

@@ -26,7 +26,7 @@ All package submissions undergo automated double-layer security auditing:
 Install the single-command CLI helper for Pulsar OS / Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pulsar-os/store/main/cli/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/install.sh | bash
 ```
 
 ### Usage:
@@ -47,7 +47,7 @@ pulsar-store install <package-id>
 ## 🚀 Submitting a Package
 
 To publish a new package, open an Issue using the appropriate form template:
-- [Submit Flatpak App](https://github.com/pulsar-os/store/issues/new?template=submit-app.yml)
-- [Submit GNOME Extension](https://github.com/pulsar-os/store/issues/new?template=submit-extension.yml)
-- [Submit Sayri Skill](https://github.com/pulsar-os/store/issues/new?template=submit-skill.yml)
-- [Submit Sayri Plugin](https://github.com/pulsar-os/store/issues/new?template=submit-plugin.yml)
+- [Submit Flatpak App](https://github.com/Inled-Pulsar-OS/store/issues/new?template=submit-app.yml)
+- [Submit GNOME Extension](https://github.com/Inled-Pulsar-OS/store/issues/new?template=submit-extension.yml)
+- [Submit Sayri Skill](https://github.com/Inled-Pulsar-OS/store/issues/new?template=submit-skill.yml)
+- [Submit Sayri Plugin](https://github.com/Inled-Pulsar-OS/store/issues/new?template=submit-plugin.yml)
