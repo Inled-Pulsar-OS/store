@@ -252,7 +252,13 @@ async function run() {
     await downloadFile(formData.zip_url, downloadedPkgPath);
 
     const iconPath = path.join('assets/icons', `${pkgId}.png`);
-    await downloadFile(formData.icon_url, iconPath);
+    if (formData.icon_url) {
+        try {
+            await downloadFile(formData.icon_url, iconPath);
+        } catch (e) {
+            console.warn(`Icon download warning: ${e.message}`);
+        }
+    }
 
     const demoPaths = [];
     if (formData.demo_urls && formData.demo_urls.length > 0) {
