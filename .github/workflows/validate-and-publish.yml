@@ -40,10 +40,10 @@ jobs:
         run: |
           ISSUE_NUM=${{ inputs.issue_number }}
           echo "Fetching issue #${ISSUE_NUM}..."
-          gh issue view $ISSUE_NUM --repo ${{ github.repository }} --json title,body,user,labels > /tmp/issue.json
+          gh issue view $ISSUE_NUM --repo ${{ github.repository }} --json title,body,author,labels > /tmp/issue.json
           TITLE=$(cat /tmp/issue.json | jq -r '.title')
           BODY=$(cat /tmp/issue.json | jq -r '.body')
-          USER=$(cat /tmp/issue.json | jq -r '.user.login')
+          USER=$(cat /tmp/issue.json | jq -r '.author.login')
           LABELS=$(cat /tmp/issue.json | jq -c '[.labels[] | {name: .name}]')
           echo "ISSUE_TITLE=$TITLE" >> $GITHUB_ENV
           echo "ISSUE_BODY=$BODY" >> $GITHUB_ENV
