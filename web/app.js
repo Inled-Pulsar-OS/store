@@ -187,6 +187,14 @@ function showPackageDetail(pkgId) {
         <button class="btn-copy" onclick="copyCode(this, 'pulsar-store install ${escapeHtml(pkg.id)}')">Copy Command</button>
       </div>
 
+      <!-- README Section (fetched from readme_url) -->
+      ${pkg.readme_url ? `<div class="readme-section" id="readme-section">
+        <div class="readme-loading" id="readme-loading">
+          <span class="btn-spinner" style="display:inline-block; margin-right:8px; vertical-align:middle;"></span> Loading README…
+        </div>
+        <div class="readme-content hidden" id="readme-content"></div>
+      </div>` : ''}
+
       <!-- Specifications -->
       <div>
         <h3 class="detail-section-heading">Specifications</h3>
@@ -223,15 +231,6 @@ function showPackageDetail(pkgId) {
           • <b>VirusTotal Malware Scan</b>: 0/72 engines clean (zero malicious signatures or binaries detected).
         </p>
       </div>
-
-      <!-- README Section (fetched from readme_url) -->
-      ${pkg.readme_url ? `<div class="readme-section" id="readme-section">
-        <h3 class="detail-section-heading">📖 README</h3>
-        <div class="readme-loading" id="readme-loading">
-          <span class="btn-spinner" style="display:inline-block; margin-right:8px; vertical-align:middle;"></span> Loading README…
-        </div>
-        <div class="readme-content hidden" id="readme-content"></div>
-      </div>` : ''}
     </article>
   `;
 
@@ -455,6 +454,45 @@ function renderMarkdown(md) {
 
   // Horizontal rules
   html = html.replace(/^---+$/gm, '<hr class="readme-hr">');
+
+  // Tables
+  html = html.replace(/^(\|.*\|\n\|[-:| ]+\|\n(?:\|.*\|\n?)+)/gm, (tableBlock) => {
+    const lines = tableBlock.trim().split('\n');
+    if (lines.length < 2) return tableBlock;
+
+    // Parse header
+    const headers = lines[0].split('|').filter(c => c.trim()).map(c => c.trim());
+
+    // Parse alignment from separator line
+    const alignments = lines[1].split('|').filter(c => c.trim()).map(c => {
+      const cell = c.trim();
+      if (cell.startsWith(':') && cell.endsWith(':')) return 'center';
+      if (cell.endsWith(':')) return 'right';
+      return 'left';
+    });
+
+    // Parse rows
+    const rows = lines.slice(2).map(line =>
+      line.split('|').filter(c => c.trim()).map(c => c.trim())
+    );
+
+    let table = '<table class="readme-table"><thead><tr>';
+    headers.forEach((h, i) => {
+      const align = alignments[i] || 'left';
+      table += `<th style="text-align:${align}">${h}</th>`;
+    });
+    table += '</tr></thead><tbody>';
+    rows.forEach(row => {
+      table += '<tr>';
+      row.forEach((cell, i) => {
+        const align = alignments[i] || 'left';
+        table += `<td style="text-align:${align}">${cell}</td>`;
+      });
+      table += '</tr>';
+    });
+    table += '</tbody></table>';
+    return table;
+  });
 
   // Unordered lists
   html = html.replace(/^(?:- (.+)\n?)+/gm, (block) => {
