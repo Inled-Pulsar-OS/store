@@ -808,6 +808,152 @@ html.dark .pkg-card:hover {
   overflow-y: auto;
 }
 
+/* ==========================================================================
+   README Rendered Content
+   ========================================================================== */
+.readme-section {
+  border-top: 1px solid var(--border-color);
+  padding-top: 24px;
+}
+
+.readme-loading {
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.readme-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 28px 32px;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+}
+
+.readme-content h1 {
+  font-size: 1.8rem;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.readme-content h2 {
+  font-size: 1.4rem;
+  margin: 28px 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.readme-content h3 {
+  font-size: 1.15rem;
+  margin: 22px 0 8px 0;
+}
+
+.readme-content h4,
+.readme-content h5,
+.readme-content h6 {
+  font-size: 1rem;
+  margin: 18px 0 6px 0;
+}
+
+.readme-content p.readme-p {
+  margin: 0 0 14px 0;
+}
+
+.readme-content a {
+  color: var(--accent-purple);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.readme-content a:hover {
+  color: var(--accent-blue);
+}
+
+.readme-content strong {
+  font-weight: 700;
+}
+
+.readme-content code.readme-inline {
+  background: var(--bg-highlight);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  color: var(--accent-purple);
+}
+
+.readme-content pre.readme-code {
+  background: var(--bg-highlight);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px 20px;
+  overflow-x: auto;
+  margin: 14px 0;
+}
+
+.readme-content pre.readme-code code {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.readme-content ul.readme-list {
+  padding-left: 24px;
+  margin: 10px 0;
+}
+
+.readme-content ul.readme-list li {
+  margin: 4px 0;
+}
+
+.readme-content blockquote.readme-quote {
+  border-left: 3px solid var(--accent-purple);
+  padding: 8px 16px;
+  margin: 14px 0;
+  background: var(--bg-highlight);
+  border-radius: 0 10px 10px 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.readme-content hr.readme-hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 24px 0;
+}
+
+.readme-content img.readme-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+.readme-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+}
+
+.readme-content table th,
+.readme-content table td {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.readme-content table th {
+  background: var(--bg-highlight);
+  font-weight: 600;
+}
+
 .hidden {
   display: none !important;
 }

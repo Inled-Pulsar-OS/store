@@ -13,6 +13,7 @@
       "icon_url": "assets/icons/sayri-gateway-telegram.png",
       "demo_urls": [],
       "github_url": "https://github.com/Inled-Pulsar-OS/store",
+      "readme_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/PKG/main/PKG/sayri/README.md",
       "promo_url": "",
       "skill_md": "{\n  \"id\": \"sayri-gateway-telegram\",\n  \"name\": \"Telegram Bot Gateway\",\n  \"version\": \"1.1.0\",\n  \"entrypoint\": \"gateway.py\",\n  \"sandbox_level\": \"LEVEL_1_READONLY\",\n  \"required_secrets\": [\"TELEGRAM_BOT_TOKEN\"],\n  \"authorization\": {\n    \"mode\": \"pairing_otp\",\n    \"allowed_users\": [],\n    \"pairing_pin_required\": true\n  }\n}",
       "security_report": {
@@ -39,6 +40,7 @@
       "icon_url": "assets/icons/sayri-gateway-discord.png",
       "demo_urls": [],
       "github_url": "",
+      "readme_url": "",
       "promo_url": "",
       "skill_md": "",
       "security_report": {

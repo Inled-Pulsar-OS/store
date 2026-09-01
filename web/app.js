@@ -223,8 +223,22 @@ function showPackageDetail(pkgId) {
           • <b>VirusTotal Malware Scan</b>: 0/72 engines clean (zero malicious signatures or binaries detected).
         </p>
       </div>
+
+      <!-- README Section (fetched from readme_url) -->
+      ${pkg.readme_url ? `<div class="readme-section" id="readme-section">
+        <h3 class="detail-section-heading">📖 README</h3>
+        <div class="readme-loading" id="readme-loading">
+          <span class="btn-spinner" style="display:inline-block; margin-right:8px; vertical-align:middle;"></span> Loading README…
+        </div>
+        <div class="readme-content hidden" id="readme-content"></div>
+      </div>` : ''}
     </article>
   `;
+
+  // Fetch and render README if readme_url is provided
+  if (pkg.readme_url) {
+    fetchReadme(pkg.readme_url);
+  }
 }
 
 // ── Install Button Handler with Perfectly Circular Spinner & Feedback ─────
@@ -262,6 +276,25 @@ function handleInstall(event, pkgId, buttonEl) {
     buttonEl.style.borderColor = '';
     buttonEl.style.minWidth = '';
   }, 4000);
+}
+
+// ── Fetch & Render README ─────────────────────────────────────────────────
+async function fetchReadme(url) {
+  const loadingEl = document.getElementById('readme-loading');
+  const contentEl = document.getElementById('readme-content');
+  if (!loadingEl || !contentEl) return;
+
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const md = await res.text();
+    contentEl.innerHTML = renderMarkdown(md);
+    loadingEl.classList.add('hidden');
+    contentEl.classList.remove('hidden');
+  } catch (err) {
+    console.warn('Failed to load README:', err);
+    loadingEl.innerHTML = `<span style="color: var(--text-muted); font-size: 0.9rem;">README not available.</span>`;
+  }
 }
 
 // ── Render Catalog Grid ───────────────────────────────────────────────────
@@ -385,4 +418,64 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+// ── Lightweight Markdown → HTML Renderer ──────────────────────────────────
+function renderMarkdown(md) {
+  if (!md) return '';
+  let html = escapeHtml(md);
+
+  // Fenced code blocks (``` ... ```)
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    const cls = lang ? ` class="lang-${lang}"` : '';
+    return `<pre class="readme-code"${cls}><code>${code.trim()}</code></pre>`;
+  });
+
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code class="readme-inline">$1</code>');
+
+  // Headings
+  html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
+  html = html.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
+  html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+
+  // Bold & italic
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // Links
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+  // Images
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="readme-img">');
+
+  // Horizontal rules
+  html = html.replace(/^---+$/gm, '<hr class="readme-hr">');
+
+  // Unordered lists
+  html = html.replace(/^(?:- (.+)\n?)+/gm, (block) => {
+    const items = block.trim().split('\n').map(line => {
+      const content = line.replace(/^- /, '');
+      return `<li>${content}</li>`;
+    }).join('');
+    return `<ul class="readme-list">${items}</ul>`;
+  });
+
+  // Blockquotes
+  html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote class="readme-quote">$1</blockquote>');
+
+  // Paragraphs (double newline)
+  html = html.replace(/\n\n+/g, '</p><p class="readme-p">');
+  html = '<p class="readme-p">' + html + '</p>';
+
+  // Clean up empty paragraphs
+  html = html.replace(/<p class="readme-p">\s*<\/p>/g, '');
+  html = html.replace(/<p class="readme-p">\s*(<h[1-6]|<pre|<ul|<hr|<blockquote)/g, '$1');
+  html = html.replace(/(<\/h[1-6]>|<\/pre>|<\/ul>|<hr[^>]*>|<\/blockquote>)\s*<\/p>/g, '$1');
+
+  return html;
 }
