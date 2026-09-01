@@ -397,17 +397,17 @@ Respond strictly with a JSON object:
   "reason": "<clear explanation in 2-3 sentences>"
 }`;
 
-    // A. Run OpenCode CLI Agent
+    // A. Run OpenCode CLI Agent with explicit default model
     try {
         console.log(`[OpenCode] Spawning OpenCode agent in ${extractedDir} using binary ${opencodeBin}...`);
-        const opencodeResult = spawnSync(opencodeBin, ['run', '--pure', '--dir', extractedDir, auditPrompt], {
+        const opencodeResult = spawnSync(opencodeBin, ['run', '--model', 'opencode/big-pickle', '--dir', extractedDir, auditPrompt], {
             encoding: 'utf8',
             timeout: 60000,
             env: { ...process.env }
         });
 
         const fullOutput = (opencodeResult.stdout || "") + "\n" + (opencodeResult.stderr || "");
-        console.log(`[OpenCode] Agent process finished. Output length: ${fullOutput.length}`);
+        console.log(`[OpenCode] Agent process finished. Raw output: ${fullOutput.trim()}`);
 
         const jsonMatch = fullOutput.match(/\{[\s\S]*"status"[\s\S]*"score"[\s\S]*\}/);
         if (jsonMatch) {
@@ -419,7 +419,7 @@ Respond strictly with a JSON object:
         console.warn(`[OpenCode] CLI agent notice: ${opencodeErr.message}`);
     }
 
-    // B. Direct LLM Audit with Groq / OpenAI (Fixed baseURL)
+    // B. Direct LLM Audit with Groq / OpenAI (Dynamic models & fixed baseURL)
     if (!aiResponse && (process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY)) {
         console.log("[OpenCode] Running direct LLM semantic audit...");
         let codeSnippet = "";
@@ -435,10 +435,18 @@ Respond strictly with a JSON object:
 
         const providers = [];
         if (process.env.GROQ_API_KEY) {
+            let groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
+            try {
+                const listRes = await axios.get('https://api.groq.com/openai/v1/models', {
+                    headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` }
+                });
+                const fetched = (listRes.data?.data || []).map(m => m.id).filter(id => !id.includes('whisper') && !id.includes('guard'));
+                if (fetched.length > 0) groqModels = fetched;
+            } catch (e) {}
             providers.push({
                 apiKey: process.env.GROQ_API_KEY,
                 baseURL: 'https://api.groq.com/openai/v1',
-                models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']
+                models: groqModels
             });
         }
         if (process.env.OPENAI_API_KEY) {
