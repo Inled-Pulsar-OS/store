@@ -42,16 +42,16 @@
       "promo_url": "",
       "skill_md": "",
       "security_report": {
-        "score": 95,
+        "score": 90,
         "status": "PASSED",
-        "audited_by": "OpenCode (Local Static Analysis) + VirusTotal",
-        "summary": "Static heuristic audit completed (Score: 95/100 - Clean structure verified).",
+        "audited_by": "VirusTotal Zero-Tolerance Malware Shield + VirusTotal",
+        "summary": "✅ Verified Safe: VirusTotal confirmed 0 malware detections across all engines. Package structure validated.",
         "virustotal_detections": 0,
-        "timestamp": 1788252171449
+        "timestamp": 1788252644367
       },
       "metadata": {
         "shell_versions": [],
-        "sandbox_level": "LEVEL_0_NO_EXEC"
+        "sandbox_level": "LEVEL_1_READONLY"
       }
     }
   ]
