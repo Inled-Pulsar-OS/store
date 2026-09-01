@@ -20,6 +20,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      deployments: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,6 +33,11 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
+
+      - name: Install OpenCode CLI Agent
+        run: |
+          curl -fsSL https://opencode.ai/install | bash
+          echo "$HOME/.opencode/bin" >> $GITHUB_PATH
 
       - name: Fetch issue data (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
@@ -82,3 +88,11 @@ jobs:
           git add schema/index.json CATALOG.md assets/
           git commit -m "Auto-publish package from Issue #${{ github.event.issue.number }}" || echo "No changes to commit"
           git push
+
+      - name: Deploy to Cloudflare Pages
+        if: success()
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=pulsar-store --commit-dirty=true
