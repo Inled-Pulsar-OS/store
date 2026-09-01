@@ -30,24 +30,24 @@
     },
     {
       "id": "sayri-gateway-discord",
-      "type": "sayri_plugin",
+      "type": "app",
       "name": "Discord Bot Gateway",
-      "description": "Autonomous Discord Bot Gateway connecting server channels and DMs to Sayri AI Agents with Desktop OTP pairing, channel history reading/summaries (/resume), and customizable sandbox levels.",
-      "version": "1.0.0",
+      "description": "Autonomous Discord Bot Gateway connecting server channels and DMs to Sayri AI Agents with persistent conversation memory (/new), guest access kill switch (/guests), channel summaries (/resume), and OTP desktop pairing.",
+      "version": "1.1.0",
       "author": "jaimegh-es",
       "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/sayri-gateway-discord.zip",
       "icon_url": "assets/icons/sayri-gateway-discord.png",
       "demo_urls": [],
-      "github_url": "https://github.com/Inled-Pulsar-OS/store",
+      "github_url": "",
       "promo_url": "",
       "skill_md": "",
       "security_report": {
         "score": 92,
         "status": "PASSED",
         "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 92/100):\nThe package is a legitimate Discord gateway: all network traffic is confined to Discord's official API/gateway domains, the bot token is read from environment and used only for Discord authentication, and it communicates with the Sayri core over a local Unix socket. There are no subprocess/eval/exec calls, no destructive commands, no credentials exfiltration, and sandbox compliance is respected (LEVEL_1_READONLY with OTP pairing and rate limiting). Minor deductions for the inherent broad read/write of Discord channel messages and hardcoded PID/auth file handling, but no malicious behavior found.",
+        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 92/100):\nNo backdoors, no credential exfiltration, and no destructive commands found. The package implements strong security controls including HMAC-based PIN verification, rate limiting, PIN rotation, strict DM isolation, and a guest access kill switch. Sandbox compliance is maintained — all communication is restricted to the official Discord API and a local UNIX domain socket with no shell injection vectors.",
         "virustotal_detections": 0,
-        "timestamp": 1788252974674
+        "timestamp": 1788255714620
       },
       "metadata": {
         "shell_versions": [],
