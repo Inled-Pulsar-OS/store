@@ -87,7 +87,13 @@ function setupEventListeners() {
 async function loadCatalog() {
   const grid = document.getElementById('packages-grid');
   try {
-    const res = await fetch('schema/index.json');
+    const res = await fetch(`schema/index.json?_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     allPackages = data.packages || [];
@@ -153,7 +159,7 @@ function showPackageDetail(pkgId) {
     <article class="detail-article">
       <div class="detail-header-block">
         ${pkg.icon_url 
-          ? `<img src="${escapeHtml(pkg.icon_url)}" class="detail-large-icon" alt="${escapeHtml(pkg.name)}" onerror="this.style.display='none'">`
+          ? `<img src="${escapeHtml(pkg.icon_url)}?_t=${encodeURIComponent(pkg.security_report?.timestamp || pkg.version || '1')}" class="detail-large-icon" alt="${escapeHtml(pkg.name)}" onerror="this.style.display='none'">`
           : ''
         }
         <div>
@@ -290,7 +296,7 @@ function renderGrid() {
         <div class="card-top">
           <div class="card-icon-frame">
             ${pkg.icon_url 
-              ? `<img src="${escapeHtml(pkg.icon_url)}" class="card-icon" alt="${escapeHtml(pkg.name)}" onerror="this.style.display='none'">`
+              ? `<img src="${escapeHtml(pkg.icon_url)}?_t=${encodeURIComponent(pkg.security_report?.timestamp || pkg.version || '1')}" class="card-icon" alt="${escapeHtml(pkg.name)}" onerror="this.style.display='none'">`
               : `<span style="font-weight: 700; color: var(--accent-purple);">${escapeHtml(pkg.name.charAt(0))}</span>`
             }
           </div>

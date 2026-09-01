@@ -17,7 +17,7 @@ if (fs.existsSync(distDir)) {
 fs.mkdirSync(distDir, { recursive: true });
 
 // Copy frontend files
-['index.html', 'style.css', 'app.js'].forEach(file => {
+['index.html', 'style.css', 'app.js', '_headers'].forEach(file => {
     const src = path.join(rootDir, 'web', file);
     if (fs.existsSync(src)) {
         fs.copyFileSync(src, path.join(distDir, file));
