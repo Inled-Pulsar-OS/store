@@ -432,8 +432,55 @@ function renderMarkdown(md) {
     return `%%CODEBLOCK_${idx}%%`;
   });
 
-  // Phase 2: Split into blocks by double newlines
-  const blocks = processed.split(/\n{2,}/);
+  // Phase 2: Pre-merge consecutive list-like blocks before splitting
+  // This prevents list items separated by double newlines from being split
+  const rawBlocks = processed.split(/\n{2,}/);
+  const blocks = [];
+  let i = 0;
+  while (i < rawBlocks.length) {
+    const block = rawBlocks[i];
+    const trimmed = block.trim();
+    const firstLine = trimmed.split('\n')[0];
+
+    // Detect if this block starts a list (ordered or unordered)
+    const startsOl = /^\s*\d+\.\s/.test(firstLine);
+    const startsUl = /^\s*[-*]\s/.test(firstLine);
+    const isListFrag = startsOl || startsUl;
+    // Detect heading blocks (might be followed by list)
+    const isHeading = /^#{1,6}\s/.test(firstLine);
+
+    if (isListFrag) {
+      // Merge forward with any subsequent list-fragment blocks
+      let merged = block;
+      while (i + 1 < rawBlocks.length) {
+        const nextTrimmed = rawBlocks[i + 1].trim();
+        const nextFirstLine = nextTrimmed.split('\n')[0];
+        const nextStartsOl = /^\s*\d+\.\s/.test(nextFirstLine);
+        const nextStartsUl = /^\s*[-*]\s/.test(nextFirstLine);
+        if (nextStartsOl || nextStartsUl) {
+          merged += '\n' + rawBlocks[i + 1];
+          i++;
+        } else {
+          break;
+        }
+      }
+      blocks.push(merged);
+    } else if (isHeading && i + 1 < rawBlocks.length) {
+      // Check if next block is a list — if so, merge heading + list
+      const nextFirstLine = rawBlocks[i + 1].trim().split('\n')[0];
+      const nextIsList = /^\s*(\d+\.\s|[-*]\s)/.test(nextFirstLine);
+      if (nextIsList) {
+        blocks.push(block + '\n' + rawBlocks[i + 1]);
+        i++;
+      } else {
+        blocks.push(block);
+      }
+    } else {
+      blocks.push(block);
+    }
+    i++;
+  }
+
   let result = '';
 
   for (let i = 0; i < blocks.length; i++) {
@@ -464,21 +511,40 @@ function renderMarkdown(md) {
     const headingMatch = block.trim().match(/^(#{1,6})\s+(.+)$/m);
     if (headingMatch && block.trim().startsWith('#')) {
       const level = headingMatch[1].length;
+      const headingLine = headingMatch[0];
       result += `<h${level}>${renderInline(headingMatch[2])}</h${level}>`;
+      // Process remaining content after heading
+      const remaining = block.trim().substring(headingLine.length).trim();
+      if (remaining) {
+        const remLines = remaining.split('\n');
+        const firstRemLine = remLines[0];
+        // Detect ordered list (starts with number)
+        const isOl = /^\s*\d+\.\s/.test(firstRemLine);
+        // Detect unordered list (starts with - or * at line start, not **bold**)
+        const isUl = /^\s*[-]\s/.test(firstRemLine) || /^\s\*\s/.test(firstRemLine);
+        if (isOl) {
+          result += renderOrderedList(remaining);
+        } else if (isUl) {
+          result += renderList(remaining);
+        } else {
+          result += `<p class="readme-p">${renderInline(remaining.replace(/\n/g, ' '))}</p>`;
+        }
+      }
       continue;
     }
 
     // Unordered list (check for lines starting with - or spaces + -)
     const lines = block.split('\n');
-    const isList = lines.some(l => /^\s*[-*]\s/.test(l));
-    if (isList) {
+    const firstLine = lines[0];
+    const isUl = /^\s*[-]\s/.test(firstLine) || /^\s\*\s/.test(firstLine);
+    const isOl = /^\s*\d+\.\s/.test(firstLine);
+    if (isUl) {
       result += renderList(block);
       continue;
     }
 
     // Ordered list
-    const isOrderedList = lines.some(l => /^\s*\d+\.\s/.test(l));
-    if (isOrderedList) {
+    if (isOl) {
       result += renderOrderedList(block);
       continue;
     }
@@ -603,18 +669,73 @@ function renderList(block) {
   return html;
 }
 
-// ── Render ordered list ───────────────────────────────────────────────────
+// ── Render ordered list with nesting support ──────────────────────────────
 function renderOrderedList(block) {
   const lines = block.split('\n');
-  let html = '<ol class="readme-list">';
+  let html = '';
+  let prevDepth = -1;
+  let openOl = 0;
+  let openUl = 0;
 
   for (const line of lines) {
-    const match = line.match(/^\s*\d+\.\s+(.*)/);
-    if (match) {
-      html += `<li>${renderInline(match[1])}</li>`;
+    // Ordered list item
+    const olMatch = line.match(/^(\s*)\d+\.\s+(.*)/);
+    // Unordered list item (nested under ordered)
+    const ulMatch = line.match(/^(\s*)[-*]\s+(.*)/);
+
+    if (olMatch) {
+      const indent = olMatch[1].length;
+      const content = olMatch[2];
+      const depth = Math.floor(indent / 2);
+
+      // Close any open unordered lists
+      while (openUl > 0) {
+        html += '</li></ul>';
+        openUl--;
+      }
+
+      if (depth > prevDepth) {
+        for (let d = prevDepth + 1; d <= depth; d++) {
+          html += '<ol class="readme-list">';
+          openOl++;
+        }
+      } else if (depth < prevDepth) {
+        for (let d = prevDepth; d > depth; d--) {
+          html += '</li></ol>';
+          openOl--;
+        }
+      } else if (prevDepth >= 0) {
+        html += '</li>';
+      }
+
+      html += `<li>${renderInline(content)}`;
+      prevDepth = depth;
+    } else if (ulMatch && prevDepth >= 0) {
+      // Nested unordered item under an ordered list
+      const indent = ulMatch[1].length;
+      const content = ulMatch[2];
+      const ulDepth = Math.floor(indent / 2);
+
+      if (openUl === 0) {
+        html += '<ul class="readme-list">';
+        openUl++;
+      } else {
+        html += '</li>';
+      }
+
+      html += `<li>${renderInline(content)}`;
     }
   }
 
-  html += '</ol>';
+  // Close remaining open tags
+  while (openUl > 0) {
+    html += '</li></ul>';
+    openUl--;
+  }
+  while (openOl > 0) {
+    html += '</li></ol>';
+    openOl--;
+  }
+
   return html;
 }
