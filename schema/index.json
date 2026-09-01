@@ -27,6 +27,32 @@
         "shell_versions": [],
         "sandbox_level": "LEVEL_0_NO_EXEC"
       }
+    },
+    {
+      "id": "sayri-gateway-discord",
+      "type": "sayri_plugin",
+      "name": "Discord Bot Gateway",
+      "description": "Autonomous Discord Bot Gateway connecting server channels and DMs to Sayri AI Agents with Desktop OTP pairing, channel history reading/summaries (/resume), and customizable sandbox levels.",
+      "version": "1.0.0",
+      "author": "jaimegh-es",
+      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/sayri-gateway-discord.zip",
+      "icon_url": "assets/icons/sayri-gateway-discord.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/Inled-Pulsar-OS/store",
+      "promo_url": "",
+      "skill_md": "",
+      "security_report": {
+        "score": 95,
+        "status": "PASSED",
+        "audited_by": "OpenCode (Local Static Analysis) + VirusTotal",
+        "summary": "Static heuristic audit completed (Score: 95/100 - Clean structure verified).",
+        "virustotal_detections": 0,
+        "timestamp": 1788252171449
+      },
+      "metadata": {
+        "shell_versions": [],
+        "sandbox_level": "LEVEL_0_NO_EXEC"
+      }
     }
   ]
 }
