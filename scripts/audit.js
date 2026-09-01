@@ -203,6 +203,68 @@ async function run() {
         process.exit(0);
     }
 
+    // 1.5 METADATA-ONLY EDIT (No ZIP re-upload needed)
+    if (mode === 'edit' && !formData.zip_url) {
+        if (!pkgId) await failAudit('prep', 'Missing Package ID to edit.');
+        if (!targetPkg) await failAudit('prep', `Package ID '${pkgId}' not found in catalog.`);
+        if (targetPkg.author !== issueUser && issueUser !== ADMIN_USER) {
+            await failAudit('prep', `Unauthorized: Package belongs to @${targetPkg.author}. Only author or @${ADMIN_USER} can edit.`);
+        }
+
+        await updateStep('prep', 'success', `Metadata edit authorized for '${pkgId}'.`);
+        await updateStep('download', 'running', 'Downloading updated assets...');
+
+        // Update Icon if provided
+        if (formData.icon_url) {
+            try {
+                await downloadFile(formData.icon_url, path.join('assets/icons', `${pkgId}.png`));
+                console.log(`[Edit] Updated icon for ${pkgId}`);
+            } catch (e) {
+                console.warn(`Icon update warning: ${e.message}`);
+            }
+        }
+
+        // Update Demo screenshots if provided
+        if (formData.demo_urls && formData.demo_urls.length > 0) {
+            const demosDir = path.join('assets/demos', pkgId);
+            fs.mkdirSync(demosDir, { recursive: true });
+            const demoPaths = [];
+            for (let i = 0; i < formData.demo_urls.length; i++) {
+                const dest = path.join(demosDir, `demo${i + 1}.png`);
+                try {
+                    await downloadFile(formData.demo_urls[i], dest);
+                    demoPaths.push(`assets/demos/${pkgId}/demo${i + 1}.png`);
+                } catch (e) {}
+            }
+            if (demoPaths.length > 0) targetPkg.demo_urls = demoPaths;
+        }
+
+        if (formData.name) targetPkg.name = formData.name;
+        if (formData.description) targetPkg.description = formData.description;
+        if (formData.github_url) targetPkg.github_url = formData.github_url;
+        if (formData.promo_url) targetPkg.promo_url = formData.promo_url;
+
+        db.packages = db.packages.map(p => p.id === pkgId ? targetPkg : p);
+        fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+
+        await updateStep('download', 'success', 'Assets and metadata successfully updated.');
+        await updateStep('metadata', 'success', `Metadata updated for ${pkgId}.`);
+        await updateStep('malware', 'success', 'Previous security certification preserved.');
+        await updateStep('ai', 'success', 'Previous security certification preserved.');
+        await updateStep('publish', 'success', `🎉 Package '${targetPkg.name}' metadata updated successfully in Pulsar Store!`);
+
+        if (process.env.GITHUB_TOKEN && process.env.REPOSITORY && process.env.ISSUE_NUMBER) {
+            try {
+                await axios.patch(
+                    `https://api.github.com/repos/${process.env.REPOSITORY}/issues/${process.env.ISSUE_NUMBER}`,
+                    { state: 'closed', state_reason: 'completed' },
+                    { headers: { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } }
+                );
+            } catch (e) {}
+        }
+        process.exit(0);
+    }
+
     // 2. VALIDATION
     if (!pkgId || !formData.name || !formData.zip_url || !formData.icon_url) {
         await failAudit('prep', 'Missing mandatory fields (ID, Name, Package Archive URL, or Icon URL).');

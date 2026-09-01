@@ -1,0 +1,48 @@
+name: "✏️ Edit Package Info & Assets"
+description: "Update the icon, description, name, screenshots, or metadata of an existing package"
+title: "edit: "
+labels: ["edit", "metadata-update"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### ✏️ Edit Package Metadata & Assets
+        Use this form to update the description, name, icon logo, or demo screenshots of an existing package in the Pulsar Store.
+        *Only the package author or store admins can submit edits.*
+  - type: input
+    id: id
+    attributes:
+      label: "Package ID"
+      description: "The unique identifier of the package you want to edit."
+      placeholder: "sayri-gateway-discord"
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: "Package Name"
+      description: "Updated human-readable name (leave blank to keep current)."
+      placeholder: "Discord Bot Gateway"
+  - type: textarea
+    id: description
+    attributes:
+      label: "Package Description"
+      description: "Updated summary of what the software does (leave blank to keep current)."
+      placeholder: "Updated description..."
+  - type: textarea
+    id: icon_url
+    attributes:
+      label: "New Package Icon (PNG or SVG)"
+      description: "Drag and drop a new square icon (128x128+) or paste an image URL (leave blank to keep current)."
+      placeholder: "Drag and drop new icon here..."
+  - type: textarea
+    id: demo_urls
+    attributes:
+      label: "Demo Screenshots (Optional)"
+      description: "Drag and drop updated screenshot previews."
+      placeholder: "Drag and drop preview images here..."
+  - type: input
+    id: github_url
+    attributes:
+      label: "Source Repository (Optional)"
+      placeholder: "https://github.com/myorg/myrepo"
