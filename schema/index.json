@@ -42,12 +42,12 @@
       "promo_url": "",
       "skill_md": "",
       "security_report": {
-        "score": 90,
+        "score": 92,
         "status": "PASSED",
-        "audited_by": "VirusTotal Zero-Tolerance Malware Shield + VirusTotal",
-        "summary": "✅ Verified Safe: VirusTotal confirmed 0 malware detections across 72 engines. Package structure validated.",
+        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 92/100):\nThe package is a legitimate Discord gateway: all network traffic is confined to Discord's official API/gateway domains, the bot token is read from environment and used only for Discord authentication, and it communicates with the Sayri core over a local Unix socket. There are no subprocess/eval/exec calls, no destructive commands, no credentials exfiltration, and sandbox compliance is respected (LEVEL_1_READONLY with OTP pairing and rate limiting). Minor deductions for the inherent broad read/write of Discord channel messages and hardcoded PID/auth file handling, but no malicious behavior found.",
         "virustotal_detections": 0,
-        "timestamp": 1788252835801
+        "timestamp": 1788252974674
       },
       "metadata": {
         "shell_versions": [],
