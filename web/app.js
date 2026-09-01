@@ -422,24 +422,93 @@ function escapeHtml(str) {
 // ── Lightweight Markdown → HTML Renderer ──────────────────────────────────
 function renderMarkdown(md) {
   if (!md) return '';
-  let html = escapeHtml(md);
 
-  // Fenced code blocks (``` ... ```)
-  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+  // Phase 1: Protect fenced code blocks by replacing them with placeholders
+  const codeBlocks = [];
+  let processed = md.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    const idx = codeBlocks.length;
     const cls = lang ? ` class="lang-${lang}"` : '';
-    return `<pre class="readme-code"${cls}><code>${code.trim()}</code></pre>`;
+    codeBlocks.push(`<pre class="readme-code"${cls}><code>${escapeHtml(code.trim())}</code></pre>`);
+    return `%%CODEBLOCK_${idx}%%`;
   });
 
-  // Inline code
-  html = html.replace(/`([^`]+)`/g, '<code class="readme-inline">$1</code>');
+  // Phase 2: Split into blocks by double newlines
+  const blocks = processed.split(/\n{2,}/);
+  let result = '';
 
-  // Headings
-  html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
-  html = html.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
-  html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
-  html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+
+    // Restore code block placeholders
+    if (block.trim().startsWith('%%CODEBLOCK_')) {
+      const idx = parseInt(block.trim().match(/%%CODEBLOCK_(\d+)%%/)?.[1] ?? -1);
+      if (idx >= 0 && idx < codeBlocks.length) {
+        result += codeBlocks[idx];
+      }
+      continue;
+    }
+
+    // Horizontal rules
+    if (/^---+\s*$/.test(block.trim())) {
+      result += '<hr class="readme-hr">';
+      continue;
+    }
+
+    // Tables (block starts and ends with |)
+    if (block.trim().startsWith('|') && block.trim().includes('|\n')) {
+      result += renderTable(block.trim());
+      continue;
+    }
+
+    // Headings
+    const headingMatch = block.trim().match(/^(#{1,6})\s+(.+)$/m);
+    if (headingMatch && block.trim().startsWith('#')) {
+      const level = headingMatch[1].length;
+      result += `<h${level}>${renderInline(headingMatch[2])}</h${level}>`;
+      continue;
+    }
+
+    // Unordered list (check for lines starting with - or spaces + -)
+    const lines = block.split('\n');
+    const isList = lines.some(l => /^\s*[-*]\s/.test(l));
+    if (isList) {
+      result += renderList(block);
+      continue;
+    }
+
+    // Ordered list
+    const isOrderedList = lines.some(l => /^\s*\d+\.\s/.test(l));
+    if (isOrderedList) {
+      result += renderOrderedList(block);
+      continue;
+    }
+
+    // Blockquote
+    if (block.trim().startsWith('&gt;') || block.trim().startsWith('>')) {
+      const quoteText = block.replace(/^&gt;\s?|^>\s?/gm, '');
+      result += `<blockquote class="readme-quote">${renderInline(quoteText)}</blockquote>`;
+      continue;
+    }
+
+    // Regular paragraph
+    result += `<p class="readme-p">${renderInline(block.replace(/\n/g, ' '))}</p>`;
+  }
+
+  // Restore any remaining code block placeholders
+  result = result.replace(/%%CODEBLOCK_(\d+)%%/g, (_, idx) => {
+    return codeBlocks[parseInt(idx)] || '';
+  });
+
+  return result;
+}
+
+// ── Render inline elements (bold, italic, code, links) ────────────────────
+function renderInline(text) {
+  if (!text) return '';
+  let html = escapeHtml(text);
+
+  // Inline code (must be before bold/italic to avoid conflicts)
+  html = html.replace(/`([^`]+)`/g, '<code class="readme-inline">$1</code>');
 
   // Bold & italic
   html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
@@ -452,68 +521,100 @@ function renderMarkdown(md) {
   // Images
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="readme-img">');
 
-  // Horizontal rules
-  html = html.replace(/^---+$/gm, '<hr class="readme-hr">');
+  return html;
+}
 
-  // Tables
-  html = html.replace(/^(\|.*\|\n\|[-:| ]+\|\n(?:\|.*\|\n?)+)/gm, (tableBlock) => {
-    const lines = tableBlock.trim().split('\n');
-    if (lines.length < 2) return tableBlock;
+// ── Render a table block ──────────────────────────────────────────────────
+function renderTable(block) {
+  const lines = block.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) return `<p class="readme-p">${escapeHtml(block)}</p>`;
 
-    // Parse header
-    const headers = lines[0].split('|').filter(c => c.trim()).map(c => c.trim());
+  const parseRow = (line) => line.split('|').slice(1, -1).map(c => c.trim());
 
-    // Parse alignment from separator line
-    const alignments = lines[1].split('|').filter(c => c.trim()).map(c => {
-      const cell = c.trim();
-      if (cell.startsWith(':') && cell.endsWith(':')) return 'center';
-      if (cell.endsWith(':')) return 'right';
-      return 'left';
-    });
-
-    // Parse rows
-    const rows = lines.slice(2).map(line =>
-      line.split('|').filter(c => c.trim()).map(c => c.trim())
-    );
-
-    let table = '<table class="readme-table"><thead><tr>';
-    headers.forEach((h, i) => {
-      const align = alignments[i] || 'left';
-      table += `<th style="text-align:${align}">${h}</th>`;
-    });
-    table += '</tr></thead><tbody>';
-    rows.forEach(row => {
-      table += '<tr>';
-      row.forEach((cell, i) => {
-        const align = alignments[i] || 'left';
-        table += `<td style="text-align:${align}">${cell}</td>`;
-      });
-      table += '</tr>';
-    });
-    table += '</tbody></table>';
-    return table;
+  const headers = parseRow(lines[0]);
+  const alignments = parseRow(lines[1]).map(c => {
+    if (c.startsWith(':') && c.endsWith(':')) return 'center';
+    if (c.endsWith(':')) return 'right';
+    return 'left';
   });
 
-  // Unordered lists
-  html = html.replace(/^(?:- (.+)\n?)+/gm, (block) => {
-    const items = block.trim().split('\n').map(line => {
-      const content = line.replace(/^- /, '');
-      return `<li>${content}</li>`;
-    }).join('');
-    return `<ul class="readme-list">${items}</ul>`;
+  let table = '<table class="readme-table"><thead><tr>';
+  headers.forEach((h, i) => {
+    const align = alignments[i] || 'left';
+    table += `<th style="text-align:${align}">${renderInline(h)}</th>`;
   });
+  table += '</tr></thead><tbody>';
 
-  // Blockquotes
-  html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote class="readme-quote">$1</blockquote>');
+  for (let i = 2; i < lines.length; i++) {
+    const cells = parseRow(lines[i]);
+    table += '<tr>';
+    cells.forEach((cell, j) => {
+      const align = alignments[j] || 'left';
+      table += `<td style="text-align:${align}">${renderInline(cell)}</td>`;
+    });
+    table += '</tr>';
+  }
+  table += '</tbody></table>';
+  return table;
+}
 
-  // Paragraphs (double newline)
-  html = html.replace(/\n\n+/g, '</p><p class="readme-p">');
-  html = '<p class="readme-p">' + html + '</p>';
+// ── Render unordered list with nesting support ────────────────────────────
+function renderList(block) {
+  const lines = block.split('\n');
+  let html = '';
+  let prevDepth = -1;
+  let openUl = 0;
 
-  // Clean up empty paragraphs
-  html = html.replace(/<p class="readme-p">\s*<\/p>/g, '');
-  html = html.replace(/<p class="readme-p">\s*(<h[1-6]|<pre|<ul|<hr|<blockquote)/g, '$1');
-  html = html.replace(/(<\/h[1-6]>|<\/pre>|<\/ul>|<hr[^>]*>|<\/blockquote>)\s*<\/p>/g, '$1');
+  for (const line of lines) {
+    const match = line.match(/^(\s*)([-*])\s+(.*)/);
+    if (!match) continue;
 
+    const indent = match[1].length;
+    const content = match[3];
+    const depth = Math.floor(indent / 2);
+
+    if (depth > prevDepth) {
+      // Going deeper: open new <ul> for each level
+      for (let d = prevDepth + 1; d <= depth; d++) {
+        html += '<ul class="readme-list">';
+        openUl++;
+      }
+    } else if (depth < prevDepth) {
+      // Going shallower: close </li> and <ul> for each level
+      for (let d = prevDepth; d > depth; d--) {
+        html += '</li></ul>';
+        openUl--;
+      }
+    } else {
+      // Same depth: close previous <li>
+      html += '</li>';
+    }
+
+    html += `<li>${renderInline(content)}`;
+    prevDepth = depth;
+  }
+
+  // Close remaining open lists
+  while (openUl > 0) {
+    html += '</li></ul>';
+    openUl--;
+  }
+
+  return html;
+}
+
+// ── Render ordered list ───────────────────────────────────────────────────
+function renderOrderedList(block) {
+  const lines = block.split('\n');
+  let html = '<ol class="readme-list">';
+
+  for (const line of lines) {
+    const match = line.match(/^\s*\d+\.\s+(.*)/);
+    if (match) {
+      html += `<li>${renderInline(match[1])}</li>`;
+    }
+  }
+
+  html += '</ol>';
   return html;
 }

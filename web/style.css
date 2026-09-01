@@ -903,13 +903,25 @@ html.dark .pkg-card:hover {
   color: var(--text-primary);
 }
 
-.readme-content ul.readme-list {
+.readme-content ul.readme-list,
+.readme-content ol.readme-list {
   padding-left: 24px;
   margin: 10px 0;
 }
 
-.readme-content ul.readme-list li {
+.readme-content ul.readme-list li,
+.readme-content ol.readme-list li {
   margin: 4px 0;
+  line-height: 1.6;
+}
+
+.readme-content ul.readme-list ul.readme-list {
+  margin: 4px 0 4px 20px;
+  padding-left: 20px;
+}
+
+.readme-content ul.readme-list ul.readme-list li {
+  font-size: 0.92em;
 }
 
 .readme-content blockquote.readme-quote {
