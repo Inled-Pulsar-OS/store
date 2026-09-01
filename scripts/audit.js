@@ -74,6 +74,22 @@ async function updateStep(id, status, message) {
     await postOrUpdateComment(getStatusMarkdown(auditSteps));
 }
 
+function extractUrl(text) {
+    if (!text || text.trim() === '_No response_') return '';
+    const htmlMatch = text.match(/src=["'](https?:\/\/[^"']+)["']/i);
+    if (htmlMatch) return htmlMatch[1];
+    const mdMatch = text.match(/\((https?:\/\/[^\)]+)\)/i);
+    if (mdMatch) return mdMatch[1];
+    const rawMatch = text.match(/(https?:\/\/[^\s\)<>"]+)/i);
+    if (rawMatch) return rawMatch[1];
+    return text.trim();
+}
+
+function cleanText(val) {
+    if (!val || val.trim() === '_No response_') return '';
+    return val.trim();
+}
+
 async function downloadFile(url, dest) {
     if (!url) throw new Error("URL is empty");
     console.log(`Downloading: ${url} -> ${dest}`);
@@ -157,6 +173,17 @@ function parseIssueBody(bodyText) {
     if (currentKey) {
         data[currentKey] = currentVal.join('\n').trim();
     }
+
+    // Clean up inputs
+    if (data.id) data.id = cleanText(data.id);
+    if (data.name) data.name = cleanText(data.name);
+    if (data.description) data.description = cleanText(data.description);
+    if (data.zip_url) data.zip_url = extractUrl(data.zip_url);
+    if (data.icon_url) data.icon_url = extractUrl(data.icon_url);
+    if (data.github_url) data.github_url = extractUrl(data.github_url);
+    if (data.version) data.version = cleanText(data.version);
+    if (data.sandbox_level) data.sandbox_level = cleanText(data.sandbox_level);
+
     return data;
 }
 
@@ -171,7 +198,8 @@ async function run() {
     let mode = 'new';
     let pkgType = 'app';
 
-    if (issueTitle.startsWith('update:') || issueTitle.startsWith('edit:')) mode = 'update';
+    if (issueTitle.startsWith('edit:')) mode = 'edit';
+    else if (issueTitle.startsWith('update:')) mode = 'update';
     else if (issueTitle.startsWith('delete:')) mode = 'delete';
     else if (issueTitle.startsWith('[Skill]')) pkgType = 'sayri_skill';
     else if (issueTitle.startsWith('[Plugin]') || issueTitle.startsWith('[Gateway]')) pkgType = 'sayri_plugin';
@@ -190,7 +218,7 @@ async function run() {
     const pkgId = (formData.id || '').trim().toLowerCase();
     const targetPkg = db.packages.find(p => p.id === pkgId);
 
-    // 1. DELETE ACTION
+    // 1. DELETE ACTION (0 AI, 0 VirusTotal - Instant)
     if (mode === 'delete') {
         if (!pkgId) await failAudit('prep', 'Missing Package ID to delete.');
         if (!targetPkg) await failAudit('prep', `Package ID '${pkgId}' not found in catalog.`);
@@ -200,11 +228,21 @@ async function run() {
         db.packages = db.packages.filter(p => p.id !== pkgId);
         fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
         await updateStep('prep', 'success', `Package '${pkgId}' deleted from catalog by authorized user @${issueUser}.`);
+        await updateStep('publish', 'success', `Package '${pkgId}' successfully uninstalled from Pulsar Store.`);
+        if (process.env.GITHUB_TOKEN && process.env.REPOSITORY && process.env.ISSUE_NUMBER) {
+            try {
+                await axios.patch(
+                    `https://api.github.com/repos/${process.env.REPOSITORY}/issues/${process.env.ISSUE_NUMBER}`,
+                    { state: 'closed', state_reason: 'completed' },
+                    { headers: { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } }
+                );
+            } catch (e) {}
+        }
         process.exit(0);
     }
 
-    // 1.5 METADATA-ONLY EDIT (No ZIP re-upload needed)
-    if (mode === 'edit' && !formData.zip_url) {
+    // 2. METADATA-ONLY EDIT (0 AI, 0 VirusTotal - Instant Logo/Info Update)
+    if (mode === 'edit' || (mode === 'update' && !formData.zip_url)) {
         if (!pkgId) await failAudit('prep', 'Missing Package ID to edit.');
         if (!targetPkg) await failAudit('prep', `Package ID '${pkgId}' not found in catalog.`);
         if (targetPkg.author !== issueUser && issueUser !== ADMIN_USER) {
@@ -225,18 +263,21 @@ async function run() {
         }
 
         // Update Demo screenshots if provided
-        if (formData.demo_urls && formData.demo_urls.length > 0) {
-            const demosDir = path.join('assets/demos', pkgId);
-            fs.mkdirSync(demosDir, { recursive: true });
-            const demoPaths = [];
-            for (let i = 0; i < formData.demo_urls.length; i++) {
-                const dest = path.join(demosDir, `demo${i + 1}.png`);
-                try {
-                    await downloadFile(formData.demo_urls[i], dest);
-                    demoPaths.push(`assets/demos/${pkgId}/demo${i + 1}.png`);
-                } catch (e) {}
+        if (formData.demo_urls && formData.demo_urls.length > 0 && formData.demo_urls !== '_No response_') {
+            const rawUrls = formData.demo_urls.split('\n').map(extractUrl).filter(Boolean);
+            if (rawUrls.length > 0) {
+                const demosDir = path.join('assets/demos', pkgId);
+                fs.mkdirSync(demosDir, { recursive: true });
+                const demoPaths = [];
+                for (let i = 0; i < rawUrls.length; i++) {
+                    const dest = path.join(demosDir, `demo${i + 1}.png`);
+                    try {
+                        await downloadFile(rawUrls[i], dest);
+                        demoPaths.push(`assets/demos/${pkgId}/demo${i + 1}.png`);
+                    } catch (e) {}
+                }
+                if (demoPaths.length > 0) targetPkg.demo_urls = demoPaths;
             }
-            if (demoPaths.length > 0) targetPkg.demo_urls = demoPaths;
         }
 
         if (formData.name) targetPkg.name = formData.name;
@@ -251,7 +292,7 @@ async function run() {
         await updateStep('metadata', 'success', `Metadata updated for ${pkgId}.`);
         await updateStep('malware', 'success', 'Previous security certification preserved.');
         await updateStep('ai', 'success', 'Previous security certification preserved.');
-        await updateStep('publish', 'success', `🎉 Package '${targetPkg.name}' metadata updated successfully in Pulsar Store!`);
+        await updateStep('publish', 'success', `🎉 Package '${targetPkg.name}' info and assets updated successfully in Pulsar Store!`);
 
         if (process.env.GITHUB_TOKEN && process.env.REPOSITORY && process.env.ISSUE_NUMBER) {
             try {
@@ -265,7 +306,7 @@ async function run() {
         process.exit(0);
     }
 
-    // 2. VALIDATION
+    // 3. FULL CODE PUBLICATION / UPDATE (Requires VirusTotal + OpenCode Agent)
     if (!pkgId || !formData.name || !formData.zip_url || !formData.icon_url) {
         await failAudit('prep', 'Missing mandatory fields (ID, Name, Package Archive URL, or Icon URL).');
     }
@@ -278,7 +319,7 @@ async function run() {
 
     await updateStep('prep', 'success', `Submission valid [Type: ${pkgType}, ID: ${pkgId}, Mode: ${mode}].`);
 
-    // 3. ASSET DOWNLOAD
+    // 4. ASSET DOWNLOAD
     await updateStep('download', 'running', 'Downloading package binary, icon, and screenshot assets...');
     const tmpDir = path.join('/tmp', `pulsar-pkg-${pkgId}-${Date.now()}`);
     const extractedDir = path.join(tmpDir, 'extracted');
@@ -300,19 +341,20 @@ async function run() {
 
     const demoPaths = [];
     if (formData.demo_urls && formData.demo_urls.length > 0) {
+        const rawUrls = formData.demo_urls.split('\n').map(extractUrl).filter(Boolean);
         const demosDir = path.join('assets/demos', pkgId);
         fs.mkdirSync(demosDir, { recursive: true });
-        for (let i = 0; i < formData.demo_urls.length; i++) {
+        for (let i = 0; i < rawUrls.length; i++) {
             const dest = path.join(demosDir, `demo${i + 1}.png`);
             try {
-                await downloadFile(formData.demo_urls[i], dest);
+                await downloadFile(rawUrls[i], dest);
                 demoPaths.push(`assets/demos/${pkgId}/demo${i + 1}.png`);
             } catch (e) {}
         }
     }
     await updateStep('download', 'success', 'All assets successfully downloaded.');
 
-    // 4. METADATA & MANIFEST EXTRACTION
+    // 5. METADATA & MANIFEST EXTRACTION
     await updateStep('metadata', 'running', 'Extracting metadata manifests, scripts, and sandbox configurations...');
     let version = formData.version || "1.0.0";
     let shellVersions = [];
@@ -348,7 +390,7 @@ async function run() {
     }
     await updateStep('metadata', 'success', `Metadata valid (v${version}, Sandbox: ${declaredSandbox}).`);
 
-    // 5. VIRUSTOTAL SCAN (STRICT ZERO-TOLERANCE)
+    // 6. VIRUSTOTAL SCAN (STRICT ZERO-TOLERANCE)
     await updateStep('malware', 'running', 'Scanning package with VirusTotal API (Strict Zero-Tolerance)...');
     const vtKey = process.env.VT_API_KEY || process.env.VIRUSTOTAL_API_KEY;
     let vtResult = { malicious: 0, suspicious: 0, undetected: 72, sha256: "N/A", permalink: "" };
@@ -428,14 +470,13 @@ async function run() {
         await updateStep('malware', 'success', `VirusTotal Hash Verified: \`${sha256.substring(0, 16)}...\` (0 threats detected).`);
     }
 
-    // 6. OPENCODE AGENT SEMANTIC AI AUDIT
+    // 7. OPENCODE AGENT SEMANTIC AI AUDIT
     await updateStep('ai', 'running', 'Launching OpenCode AI agent to audit repository and inspect source files...');
     let aiVerdict = "";
     let safetyScore = 0;
     let aiResponse = null;
     let auditedBy = "OpenCode Agent (opencode.ai)";
 
-    // Find opencode executable
     let opencodeBin = "opencode";
     const opencodeCandidates = [
         path.join(process.env.HOME || '/home/runner', '.opencode', 'bin', 'opencode'),
@@ -459,7 +500,7 @@ Respond strictly with a JSON object:
   "reason": "<clear explanation in 2-3 sentences>"
 }`;
 
-    // A. Run OpenCode CLI Agent with explicit default model
+    // A. Run OpenCode CLI Agent
     try {
         console.log(`[OpenCode] Spawning OpenCode agent in ${extractedDir} using binary ${opencodeBin}...`);
         const opencodeResult = spawnSync(opencodeBin, ['run', '--model', 'opencode/big-pickle', '--dir', extractedDir, auditPrompt], {
@@ -481,7 +522,7 @@ Respond strictly with a JSON object:
         console.warn(`[OpenCode] CLI agent notice: ${opencodeErr.message}`);
     }
 
-    // B. Direct LLM Audit with Groq / OpenAI (Dynamic models & fixed baseURL)
+    // B. Direct LLM Audit with Groq / OpenAI Fallback
     if (!aiResponse && (process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY)) {
         console.log("[OpenCode] Running direct LLM semantic audit...");
         let codeSnippet = "";
@@ -553,7 +594,6 @@ Respond strictly with a JSON object:
         }
         aiVerdict = `✅ Approved by OpenCode AI (${auditedBy} - Score: ${safetyScore}/100):\n${aiResponse.reason}`;
     } else {
-        // Enforce Policy: If AI failed, require clean VirusTotal scan
         if (vtResult.malicious === 0) {
             safetyScore = 90;
             auditedBy = "VirusTotal Zero-Tolerance Malware Shield";
@@ -565,7 +605,7 @@ Respond strictly with a JSON object:
 
     await updateStep('ai', 'success', aiVerdict);
 
-    // 7. PUBLICATION & CATALOG COMMIT
+    // 8. PUBLICATION & CATALOG COMMIT
     await updateStep('publish', 'running', 'Publishing package asset to GitHub Releases and updating catalog...');
     const repo = process.env.REPOSITORY || 'Inled-Pulsar-OS/store';
     const releaseTag = "packages";
