@@ -1,6 +1,12 @@
 {
   "version": 1,
-  "updated_at": 1757164200,
+  "updated_at": 1757164400,
+  "announcement": {
+    "title": "Publish your App or Plugin on Pulsar Store",
+    "description": "Have an application, GNOME extension, or Sayri AI plugin? Publish it here and reach all Pulsar OS users worldwide.",
+    "action_label": "Submit an Application",
+    "action_url": "https://github.com/Inled-Pulsar-OS/store/issues/new/choose"
+  },
   "packages": [
     {
       "id": "sayri-gateway-telegram",
