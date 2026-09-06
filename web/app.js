@@ -806,3 +806,32 @@ function renderOrderedList(block) {
 
   return html;
 }
+
+// ── Download Modal Controller ─────────────────────────────────────────────
+function openDownloadModal(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  const modal = document.getElementById('download-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeDownloadModal(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  const modal = document.getElementById('download-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeDownloadModal();
+  }
+});
