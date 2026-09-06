@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="dsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f6d32d"/>
+      <stop offset="100%" stop-color="#ff7800"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#dsGrad)"/>
+  <!-- Sun and briefing icon -->
+  <circle cx="64" cy="56" r="22" fill="#ffffff"/>
+  <rect x="34" y="86" width="60" height="8" rx="4" fill="#ffffff" opacity="0.9"/>
+  <rect x="44" y="98" width="40" height="6" rx="3" fill="#ffffff" opacity="0.75"/>
+</svg>

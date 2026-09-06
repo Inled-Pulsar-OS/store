@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="crGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#26a269"/>
+      <stop offset="100%" stop-color="#1c71d8"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#crGrad)"/>
+  <!-- Code brackets -->
+  <path d="M 48 44 L 32 64 L 48 84" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 80 44 L 96 64 L 80 84" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="68" y1="42" x2="60" y2="86" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+</svg>

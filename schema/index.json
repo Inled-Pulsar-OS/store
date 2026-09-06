@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": 1757164000,
+  "updated_at": 1757164200,
   "packages": [
     {
       "id": "sayri-gateway-telegram",
@@ -106,7 +106,7 @@
       "version": "64",
       "author": "aunetx",
       "download_url": "https://extensions.gnome.org/extension-data/blur-my-shellaunetx.v64.shell-extension.zip",
-      "icon_url": "https://raw.githubusercontent.com/aunetx/blur-my-shell/master/resources/icons/scalable/org.gnome.Shell.Extensions.BlurMyShell.svg",
+      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/blur-my-shell@aunetx.svg",
       "metadata": {
         "uuid": "blur-my-shell@aunetx",
         "shell_versions": ["45", "46", "47"]
@@ -128,7 +128,7 @@
       "version": "58",
       "author": "rgcjonas",
       "download_url": "https://extensions.gnome.org/extension-data/appindicatorsupportrgcjonas.gmail.com.v58.shell-extension.zip",
-      "icon_url": "https://raw.githubusercontent.com/ubuntu/gnome-shell-extension-appindicator/master/icon.png",
+      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/appindicatorsupport@rgcjonas.gmail.com.svg",
       "metadata": {
         "uuid": "appindicatorsupport@rgcjonas.gmail.com",
         "shell_versions": ["45", "46", "47"]
@@ -150,7 +150,7 @@
       "version": "1.0.0",
       "author": "Pulsar Team",
       "download_url": "",
-      "icon_url": "",
+      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/daily_summary.svg",
       "raw_content": "---\nname: daily_summary\ndescription: Generates short daily morning briefings, weather hints, and agenda digests for Pulsar OS.\nversion: 1.0.0\nauthor: Pulsar Team\ncategory: productivity\n---\n\n# Daily Summary Skill\n\nThis skill provides concise daily summaries for the user upon request or during automated morning briefings.\n\n## Instructions\nWhen the user asks for a daily summary or morning news:\n1. Provide a warm, concise greeting suited for the time of day.\n2. Summarize top priorities and system readiness in 2 to 3 natural sentences.\n3. Keep the tone friendly, helpful, and optimistic.\n",
       "security_report": {
         "score": 98,
@@ -170,7 +170,7 @@
       "version": "1.0.0",
       "author": "Pulsar Team",
       "download_url": "",
-      "icon_url": "",
+      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/code_review_assistant.svg",
       "raw_content": "---\nname: code_review_assistant\ndescription: Performs code reviews, diff inspections, and lint recommendations for Sayri AI.\nversion: 1.0.0\nauthor: Pulsar Team\ncategory: development\n---\n\n# Code Review Assistant Skill\n\nAnalyzes git diffs and code snippets for architecture patterns, performance bottlenecks, and security bugs.\n",
       "security_report": {
         "score": 98,
