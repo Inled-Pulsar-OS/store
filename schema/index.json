@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": 1757163600,
+  "updated_at": 1757163800,
   "packages": [
     {
       "id": "sayri-gateway-telegram",
@@ -57,6 +57,92 @@
       }
     },
     {
+      "id": "org.mozilla.firefox",
+      "type": "flatpak",
+      "name": "Mozilla Firefox",
+      "description": "Fast, private, and independent web browser by Mozilla Foundation.",
+      "version": "135.0",
+      "author": "Mozilla",
+      "download_url": "",
+      "icon_url": "https://dl.flathub.org/repo/appstream/x86_64/icons/128x128/org.mozilla.firefox.png",
+      "metadata": {
+        "flatpakref_url": "https://dl.flathub.org/repo/appstream/org.mozilla.firefox.flatpakref"
+      },
+      "security_report": {
+        "score": 100,
+        "status": "PASSED",
+        "audited_by": "Flathub + OpenCode",
+        "summary": "Approved Flathub build.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      }
+    },
+    {
+      "id": "md.obsidian.Obsidian",
+      "type": "flatpak",
+      "name": "Obsidian",
+      "description": "Powerful and extensible knowledge base and Markdown note taking app.",
+      "version": "1.7.7",
+      "author": "Dynalist Inc.",
+      "download_url": "",
+      "icon_url": "https://dl.flathub.org/repo/appstream/x86_64/icons/128x128/md.obsidian.Obsidian.png",
+      "metadata": {
+        "flatpakref_url": "https://dl.flathub.org/repo/appstream/md.obsidian.Obsidian.flatpakref"
+      },
+      "security_report": {
+        "score": 100,
+        "status": "PASSED",
+        "audited_by": "Flathub + OpenCode",
+        "summary": "Approved Flathub build.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      }
+    },
+    {
+      "id": "blur-my-shell@aunetx",
+      "type": "gnome_extension",
+      "name": "Blur my Shell",
+      "description": "Adds a modern blurred acrylic glass effect to GNOME Shell UI components including the top panel, dock, and overview.",
+      "version": "64",
+      "author": "aunetx",
+      "download_url": "https://extensions.gnome.org/extension-data/blur-my-shellaunetx.v64.shell-extension.zip",
+      "icon_url": "https://raw.githubusercontent.com/aunetx/blur-my-shell/master/resources/icons/scalable/org.gnome.Shell.Extensions.BlurMyShell.svg",
+      "metadata": {
+        "uuid": "blur-my-shell@aunetx",
+        "shell_versions": ["45", "46", "47"]
+      },
+      "security_report": {
+        "score": 95,
+        "status": "PASSED",
+        "audited_by": "OpenCode Agent + VirusTotal",
+        "summary": "Approved by OpenCode AI: Open-source GNOME Shell extension.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      }
+    },
+    {
+      "id": "appindicatorsupport@rgcjonas.gmail.com",
+      "type": "gnome_extension",
+      "name": "AppIndicator Support",
+      "description": "Adds AppIndicator, KStatusNotifierItem and legacy system tray icon support to GNOME top panel.",
+      "version": "58",
+      "author": "rgcjonas",
+      "download_url": "https://extensions.gnome.org/extension-data/appindicatorsupportrgcjonas.gmail.com.v58.shell-extension.zip",
+      "icon_url": "https://raw.githubusercontent.com/ubuntu/gnome-shell-extension-appindicator/master/icon.png",
+      "metadata": {
+        "uuid": "appindicatorsupport@rgcjonas.gmail.com",
+        "shell_versions": ["45", "46", "47"]
+      },
+      "security_report": {
+        "score": 96,
+        "status": "PASSED",
+        "audited_by": "OpenCode Agent + VirusTotal",
+        "summary": "Approved by OpenCode AI: Safe GNOME Shell extension.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      }
+    },
+    {
       "id": "daily_summary",
       "type": "sayri_skill",
       "name": "Daily Summary Skill",
@@ -95,92 +181,6 @@
         "timestamp": 1788255714620
       },
       "metadata": {}
-    },
-    {
-      "id": "blur-my-shell@aunetx",
-      "type": "gnome_extension",
-      "name": "Blur my Shell",
-      "description": "Adds a modern blurred acrylic glass effect to GNOME Shell UI components including the top panel, dock, and overview.",
-      "version": "64",
-      "author": "aunetx",
-      "download_url": "https://extensions.gnome.org/extension-data/blur-my-shellaunetx.v64.shell-extension.zip",
-      "icon_url": "",
-      "metadata": {
-        "uuid": "blur-my-shell@aunetx",
-        "shell_versions": ["45", "46", "47"]
-      },
-      "security_report": {
-        "score": 95,
-        "status": "PASSED",
-        "audited_by": "OpenCode Agent + VirusTotal",
-        "summary": "Approved by OpenCode AI: Open-source GNOME Shell extension.",
-        "virustotal_detections": 0,
-        "timestamp": 1788255714620
-      }
-    },
-    {
-      "id": "appindicatorsupport@rgcjonas.gmail.com",
-      "type": "gnome_extension",
-      "name": "AppIndicator Support",
-      "description": "Adds AppIndicator, KStatusNotifierItem and legacy system tray icon support to GNOME top panel.",
-      "version": "58",
-      "author": "rgcjonas",
-      "download_url": "https://extensions.gnome.org/extension-data/appindicatorsupportrgcjonas.gmail.com.v58.shell-extension.zip",
-      "icon_url": "",
-      "metadata": {
-        "uuid": "appindicatorsupport@rgcjonas.gmail.com",
-        "shell_versions": ["45", "46", "47"]
-      },
-      "security_report": {
-        "score": 96,
-        "status": "PASSED",
-        "audited_by": "OpenCode Agent + VirusTotal",
-        "summary": "Approved by OpenCode AI: Safe GNOME Shell extension.",
-        "virustotal_detections": 0,
-        "timestamp": 1788255714620
-      }
-    },
-    {
-      "id": "org.mozilla.firefox",
-      "type": "flatpak",
-      "name": "Mozilla Firefox",
-      "description": "Fast, private, and independent web browser by Mozilla Foundation.",
-      "version": "135.0",
-      "author": "Mozilla",
-      "download_url": "",
-      "icon_url": "",
-      "metadata": {
-        "flatpakref_url": "https://dl.flathub.org/repo/appstream/org.mozilla.firefox.flatpakref"
-      },
-      "security_report": {
-        "score": 100,
-        "status": "PASSED",
-        "audited_by": "Flathub + OpenCode",
-        "summary": "Approved Flathub build.",
-        "virustotal_detections": 0,
-        "timestamp": 1788255714620
-      }
-    },
-    {
-      "id": "md.obsidian.Obsidian",
-      "type": "flatpak",
-      "name": "Obsidian",
-      "description": "Powerful and extensible knowledge base and Markdown note taking app.",
-      "version": "1.7.7",
-      "author": "Dynalist Inc.",
-      "download_url": "",
-      "icon_url": "",
-      "metadata": {
-        "flatpakref_url": "https://dl.flathub.org/repo/appstream/md.obsidian.Obsidian.flatpakref"
-      },
-      "security_report": {
-        "score": 100,
-        "status": "PASSED",
-        "audited_by": "Flathub + OpenCode",
-        "summary": "Approved Flathub build.",
-        "virustotal_detections": 0,
-        "timestamp": 1788255714620
-      }
     }
   ]
 }
