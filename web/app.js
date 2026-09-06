@@ -187,12 +187,41 @@ function showPackageDetail(pkgId) {
         <button class="btn-copy" onclick="copyCode(this, 'pulsar-store install ${escapeHtml(pkg.id)}')">Copy Command</button>
       </div>
 
-      <!-- README Section (fetched from readme_url) -->
-      ${pkg.readme_url ? `<div class="readme-section" id="readme-section">
-        <div class="readme-loading" id="readme-loading">
-          <span class="btn-spinner" style="display:inline-block; margin-right:8px; vertical-align:middle;"></span> Loading README…
-        </div>
-        <div class="readme-content hidden" id="readme-content"></div>
+      <!-- Package Files & Bundle Contents -->
+      <div>
+        <h3 class="detail-section-heading">Package Files & Destination</h3>
+        <table class="specs-table">
+          <thead>
+            <tr>
+              <th style="width: 45%;">Destination Path</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${getPackageFilesList(pkg).map(f => `
+              <tr>
+                <td><code>${escapeHtml(f.path)}</code></td>
+                <td>${escapeHtml(f.desc)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- README / Documentation Preview Section -->
+      ${(pkg.readme_url || pkg.raw_content || pkg.skill_md) ? `
+      <div class="readme-section" id="readme-section">
+        <h3 class="detail-section-heading" style="margin-bottom: 12px;">Documentation & Preview</h3>
+        ${pkg.raw_content ? `
+          <div class="readme-content">${renderMarkdown(pkg.raw_content)}</div>
+        ` : (pkg.skill_md ? `
+          <div class="readme-content"><pre><code class="language-json">${escapeHtml(pkg.skill_md)}</code></pre></div>
+        ` : `
+          <div class="readme-loading" id="readme-loading">
+            <span class="btn-spinner" style="display:inline-block; margin-right:8px; vertical-align:middle;"></span> Loading README…
+          </div>
+          <div class="readme-content hidden" id="readme-content"></div>
+        `)}
       </div>` : ''}
 
       <!-- Specifications -->
@@ -234,11 +263,49 @@ function showPackageDetail(pkgId) {
     </article>
   `;
 
-  // Fetch and render README if readme_url is provided
-  if (pkg.readme_url) {
+  // Fetch and render README if readme_url is provided and no inline raw_content
+  if (pkg.readme_url && !pkg.raw_content && !pkg.skill_md) {
     fetchReadme(pkg.readme_url);
   }
 }
+
+// ── Package Files Helper ──────────────────────────────────────────────────
+function getPackageFilesList(pkg) {
+  const type = pkg.type;
+  const id = pkg.id;
+  if (type === 'sayri_skill') {
+    return [
+      { path: `~/.local/share/sayri/skills/${id}/SKILL.md`, desc: 'Skill instructions, persona & tool definitions' },
+      { path: `~/.local/share/sayri/skills/${id}/metadata.json`, desc: 'Security audit & manifest parameters' }
+    ];
+  } else if (type === 'sayri_plugin') {
+    return [
+      { path: `~/.local/share/sayri/plugins/${id}/manifest.json`, desc: 'Plugin manifest, OTP pairing & sandbox configuration' },
+      { path: `~/.local/share/sayri/plugins/${id}/gateway.py`, desc: 'Bridge service executable script' },
+      { path: `~/.local/share/sayri/plugins/${id}/README.md`, desc: 'Setup & token pairing documentation' }
+    ];
+  } else if (type === 'gnome_extension') {
+    const uuid = pkg.metadata?.uuid || id;
+    return [
+      { path: `~/.local/share/gnome-shell/extensions/${uuid}/metadata.json`, desc: 'GNOME Shell extension metadata' },
+      { path: `~/.local/share/gnome-shell/extensions/${uuid}/extension.js`, desc: 'GJS extension implementation' },
+      { path: `~/.local/share/gnome-shell/extensions/${uuid}/stylesheet.css`, desc: 'UI stylesheet' },
+      { path: `~/.local/share/gnome-shell/extensions/${uuid}/schemas/`, desc: 'GSettings schema directory' }
+    ];
+  } else if (type === 'flatpak') {
+    return [
+      { path: `/var/lib/flatpak/app/${id}/`, desc: 'Sandboxed Flatpak application container runtime' },
+      { path: `/var/lib/flatpak/exports/share/applications/${id}.desktop`, desc: 'Desktop launcher application entry' },
+      { path: `/var/lib/flatpak/exports/share/icons/hicolor/128x128/apps/${id}.png`, desc: 'Vector and bitmap icon assets' }
+    ];
+  } else {
+    return [
+      { path: `/usr/bin/${id}`, desc: 'Executable binary' },
+      { path: `/usr/share/applications/${id}.desktop`, desc: 'Desktop entry' }
+    ];
+  }
+}
+
 
 // ── Install Button Handler with Perfectly Circular Spinner & Feedback ─────
 function handleInstall(event, pkgId, buttonEl) {
