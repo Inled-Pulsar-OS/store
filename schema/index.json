@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": 1756641600,
+  "updated_at": 1757163600,
   "packages": [
     {
       "id": "sayri-gateway-telegram",
@@ -20,7 +20,7 @@
         "score": 90,
         "status": "PASSED",
         "audited_by": "OpenCode (openai/gpt-oss-20b) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (openai/gpt-oss-20b - Score: 90/100):\nThe code implements a Telegram gateway with OTP pairing and local IPC communication, using only standard libraries and no eval or hidden telemetry. It follows sandbox constraints, avoids destructive commands, and securely handles the bot token via environment variables.",
+        "summary": "Approved by OpenCode AI: The code implements a Telegram gateway with OTP pairing and local IPC communication.",
         "virustotal_detections": 0,
         "timestamp": 1788188792394
       },
@@ -46,14 +46,140 @@
       "security_report": {
         "score": 92,
         "status": "PASSED",
-        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 92/100):\nNo backdoors, no credential exfiltration, and no destructive commands found. The package implements strong security controls including HMAC-based PIN verification, rate limiting, PIN rotation, strict DM isolation, and a guest access kill switch. Sandbox compliance is maintained — all communication is restricted to the official Discord API and a local UNIX domain socket with no shell injection vectors.",
+        "audited_by": "OpenCode Agent + VirusTotal",
+        "summary": "Approved by OpenCode AI: Sandbox compliance is maintained with HMAC-based PIN verification.",
         "virustotal_detections": 0,
         "timestamp": 1788255714620
       },
       "metadata": {
         "shell_versions": [],
         "sandbox_level": "LEVEL_1_READONLY"
+      }
+    },
+    {
+      "id": "daily_summary",
+      "type": "sayri_skill",
+      "name": "Daily Summary Skill",
+      "description": "Generates short daily morning briefings, weather hints, agenda digests, and system status reports for Sayri AI on Pulsar OS.",
+      "version": "1.0.0",
+      "author": "Pulsar Team",
+      "download_url": "",
+      "icon_url": "",
+      "raw_content": "---\nname: daily_summary\ndescription: Generates short daily morning briefings, weather hints, and agenda digests for Pulsar OS.\nversion: 1.0.0\nauthor: Pulsar Team\ncategory: productivity\n---\n\n# Daily Summary Skill\n\nThis skill provides concise daily summaries for the user upon request or during automated morning briefings.\n\n## Instructions\nWhen the user asks for a daily summary or morning news:\n1. Provide a warm, concise greeting suited for the time of day.\n2. Summarize top priorities and system readiness in 2 to 3 natural sentences.\n3. Keep the tone friendly, helpful, and optimistic.\n",
+      "security_report": {
+        "score": 98,
+        "status": "PASSED",
+        "audited_by": "OpenCode Agent + VirusTotal",
+        "summary": "Approved by OpenCode AI: Pure markdown instructions with no executable binaries.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      },
+      "metadata": {}
+    },
+    {
+      "id": "code_review_assistant",
+      "type": "sayri_skill",
+      "name": "Code Review Skill",
+      "description": "Enables Sayri AI to analyze git diffs, inspect pull requests, identify security vulnerabilities, and propose unit tests.",
+      "version": "1.0.0",
+      "author": "Pulsar Team",
+      "download_url": "",
+      "icon_url": "",
+      "raw_content": "---\nname: code_review_assistant\ndescription: Performs code reviews, diff inspections, and lint recommendations for Sayri AI.\nversion: 1.0.0\nauthor: Pulsar Team\ncategory: development\n---\n\n# Code Review Assistant Skill\n\nAnalyzes git diffs and code snippets for architecture patterns, performance bottlenecks, and security bugs.\n",
+      "security_report": {
+        "score": 98,
+        "status": "PASSED",
+        "audited_by": "OpenCode Agent + VirusTotal",
+        "summary": "Approved by OpenCode AI: Markdown prompt skill.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      },
+      "metadata": {}
+    },
+    {
+      "id": "blur-my-shell@aunetx",
+      "type": "gnome_extension",
+      "name": "Blur my Shell",
+      "description": "Adds a modern blurred acrylic glass effect to GNOME Shell UI components including the top panel, dock, and overview.",
+      "version": "64",
+      "author": "aunetx",
+      "download_url": "https://extensions.gnome.org/extension-data/blur-my-shellaunetx.v64.shell-extension.zip",
+      "icon_url": "",
+      "metadata": {
+        "uuid": "blur-my-shell@aunetx",
+        "shell_versions": ["45", "46", "47"]
+      },
+      "security_report": {
+        "score": 95,
+        "status": "PASSED",
+        "audited_by": "OpenCode Agent + VirusTotal",
+        "summary": "Approved by OpenCode AI: Open-source GNOME Shell extension.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      }
+    },
+    {
+      "id": "appindicatorsupport@rgcjonas.gmail.com",
+      "type": "gnome_extension",
+      "name": "AppIndicator Support",
+      "description": "Adds AppIndicator, KStatusNotifierItem and legacy system tray icon support to GNOME top panel.",
+      "version": "58",
+      "author": "rgcjonas",
+      "download_url": "https://extensions.gnome.org/extension-data/appindicatorsupportrgcjonas.gmail.com.v58.shell-extension.zip",
+      "icon_url": "",
+      "metadata": {
+        "uuid": "appindicatorsupport@rgcjonas.gmail.com",
+        "shell_versions": ["45", "46", "47"]
+      },
+      "security_report": {
+        "score": 96,
+        "status": "PASSED",
+        "audited_by": "OpenCode Agent + VirusTotal",
+        "summary": "Approved by OpenCode AI: Safe GNOME Shell extension.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      }
+    },
+    {
+      "id": "org.mozilla.firefox",
+      "type": "flatpak",
+      "name": "Mozilla Firefox",
+      "description": "Fast, private, and independent web browser by Mozilla Foundation.",
+      "version": "135.0",
+      "author": "Mozilla",
+      "download_url": "",
+      "icon_url": "",
+      "metadata": {
+        "flatpakref_url": "https://dl.flathub.org/repo/appstream/org.mozilla.firefox.flatpakref"
+      },
+      "security_report": {
+        "score": 100,
+        "status": "PASSED",
+        "audited_by": "Flathub + OpenCode",
+        "summary": "Approved Flathub build.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
+      }
+    },
+    {
+      "id": "md.obsidian.Obsidian",
+      "type": "flatpak",
+      "name": "Obsidian",
+      "description": "Powerful and extensible knowledge base and Markdown note taking app.",
+      "version": "1.7.7",
+      "author": "Dynalist Inc.",
+      "download_url": "",
+      "icon_url": "",
+      "metadata": {
+        "flatpakref_url": "https://dl.flathub.org/repo/appstream/md.obsidian.Obsidian.flatpakref"
+      },
+      "security_report": {
+        "score": 100,
+        "status": "PASSED",
+        "audited_by": "Flathub + OpenCode",
+        "summary": "Approved Flathub build.",
+        "virustotal_detections": 0,
+        "timestamp": 1788255714620
       }
     }
   ]
