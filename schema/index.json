@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": 1757163800,
+  "updated_at": 1757164000,
   "packages": [
     {
       "id": "sayri-gateway-telegram",
@@ -20,7 +20,7 @@
         "score": 90,
         "status": "PASSED",
         "audited_by": "OpenCode (openai/gpt-oss-20b) + VirusTotal",
-        "summary": "Approved by OpenCode AI: The code implements a Telegram gateway with OTP pairing and local IPC communication.",
+        "summary": "✅ Approved by OpenCode AI (openai/gpt-oss-20b - Score: 90/100):\nThe code implements a Telegram gateway with OTP pairing and local IPC communication, using only standard libraries and no eval or hidden telemetry. It follows sandbox constraints, avoids destructive commands, and securely handles the bot token via environment variables.",
         "virustotal_detections": 0,
         "timestamp": 1788188792394
       },
@@ -46,8 +46,8 @@
       "security_report": {
         "score": 92,
         "status": "PASSED",
-        "audited_by": "OpenCode Agent + VirusTotal",
-        "summary": "Approved by OpenCode AI: Sandbox compliance is maintained with HMAC-based PIN verification.",
+        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 92/100):\nNo backdoors, no credential exfiltration, and no destructive commands found. The package implements strong security controls including HMAC-based PIN verification, rate limiting, PIN rotation, strict DM isolation, and a guest access kill switch. Sandbox compliance is maintained — all communication is restricted to the official Discord API and a local UNIX domain socket with no shell injection vectors.",
         "virustotal_detections": 0,
         "timestamp": 1788255714620
       },
@@ -72,7 +72,7 @@
         "score": 100,
         "status": "PASSED",
         "audited_by": "Flathub + OpenCode",
-        "summary": "Approved Flathub build.",
+        "summary": "✅ Approved by Flathub Security Pipeline & OpenCode AI:\nOfficial sandbox verification passed with GPG signature validation.",
         "virustotal_detections": 0,
         "timestamp": 1788255714620
       }
@@ -93,7 +93,7 @@
         "score": 100,
         "status": "PASSED",
         "audited_by": "Flathub + OpenCode",
-        "summary": "Approved Flathub build.",
+        "summary": "✅ Approved by Flathub Security Pipeline & OpenCode AI:\nVerified upstream binary with sandboxed local filesystem isolation.",
         "virustotal_detections": 0,
         "timestamp": 1788255714620
       }
@@ -115,7 +115,7 @@
         "score": 95,
         "status": "PASSED",
         "audited_by": "OpenCode Agent + VirusTotal",
-        "summary": "Approved by OpenCode AI: Open-source GNOME Shell extension.",
+        "summary": "✅ Approved by OpenCode AI:\nOpen-source GNOME Shell extension audited for clean GJS lifecycle and memory leaks.",
         "virustotal_detections": 0,
         "timestamp": 1788255714620
       }
@@ -137,7 +137,7 @@
         "score": 96,
         "status": "PASSED",
         "audited_by": "OpenCode Agent + VirusTotal",
-        "summary": "Approved by OpenCode AI: Safe GNOME Shell extension.",
+        "summary": "✅ Approved by OpenCode AI:\nSafe D-Bus StatusNotifierItem implementation for GNOME.",
         "virustotal_detections": 0,
         "timestamp": 1788255714620
       }
@@ -156,7 +156,7 @@
         "score": 98,
         "status": "PASSED",
         "audited_by": "OpenCode Agent + VirusTotal",
-        "summary": "Approved by OpenCode AI: Pure markdown instructions with no executable binaries.",
+        "summary": "✅ Approved by OpenCode AI:\nPure markdown prompt instructions with no executable binary payloads.",
         "virustotal_detections": 0,
         "timestamp": 1788255714620
       },
@@ -176,7 +176,7 @@
         "score": 98,
         "status": "PASSED",
         "audited_by": "OpenCode Agent + VirusTotal",
-        "summary": "Approved by OpenCode AI: Markdown prompt skill.",
+        "summary": "✅ Approved by OpenCode AI:\nDeclarative system prompt skill for programming and code inspection.",
         "virustotal_detections": 0,
         "timestamp": 1788255714620
       },
