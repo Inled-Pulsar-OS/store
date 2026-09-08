@@ -201,7 +201,7 @@
       "type": "flatpak",
       "name": "Notes",
       "description": "iOS-style Notes app for Linux. Features a clean, minimal interface with folder/tag organization, favorites, search, dark mode, and rich text editing. Built with Electron.",
-      "version": "1.0.0-flatpak",
+      "version": "1.0.0-flatpak-r2",
       "author": "ggg610523-lab",
       "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak",
       "formats": {
@@ -213,12 +213,12 @@
       "promo_url": "",
       "skill_md": "",
       "security_report": {
-        "score": 100,
+        "score": 70,
         "status": "PASSED",
-        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 100/100):\nThe extracted directory is completely empty — no files, no scripts, no executables, and no hidden content. The parent Flatpak archive (com.ios-notes.app.flatpak, ~71MB) exists but has not been extracted into this directory, so there is nothing to audit. With zero artifacts present, no backdoors, credential exfiltration, destructive commands, or sandbox violations can be identified.",
+        "audited_by": "OpenCode (openai/gpt-oss-120b) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (OpenCode (openai/gpt-oss-120b) - Score: 70/100):\nThe package largely follows secure Electron practices (contextIsolation enabled, nodeIntegration disabled, limited IPC surface). However, the renderer stores and later renders user‑editable HTML from notes without sanitization, creating a potential XSS vector, and the app writes plain JSON files to the home directory without encryption, exposing data to other local users.",
         "virustotal_detections": 0,
-        "timestamp": 1788878960041
+        "timestamp": 1788882851297
       },
       "metadata": {
         "shell_versions": [],

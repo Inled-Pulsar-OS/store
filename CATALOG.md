@@ -12,7 +12,7 @@ Unified repository of Flatpak applications, GNOME Shell extensions, and Sayri AI
 | **🧩 GNOME Extension** | **AppIndicator Support** (`appindicatorsupport@rgcjonas.gmail.com`)<br>_Adds AppIndicator, KStatusNotifierItem and legacy system tray icon support _ | `v58` | ![Shield](https://img.shields.io/badge/Security-96%2F100-brightgreen) | [`📲 Install`](pulsar://install/appindicatorsupport@rgcjonas.gmail.com) |
 | **🤖 Sayri Skill** | **Daily Summary Skill** (`daily_summary`)<br>_Generates short daily morning briefings, weather hints, agenda digests, and_ | `v1.0.0` | ![Shield](https://img.shields.io/badge/Security-98%2F100-brightgreen) | [`📲 Install`](pulsar://install/daily_summary) |
 | **🤖 Sayri Skill** | **Code Review Skill** (`code_review_assistant`)<br>_Enables Sayri AI to analyze git diffs, inspect pull requests, identify secu_ | `v1.0.0` | ![Shield](https://img.shields.io/badge/Security-98%2F100-brightgreen) | [`📲 Install`](pulsar://install/code_review_assistant) |
-| **📦 Flatpak App** | **Notes** (`com.ios-notes.app`)<br>_iOS-style Notes app for Linux. Features a clean, minimal interface with fol_ | `v1.0.0-flatpak` | ![Shield](https://img.shields.io/badge/Security-100%2F100-brightgreen) | [`📲 Install`](pulsar://install/com.ios-notes.app) |
+| **📦 Flatpak App** | **Notes** (`com.ios-notes.app`)<br>_iOS-style Notes app for Linux. Features a clean, minimal interface with fol_ | `v1.0.0-flatpak-r2` | ![Shield](https://img.shields.io/badge/Security-70%2F100-yellow) | [`📲 Install`](pulsar://install/com.ios-notes.app) |
 
 ---
 *Generated automatically by Pulsar Store Pipeline with OpenCode & VirusTotal security auditing.*
