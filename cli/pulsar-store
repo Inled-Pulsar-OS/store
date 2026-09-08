@@ -468,7 +468,7 @@ def run_gui_install(pkg):
             try:
                 GLib.idle_add(lambda: (
                     pbar.set_fraction(0.5),
-                    status_lbl.set_markup("<span size='9000'>Downloading & configuring package files…</span>")
+                    status_lbl.set_markup("<span size='9000'>Downloading &amp; configuring package files…</span>")
                 ))
 
                 install_package_core(pkg)
@@ -718,6 +718,8 @@ def main():
 
     inst = sub.add_parser("install", help="Install a package by ID or URL")
     inst.add_argument("id", help="Package ID or pulsar:// URL")
+    inst.add_argument("--cli", "--no-gui", action="store_true", help="Run installation in terminal mode without GUI dialog")
+    inst.add_argument("--refresh", action="store_true", help="Force refresh catalog cache before installing")
 
     rem = sub.add_parser("remove", help="Uninstall a package by ID")
     rem.add_argument("id", help="Package ID to uninstall")
@@ -785,17 +787,18 @@ def main():
     elif args.command in ("install", "handle-url"):
         raw_id = getattr(args, "id", None) or getattr(args, "url", "")
         pkg_id = raw_id.replace("pulsar://install/", "").strip()
-        catalog = get_catalog()
+        force_refresh = getattr(args, "refresh", False)
+        catalog = get_catalog(force_refresh=force_refresh)
         pkg = next((p for p in catalog.get("packages", []) if p["id"] == pkg_id or p.get("name", "").lower() == pkg_id.lower()), None)
-        if not pkg:
+        if not pkg and not force_refresh:
             catalog = get_catalog(force_refresh=True)
             pkg = next((p for p in catalog.get("packages", []) if p["id"] == pkg_id or p.get("name", "").lower() == pkg_id.lower()), None)
 
         if pkg:
-            if os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"):
-                run_gui_install(pkg)
-            else:
+            if getattr(args, "cli", False) or not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
                 run_text_install(pkg)
+            else:
+                run_gui_install(pkg)
             return
 
         print(f"✗ Package '{pkg_id}' not found in Pulsar Store catalog.")
