@@ -115,7 +115,11 @@
       "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/blur-my-shell@aunetx.svg",
       "metadata": {
         "uuid": "blur-my-shell@aunetx",
-        "shell_versions": ["45", "46", "47"]
+        "shell_versions": [
+          "45",
+          "46",
+          "47"
+        ]
       },
       "security_report": {
         "score": 95,
@@ -137,7 +141,11 @@
       "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/appindicatorsupport@rgcjonas.gmail.com.svg",
       "metadata": {
         "uuid": "appindicatorsupport@rgcjonas.gmail.com",
-        "shell_versions": ["45", "46", "47"]
+        "shell_versions": [
+          "45",
+          "46",
+          "47"
+        ]
       },
       "security_report": {
         "score": 96,
@@ -187,6 +195,32 @@
         "timestamp": 1788255714620
       },
       "metadata": {}
+    },
+    {
+      "id": "com.ios-notes.app",
+      "type": "flatpak",
+      "name": "Notes",
+      "description": "iOS-style Notes app for Linux. Features a clean, minimal interface with folder/tag organization, favorites, search, dark mode, and rich text editing. Built with Electron.",
+      "version": "1.0.0",
+      "author": "ggg610523-lab",
+      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.zip",
+      "icon_url": "assets/icons/com.ios-notes.app.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/ggg610523-lab/notes",
+      "promo_url": "",
+      "skill_md": "",
+      "security_report": {
+        "score": 85,
+        "status": "PASSED",
+        "audited_by": "OpenCode (allam-2-7b) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (OpenCode (allam-2-7b) - Score: 85/100):\nThe package files appear to be authentic and free of malicious code. However, the package relies on an outdated library which may have known vulnerabilities. Further testing and updating the library is recommended.",
+        "virustotal_detections": 0,
+        "timestamp": 1788876635324
+      },
+      "metadata": {
+        "shell_versions": [],
+        "sandbox_level": "LEVEL_1_READ_ONLY"
+      }
     }
   ]
 }
