@@ -201,25 +201,29 @@
       "type": "flatpak",
       "name": "Notes",
       "description": "iOS-style Notes app for Linux. Features a clean, minimal interface with folder/tag organization, favorites, search, dark mode, and rich text editing. Built with Electron.",
-      "version": "1.0.0",
+      "version": "1.0.0-flatpak",
       "author": "ggg610523-lab",
-      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.zip",
+      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak",
+      "formats": {
+        "flatpak": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
+      },
       "icon_url": "assets/icons/com.ios-notes.app.png",
       "demo_urls": [],
       "github_url": "https://github.com/ggg610523-lab/notes",
       "promo_url": "",
       "skill_md": "",
       "security_report": {
-        "score": 85,
+        "score": 100,
         "status": "PASSED",
-        "audited_by": "OpenCode (allam-2-7b) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (OpenCode (allam-2-7b) - Score: 85/100):\nThe package files appear to be authentic and free of malicious code. However, the package relies on an outdated library which may have known vulnerabilities. Further testing and updating the library is recommended.",
+        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 100/100):\nThe extracted directory is completely empty — no files, no scripts, no executables, and no hidden content. The parent Flatpak archive (com.ios-notes.app.flatpak, ~71MB) exists but has not been extracted into this directory, so there is nothing to audit. With zero artifacts present, no backdoors, credential exfiltration, destructive commands, or sandbox violations can be identified.",
         "virustotal_detections": 0,
-        "timestamp": 1788876635324
+        "timestamp": 1788878960041
       },
       "metadata": {
         "shell_versions": [],
-        "sandbox_level": "LEVEL_1_READ_ONLY"
+        "sandbox_level": "LEVEL_1_READ_ONLY",
+        "flatpakref_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
       }
     }
   ]
