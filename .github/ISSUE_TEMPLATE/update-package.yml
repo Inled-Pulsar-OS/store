@@ -7,27 +7,30 @@ body:
     attributes:
       value: |
         ### 🔄 Update Package Version
-        Submit a new release version for an existing package.
+        Submit a new release version for an existing package in Pulsar Store.
+        
+        * **Desktop Applications**: Provide Flatpak (`.flatpak` binary bundle or `.flatpakref` URL) **OR** dual native packages (`.deb` AND `.pkg.tar.zst`). Generic `.zip` source files are rejected for apps.
+        * **Skills & Extensions**: Provide the updated `.zip` package archive.
   - type: input
     id: id
     attributes:
       label: "Package ID"
-      placeholder: "sayri-skill-web-search"
+      placeholder: "sayri-skill-web-search or com.example.app"
     validations:
       required: true
   - type: input
     id: version
     attributes:
       label: "New Version Number"
-      placeholder: "1.3.0"
+      placeholder: "1.1.0"
     validations:
       required: true
   - type: textarea
     id: zip_url
     attributes:
-      label: "New Release ZIP Archive"
-      description: "Drag and drop the updated package .zip file."
-      placeholder: "Drag and drop your updated .zip here..."
+      label: "New Release Binary / Package Asset URL"
+      description: "Direct download link or drag-and-drop (.flatpak, .deb / .pkg.tar.zst, or .zip for skills/extensions)."
+      placeholder: "https://github.com/org/repo/releases/download/... or drag-and-drop"
     validations:
       required: true
   - type: textarea

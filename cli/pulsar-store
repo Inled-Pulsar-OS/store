@@ -292,6 +292,12 @@ def install_flatpak(pkg):
     if not shutil.which("flatpak"):
         raise RuntimeError("Flatpak is not installed on this system. Please install 'flatpak' package manager.")
 
+    # Ensure flathub remote is configured for user dependencies
+    try:
+        subprocess.run(["flatpak", "remote-add", "--user", "--if-not-exists", "flathub", "https://dl.flathub.org/repo/flathub.flatpakrepo"], capture_output=True)
+    except Exception:
+        pass
+
     ref = pkg.get("formats", {}).get("flatpak") or pkg.get("metadata", {}).get("flatpakref_url") or pkg.get("download_url")
     if ref and ref.endswith(".zip"):
         raise RuntimeError(
@@ -300,17 +306,34 @@ def install_flatpak(pkg):
             f"Flatpak packages must be provided as .flatpak binary bundles, .flatpakref files, or Flathub application IDs."
         )
 
-    if ref and (ref.startswith("http") or ref.endswith(".flatpakref")):
-        cmd = ["flatpak", "install", "-y", "--from", ref]
-    else:
-        cmd = ["flatpak", "install", "-y", "flathub", pkg_id]
+    tmp_bundle = None
+    try:
+        if ref and (ref.endswith(".flatpak") or ".flatpak" in ref):
+            if ref.startswith("http://") or ref.startswith("https://"):
+                tmp_bundle = os.path.join(tempfile.gettempdir(), f"{pkg_id}.flatpak")
+                print(f"Downloading Flatpak bundle from {ref}...")
+                urllib.request.urlretrieve(ref, tmp_bundle)
+                bundle_path = tmp_bundle
+            else:
+                bundle_path = ref
+            cmd = ["flatpak", "install", "--user", "-y", "--bundle", bundle_path]
+        elif ref and (ref.startswith("http") or ref.endswith(".flatpakref")):
+            cmd = ["flatpak", "install", "--user", "-y", "--from", ref]
+        else:
+            cmd = ["flatpak", "install", "--user", "-y", "flathub", pkg_id]
 
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        err_msg = proc.stderr.strip() or proc.stdout.strip() or f"Exited with code {proc.returncode}"
-        raise RuntimeError(f"Flatpak installation failed (command: {' '.join(cmd)}):\n{err_msg}")
-    print(f"✓ Flatpak App '{name}' ({pkg_id}) installed successfully.")
-    return True
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            err_msg = proc.stderr.strip() or proc.stdout.strip() or f"Exited with code {proc.returncode}"
+            raise RuntimeError(f"Flatpak installation failed (command: {' '.join(cmd)}):\n{err_msg}")
+        print(f"✓ Flatpak App '{name}' ({pkg_id}) installed successfully.")
+        return True
+    finally:
+        if tmp_bundle and os.path.exists(tmp_bundle):
+            try:
+                os.remove(tmp_bundle)
+            except Exception:
+                pass
 
 
 def install_system_package(pkg):

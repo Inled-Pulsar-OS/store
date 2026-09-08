@@ -152,21 +152,22 @@ function parseIssueBody(bodyText) {
             if (currentKey) {
                 data[currentKey] = currentVal.join('\n').trim();
             }
-            const header = line.replace('### ', '').toLowerCase();
-            if (header.includes('id') || header.includes('package id') || header.includes('skill id') || header.includes('plugin id') || header.includes('extension id') || header.includes('app id')) currentKey = 'id';
-            else if (header.includes('name')) currentKey = 'name';
-            else if (header.includes('description')) currentKey = 'description';
-            else if (header.includes('deb')) currentKey = 'deb_url';
-            else if (header.includes('arch') || header.includes('pacman')) currentKey = 'arch_url';
+            const header = line.replace('### ', '').trim().toLowerCase();
+            if (header.includes('version')) currentKey = 'version';
             else if (header.includes('flatpak') || header.includes('flathub')) currentKey = 'flatpak_url';
-            else if (header.includes('zip') || header.includes('archive') || header.includes('download')) currentKey = 'zip_url';
+            else if (header.includes('deb')) currentKey = 'deb_url';
+            else if (header.includes('arch linux') || header.includes('pacman') || header.includes('.pkg.tar') || header.includes('arch ') || header.startsWith('arch')) currentKey = 'arch_url';
+            else if (header.includes('zip') || header.includes('archive') || header.includes('download') || header.includes('asset') || header.includes('binary') || header.includes('bundle')) currentKey = 'zip_url';
             else if (header.includes('icon')) currentKey = 'icon_url';
+            else if (header.includes('promo') || header.includes('website')) currentKey = 'promo_url';
             else if (header.includes('source') || header.includes('repository')) currentKey = 'github_url';
             else if (header.includes('sandbox') || header.includes('isolation')) currentKey = 'sandbox_level';
-            else if (header.includes('version')) currentKey = 'version';
             else if (header.includes('changelog') || header.includes('notes')) currentKey = 'changelog';
             else if (header.includes('provider') || header.includes('ai api')) currentKey = 'ai_provider';
+            else if (header.includes('shell') || header.includes('gnome')) currentKey = 'shell_versions';
             else if (header.includes('demo') || header.includes('screenshot')) currentKey = 'demo_urls';
+            else if (header.includes('name') || header.includes('title')) currentKey = 'name';
+            else if (header.includes('id') || header.includes('identifier')) currentKey = 'id';
             else currentKey = header.replace(/\s+/g, '_');
             currentVal = [];
         } else if (currentKey) {
@@ -224,6 +225,16 @@ async function run() {
     const pkgId = (formData.id || '').trim().toLowerCase();
     const targetPkg = db.packages.find(p => p.id === pkgId);
 
+    if (targetPkg && (mode === 'update' || mode === 'edit')) {
+        pkgType = targetPkg.type || pkgType;
+        if (!formData.name) formData.name = targetPkg.name;
+        if (!formData.description) formData.description = targetPkg.description;
+        if (!formData.icon_url && targetPkg.icon_url) formData.icon_url = targetPkg.icon_url;
+        if (!formData.github_url && targetPkg.github_url) formData.github_url = targetPkg.github_url;
+        if (!formData.promo_url && targetPkg.promo_url) formData.promo_url = targetPkg.promo_url;
+        if (!formData.sandbox_level && targetPkg.metadata?.sandbox_level) formData.sandbox_level = targetPkg.metadata.sandbox_level;
+    }
+
     // 1. DELETE ACTION (0 AI, 0 VirusTotal - Instant)
     if (mode === 'delete') {
         if (!pkgId) await failAudit('prep', 'Missing Package ID to delete.');
@@ -247,8 +258,9 @@ async function run() {
         process.exit(0);
     }
 
-    // 2. METADATA-ONLY EDIT (0 AI, 0 VirusTotal - Instant Logo/Info Update)
-    if (mode === 'edit' || (mode === 'update' && !formData.zip_url)) {
+    // 2. METADATA-ONLY EDIT (0 AI, 0 VirusTotal - Instant Logo/Info/Version Update)
+    const hasBinaryUpdate = !!(formData.zip_url || formData.flatpak_url || formData.deb_url || formData.arch_url);
+    if (mode === 'edit' || (mode === 'update' && !hasBinaryUpdate)) {
         if (!pkgId) await failAudit('prep', 'Missing Package ID to edit.');
         if (!targetPkg) await failAudit('prep', `Package ID '${pkgId}' not found in catalog.`);
         if (targetPkg.author !== issueUser && issueUser !== ADMIN_USER) {
@@ -259,7 +271,7 @@ async function run() {
         await updateStep('download', 'running', 'Downloading updated assets...');
 
         // Update Icon if provided
-        if (formData.icon_url) {
+        if (formData.icon_url && (formData.icon_url.startsWith('http://') || formData.icon_url.startsWith('https://'))) {
             try {
                 await downloadFile(formData.icon_url, path.join('assets/icons', `${pkgId}.png`));
                 console.log(`[Edit] Updated icon for ${pkgId}`);
@@ -290,6 +302,7 @@ async function run() {
         if (formData.description) targetPkg.description = formData.description;
         if (formData.github_url) targetPkg.github_url = formData.github_url;
         if (formData.promo_url) targetPkg.promo_url = formData.promo_url;
+        if (formData.version) targetPkg.version = formData.version;
 
         db.packages = db.packages.map(p => p.id === pkgId ? targetPkg : p);
         fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
@@ -351,6 +364,12 @@ async function run() {
     if (mode === 'new' && targetPkg) {
         if (targetPkg.author && targetPkg.author !== issueUser && issueUser !== ADMIN_USER) {
             await failAudit('prep', `Conflict: Package ID ${pkgId} already belongs to @${targetPkg.author}.`);
+        }
+    }
+
+    if (mode === 'update' && targetPkg) {
+        if (targetPkg.author && targetPkg.author !== issueUser && issueUser !== ADMIN_USER) {
+            await failAudit('prep', `Unauthorized: Package belongs to @${targetPkg.author}. Only author or @${ADMIN_USER} can update.`);
         }
     }
 
@@ -741,14 +760,14 @@ Respond strictly with a JSON object:
         name: formData.name,
         description: formData.description || "",
         version: version,
-        author: issueUser,
+        author: (targetPkg && targetPkg.author) || issueUser,
         download_url: finalDownloadUrl,
-        formats: Object.keys(publishedFormats).length > 0 ? publishedFormats : undefined,
-        icon_url: `assets/icons/${pkgId}.png`,
-        demo_urls: demoPaths,
-        github_url: formData.github_url || "",
-        promo_url: formData.promo_url || "",
-        skill_md: extractedSkillMd || "",
+        formats: Object.keys(publishedFormats).length > 0 ? publishedFormats : (targetPkg && targetPkg.formats),
+        icon_url: targetPkg && targetPkg.icon_url && (!formData.icon_url || !formData.icon_url.startsWith('http')) ? targetPkg.icon_url : `assets/icons/${pkgId}.png`,
+        demo_urls: demoPaths.length > 0 ? demoPaths : (targetPkg && targetPkg.demo_urls ? targetPkg.demo_urls : []),
+        github_url: formData.github_url || (targetPkg && targetPkg.github_url) || "",
+        promo_url: formData.promo_url || (targetPkg && targetPkg.promo_url) || "",
+        skill_md: extractedSkillMd || (targetPkg && targetPkg.skill_md) || "",
         security_report: {
             score: safetyScore,
             status: "PASSED",
@@ -758,9 +777,9 @@ Respond strictly with a JSON object:
             timestamp: Date.now()
         },
         metadata: {
-            shell_versions: shellVersions,
-            sandbox_level: declaredSandbox,
-            flatpakref_url: publishedFormats.flatpak
+            shell_versions: shellVersions.length > 0 ? shellVersions : (targetPkg && targetPkg.metadata && targetPkg.metadata.shell_versions ? targetPkg.metadata.shell_versions : []),
+            sandbox_level: declaredSandbox || (targetPkg && targetPkg.metadata && targetPkg.metadata.sandbox_level) || "LEVEL_0_NO_EXEC",
+            flatpakref_url: publishedFormats.flatpak || (targetPkg && targetPkg.metadata && targetPkg.metadata.flatpakref_url)
         }
     };
 
