@@ -591,10 +591,20 @@ def uninstall_package(pkg_id):
 
     # 3. Flatpak
     try:
-        res = subprocess.run(["flatpak", "uninstall", "-y", pkg_id], capture_output=True, text=True)
+        res = subprocess.run(["flatpak", "list", "--app", "--columns=application"], capture_output=True, text=True)
         if res.returncode == 0:
-            print(f"✓ Flatpak application '{pkg_id}' uninstalled.")
-            removed = True
+            target_norm = pkg_id.lower().replace("-", "").replace("_", "").replace(".", "")
+            for line in res.stdout.splitlines():
+                app = line.strip()
+                if not app:
+                    continue
+                app_norm = app.lower().replace("-", "").replace("_", "").replace(".", "")
+                if app == pkg_id or app_norm == target_norm or target_norm in app_norm:
+                    uninst_res = subprocess.run(["flatpak", "uninstall", "--user", "-y", app], capture_output=True, text=True)
+                    if uninst_res.returncode == 0:
+                        print(f"✓ Flatpak application '{app}' uninstalled.")
+                        removed = True
+                    break
     except Exception:
         pass
 

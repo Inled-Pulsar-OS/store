@@ -991,7 +991,7 @@ Respond strictly with a JSON object:
         author: (targetPkg && targetPkg.author) || issueUser,
         download_url: finalDownloadUrl,
         formats: Object.keys(publishedFormats).length > 0 ? publishedFormats : (targetPkg && targetPkg.formats),
-        icon_url: targetPkg && targetPkg.icon_url && (!formData.icon_url || !formData.icon_url.startsWith('http')) ? targetPkg.icon_url : `assets/icons/${pkgId}.png`,
+        icon_url: targetPkg && targetPkg.icon_url && (!formData.icon_url || !formData.icon_url.startsWith('http')) ? targetPkg.icon_url : `https://raw.githubusercontent.com/${repo}/main/assets/icons/${pkgId}.png`,
         demo_urls: demoPaths.length > 0 ? demoPaths : (targetPkg && targetPkg.demo_urls ? targetPkg.demo_urls : []),
         github_url: formData.github_url || (targetPkg && targetPkg.github_url) || "",
         promo_url: formData.promo_url || (targetPkg && targetPkg.promo_url) || "",

@@ -207,7 +207,7 @@
       "formats": {
         "flatpak": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
       },
-      "icon_url": "assets/icons/com.ios-notes.app.png",
+      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/com.ios-notes.app.png",
       "demo_urls": [],
       "github_url": "https://github.com/ggg610523-lab/notes",
       "promo_url": "",
