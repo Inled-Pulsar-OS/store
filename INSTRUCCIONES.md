@@ -19,5 +19,9 @@ Package format: `.zip` containing:
 - `metadata.json`: Declaring `uuid`, `name`, and `shell-version`.
 - `extension.js`: Standard ESM code compatible with GNOME 45+.
 
-## 4. Flatpak Apps (`flatpak`)
-Package format: `.flatpak` binary or `.flatpakref` AppStream manifest.
+## 4. Desktop Applications (`app` / `flatpak`)
+Supports **one** of two distribution schemes:
+- **Option A (1 Asset)**: **Flatpak** (`.flatpakref` URL, `.flatpak` binary bundle, or Flathub ID).
+- **Option B (2 Required Assets)**: **Debian Edition** (`.deb`) **AND** **Arch Linux Edition** (`.pkg.tar.zst` / `.pkg.tar.xz` / `.pacman`). *Both native formats must be provided to ensure full compatibility across all Pulsar OS bases.*
+
+⚠️ *Generic .zip archives containing uncompiled source code or loose unpacked binaries are strictly forbidden.*

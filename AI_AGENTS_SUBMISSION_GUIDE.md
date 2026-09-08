@@ -1,10 +1,10 @@
-# 🤖 AI Agent Submission Guide — Pulsar Store
+#  AI Agent Submission Guide — Pulsar Store
 
 > **Purpose**: This document teaches AI coding agents how to autonomously submit, update, and manage packages on the Pulsar Store (https://store-os.inled.es) via the GitHub Issue-based automated pipeline.
 
 ---
 
-## 📖 Table of Contents
+##  Table of Contents
 
 1. [How the Store Works](#how-the-store-works)
 2. [Package Types & Structures](#package-types--structures)
@@ -157,10 +157,14 @@ my-extension.zip
 
 ---
 
-### 4. Flatpak App (`flatpak`)
-Desktop applications via Flathub or direct manifests.
+### 4. Desktop Applications (`app` / `flatpak`)
+Desktop applications for Pulsar OS.
 
-**ZIP Structure**: `.flatpak` binary or `.flatpakref` link
+**Allowed Packaging Schemes**:
+- **Option A (1 Asset)**: **Flatpak** (`.flatpakref` link, `.flatpak` binary bundle, or Flathub application ID).
+- **Option B (2 Assets Required)**: **Debian Package** (`.deb`) **AND** **Arch Linux Package** (`.pkg.tar.zst` / `.pacman`). Both native assets must be supplied so the app can be installed on both Arch-based and Debian-based Pulsar OS systems.
+
+> ⚠️ **CRITICAL FOR AI AGENTS**: Never submit generic `.zip` archives containing uncompiled source code or loose unpacked directories (e.g. Electron `dist/` folders) for desktop apps. Submissions with generic `.zip` files for applications will be automatically rejected.
 
 **Issue Template**: `submit-app.yml`
 - **Title format**: `[App]: My App Name`
@@ -170,13 +174,15 @@ Desktop applications via Flathub or direct manifests.
 
 ## How to Submit a New Package
 
-### Step 1: Prepare the ZIP Archive
+### Step 1: Prepare the Package Binary / Archive
 
-Create a properly structured ZIP file for your package type. Ensure:
-- All required files are present
-- No `node_modules/`, `vendor/`, or `__pycache__/` directories
-- No hardcoded credentials, API keys, or tokens
-- Code is clean and follows security best practices
+- **For Sayri Skills, Plugins, and GNOME Extensions**: Create a clean `.zip` archive containing the required manifests and source entrypoints.
+- **For Desktop Apps**: Provide either a Flatpak reference (`.flatpakref` / `.flatpak`) OR both native packages (`.deb` and `.pkg.tar.zst`). Do NOT package desktop apps as `.zip`.
+- Ensure:
+  - All required files and metadata are present
+  - No `node_modules/`, `vendor/`, or `__pycache__/` directories
+  - No hardcoded credentials, API keys, or tokens
+  - Code is clean and follows security best practices
 
 ### Step 2: Host the ZIP Archive
 
@@ -376,7 +382,7 @@ zip -r ../sayri-gateway-myplatform.zip . \
 
 ---
 
-## 📋 Quick Reference
+##  Quick Reference
 
 | Action | Issue Title Format | Template |
 |---|---|---|
@@ -389,14 +395,14 @@ zip -r ../sayri-gateway-myplatform.zip . \
 
 | Field | Required | Description |
 |---|---|---|
-| ID | ✅ | Unique package identifier |
-| Name | ✅ | Human-readable name |
-| Description | ✅ | What the package does |
-| ZIP Archive URL | ✅ | Direct HTTPS link to .zip |
-| Icon URL | ✅ | Square PNG or SVG (128x128+) |
-| Source Repository | ❌ | GitHub URL |
-| Sandbox Level | ✅ | Security isolation level |
-| AI Provider | ❌ | Custom LLM for audit |
+| ID |  | Unique package identifier |
+| Name |  | Human-readable name |
+| Description |  | What the package does |
+| ZIP Archive URL |  | Direct HTTPS link to .zip |
+| Icon URL |  | Square PNG or SVG (128x128+) |
+| Source Repository |  | GitHub URL |
+| Sandbox Level |  | Security isolation level |
+| AI Provider |  | Custom LLM for audit |
 
 ---
 

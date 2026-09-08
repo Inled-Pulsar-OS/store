@@ -83,6 +83,9 @@ def install_sayri_skill(pkg):
     url = pkg.get("download_url")
     raw = pkg.get("raw_content") or pkg.get("skill_md")
 
+    if not raw and not url:
+        raise ValueError(f"No package content or download URL available for skill '{name}' ({pkg_id}).")
+
     for base_dir in SAYRI_SKILL_PATHS:
         target = base_dir / pkg_id
         target.mkdir(parents=True, exist_ok=True)
@@ -119,8 +122,7 @@ def install_sayri_plugin(pkg):
     url = pkg.get("download_url")
 
     if not url:
-        print(f"✗ Error: No download URL provided for plugin '{name}'.")
-        return False
+        raise ValueError(f"No download URL provided for plugin '{name}' ({pkg_id}).")
 
     with tempfile.TemporaryDirectory() as tmp:
         pkg_p = Path(tmp) / "plugin.zip"
@@ -128,12 +130,14 @@ def install_sayri_plugin(pkg):
         with urllib.request.urlopen(req, timeout=25) as resp, open(pkg_p, "wb") as f:
             shutil.copyfileobj(resp, f)
 
+        if not zipfile.is_zipfile(pkg_p):
+            raise ValueError(f"Downloaded file for '{pkg_id}' is not a valid ZIP archive.")
+
         for base_dir in SAYRI_PLUGIN_PATHS:
             target = base_dir / pkg_id
             target.mkdir(parents=True, exist_ok=True)
-            if zipfile.is_zipfile(pkg_p):
-                with zipfile.ZipFile(pkg_p, "r") as z:
-                    z.extractall(target)
+            with zipfile.ZipFile(pkg_p, "r") as z:
+                z.extractall(target)
 
     print(f"✓ Sayri Plugin '{name}' ({pkg_id}) installed successfully.")
     return True
@@ -145,40 +149,200 @@ def install_gnome_extension(pkg):
     uuid = pkg.get("metadata", {}).get("uuid") or pkg_id
     url = pkg.get("download_url")
 
+    if not url:
+        raise ValueError(f"No download URL provided for extension '{name}' ({uuid}).")
+
     target = GNOME_EXT_DIR / uuid
     target.mkdir(parents=True, exist_ok=True)
 
-    if url:
-        with tempfile.TemporaryDirectory() as tmp:
-            zip_p = Path(tmp) / "ext.zip"
-            req = urllib.request.Request(url, headers={"User-Agent": "PulsarStoreCLI/1.0"})
-            with urllib.request.urlopen(req, timeout=20) as resp, open(zip_p, "wb") as f:
-                shutil.copyfileobj(resp, f)
-            with zipfile.ZipFile(zip_p, "r") as z:
-                z.extractall(target)
+    with tempfile.TemporaryDirectory() as tmp:
+        zip_p = Path(tmp) / "ext.zip"
+        req = urllib.request.Request(url, headers={"User-Agent": "PulsarStoreCLI/1.0"})
+        with urllib.request.urlopen(req, timeout=20) as resp, open(zip_p, "wb") as f:
+            shutil.copyfileobj(resp, f)
+        if not zipfile.is_zipfile(zip_p):
+            raise ValueError(f"Downloaded file for '{uuid}' is not a valid ZIP archive.")
+        with zipfile.ZipFile(zip_p, "r") as z:
+            z.extractall(target)
 
-    subprocess.run(["gnome-extensions", "enable", uuid], capture_output=True)
+    proc = subprocess.run(["gnome-extensions", "enable", uuid], capture_output=True, text=True)
+    if proc.returncode != 0 and proc.stderr:
+        print(f"Note: gnome-extensions enable returned: {proc.stderr.strip()}")
     print(f"✓ GNOME Extension '{name}' ({uuid}) installed and enabled.")
     return True
 
 
+def detect_os_base():
+    """Detects the underlying OS base: 'arch', 'debian', or 'flatpak'/'generic'."""
+    os_info = {}
+    for p in ["/etc/os-release", "/usr/lib/os-release"]:
+        if os.path.isfile(p):
+            try:
+                for line in Path(p).read_text(encoding="utf-8").splitlines():
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        os_info[k.strip().upper()] = v.strip().strip('"').lower()
+                break
+            except Exception:
+                pass
+
+    id_str = os_info.get("ID", "")
+    id_like = os_info.get("ID_LIKE", "")
+    full_ident = f"{id_str} {id_like}"
+
+    if "arch" in full_ident or "manjaro" in full_ident or "endeavouros" in full_ident or shutil.which("pacman"):
+        return "arch"
+    elif "debian" in full_ident or "ubuntu" in full_ident or "pop" in full_ident or shutil.which("apt-get"):
+        return "debian"
+    elif shutil.which("flatpak"):
+        return "flatpak"
+    return "generic"
+
+
+def install_app(pkg):
+    """Installs a desktop application choosing the matching edition (Arch, Debian, or Flatpak) based on the host OS."""
+    pkg_id = pkg.get("id")
+    name = pkg.get("name", pkg_id)
+    formats = pkg.get("formats", {}) or {}
+
+    flatpak_url = formats.get("flatpak") or pkg.get("metadata", {}).get("flatpakref_url")
+    deb_url = formats.get("deb")
+    arch_url = formats.get("arch") or formats.get("pacman")
+    download_url = pkg.get("download_url", "")
+
+    if not deb_url and download_url.endswith(".deb"):
+        deb_url = download_url
+    if not arch_url and (download_url.endswith(".pkg.tar.zst") or download_url.endswith(".pkg.tar.xz") or download_url.endswith(".pacman")):
+        arch_url = download_url
+    if not flatpak_url and (download_url.endswith(".flatpakref") or download_url.endswith(".flatpak") or "flathub.org" in download_url):
+        flatpak_url = download_url
+
+    os_base = detect_os_base()
+    print(f"ℹ️  Detected OS environment base: {os_base.upper()}")
+
+    # 1. Arch Linux base
+    if os_base == "arch":
+        if arch_url:
+            print(f"📦 Installing Arch package (.pkg.tar.zst) for '{name}'...")
+            with tempfile.TemporaryDirectory() as tmp:
+                pkg_file = Path(tmp) / f"{pkg_id}.pkg.tar.zst"
+                req = urllib.request.Request(arch_url, headers={"User-Agent": "PulsarStoreCLI/1.0"})
+                with urllib.request.urlopen(req, timeout=30) as resp, open(pkg_file, "wb") as f:
+                    shutil.copyfileobj(resp, f)
+                proc = subprocess.run(["sudo", "pacman", "-U", "--noconfirm", str(pkg_file)], capture_output=True, text=True)
+                if proc.returncode != 0:
+                    err = proc.stderr.strip() or proc.stdout.strip() or f"pacman error {proc.returncode}"
+                    raise RuntimeError(f"Arch pacman installation failed:\n{err}")
+            print(f"✓ Arch package '{name}' ({pkg_id}) installed successfully.")
+            return True
+        elif flatpak_url and shutil.which("flatpak"):
+            print(f"ℹ️  No native Arch package found, falling back to Flatpak for '{name}'...")
+            return install_flatpak(pkg)
+        else:
+            available = []
+            if deb_url: available.append("Debian (.deb)")
+            if flatpak_url: available.append("Flatpak")
+            raise RuntimeError(
+                f"No compatible Arch Linux package (.pkg.tar.zst) available for '{name}' on this system.\n"
+                f"Available formats: {', '.join(available) if available else 'None'}"
+            )
+
+    # 2. Debian / Ubuntu base
+    elif os_base == "debian":
+        if deb_url:
+            print(f"📦 Installing Debian package (.deb) for '{name}'...")
+            with tempfile.TemporaryDirectory() as tmp:
+                deb_file = Path(tmp) / f"{pkg_id}.deb"
+                req = urllib.request.Request(deb_url, headers={"User-Agent": "PulsarStoreCLI/1.0"})
+                with urllib.request.urlopen(req, timeout=30) as resp, open(deb_file, "wb") as f:
+                    shutil.copyfileobj(resp, f)
+                proc = subprocess.run(["sudo", "apt-get", "install", "-y", str(deb_file)], capture_output=True, text=True)
+                if proc.returncode != 0:
+                    dpkg_proc = subprocess.run(["sudo", "dpkg", "-i", str(deb_file)], capture_output=True, text=True)
+                    subprocess.run(["sudo", "apt-get", "install", "-f", "-y"], capture_output=True)
+                    if dpkg_proc.returncode != 0:
+                        err = proc.stderr.strip() or dpkg_proc.stderr.strip() or f"apt-get error {proc.returncode}"
+                        raise RuntimeError(f"Debian .deb installation failed:\n{err}")
+            print(f"✓ Debian package '{name}' ({pkg_id}) installed successfully.")
+            return True
+        elif flatpak_url and shutil.which("flatpak"):
+            print(f"ℹ️  No native Debian package found, falling back to Flatpak for '{name}'...")
+            return install_flatpak(pkg)
+        else:
+            available = []
+            if arch_url: available.append("Arch Linux (.pkg.tar.zst)")
+            if flatpak_url: available.append("Flatpak")
+            raise RuntimeError(
+                f"No compatible Debian package (.deb) available for '{name}' on this system.\n"
+                f"Available formats: {', '.join(available) if available else 'None'}"
+            )
+
+    # 3. Flatpak / Other Linux
+    else:
+        if flatpak_url and shutil.which("flatpak"):
+            return install_flatpak(pkg)
+        raise RuntimeError(
+            f"Unsupported OS base '{os_base}' and Flatpak is not available for '{name}'."
+        )
+
+
 def install_flatpak(pkg):
     pkg_id = pkg.get("id")
-    ref = pkg.get("metadata", {}).get("flatpakref_url") or pkg.get("download_url")
+    name = pkg.get("name", pkg_id)
+    if not shutil.which("flatpak"):
+        raise RuntimeError("Flatpak is not installed on this system. Please install 'flatpak' package manager.")
+
+    ref = pkg.get("formats", {}).get("flatpak") or pkg.get("metadata", {}).get("flatpakref_url") or pkg.get("download_url")
+    if ref and ref.endswith(".zip"):
+        raise RuntimeError(
+            f"Format Mismatch for '{name}' ({pkg_id}):\n"
+            f"The package is registered as Flatpak, but points to a ZIP file archive ({ref}).\n"
+            f"Flatpak packages must be provided as .flatpak binary bundles, .flatpakref files, or Flathub application IDs."
+        )
+
     if ref and (ref.startswith("http") or ref.endswith(".flatpakref")):
         cmd = ["flatpak", "install", "-y", "--from", ref]
     else:
         cmd = ["flatpak", "install", "-y", "flathub", pkg_id]
-    return subprocess.run(cmd).returncode == 0
+
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        err_msg = proc.stderr.strip() or proc.stdout.strip() or f"Exited with code {proc.returncode}"
+        raise RuntimeError(f"Flatpak installation failed (command: {' '.join(cmd)}):\n{err_msg}")
+    print(f"✓ Flatpak App '{name}' ({pkg_id}) installed successfully.")
+    return True
 
 
 def install_system_package(pkg):
     pkg_id = pkg.get("id")
     if shutil.which("pacman"):
-        return subprocess.run(["sudo", "pacman", "-S", "--noconfirm", pkg_id]).returncode == 0
+        proc = subprocess.run(["sudo", "pacman", "-S", "--noconfirm", pkg_id], capture_output=True, text=True)
     elif shutil.which("apt-get"):
-        return subprocess.run(["sudo", "apt-get", "install", "-y", pkg_id]).returncode == 0
-    return False
+        proc = subprocess.run(["sudo", "apt-get", "install", "-y", pkg_id], capture_output=True, text=True)
+    else:
+        raise RuntimeError("No supported package manager found (pacman or apt-get required).")
+
+    if proc.returncode != 0:
+        err_msg = proc.stderr.strip() or proc.stdout.strip() or f"Exited with code {proc.returncode}"
+        raise RuntimeError(f"System package installation failed:\n{err_msg}")
+    return True
+
+
+def install_package_core(pkg):
+    """Executes the appropriate installer backend and raises on failure."""
+    pkg_type = pkg.get("type")
+    if pkg_type in ("flatpak", "app", "desktop_app"):
+        return install_app(pkg)
+    elif pkg_type == "gnome_extension":
+        return install_gnome_extension(pkg)
+    elif pkg_type == "sayri_skill":
+        return install_sayri_skill(pkg)
+    elif pkg_type == "sayri_plugin":
+        return install_sayri_plugin(pkg)
+    elif pkg_type == "system":
+        return install_system_package(pkg)
+    else:
+        raise ValueError(f"Unknown package type '{pkg_type}' for package '{pkg.get('id')}'.")
 
 
 def run_text_install(pkg):
@@ -193,23 +357,16 @@ def run_text_install(pkg):
         if sec.get("summary"):
             print(f"ℹ️  {sec.get('summary')}\n")
 
-    if pkg_type == "flatpak":
-        return install_flatpak(pkg)
-    elif pkg_type == "gnome_extension":
-        return install_gnome_extension(pkg)
-    elif pkg_type == "sayri_skill":
-        return install_sayri_skill(pkg)
-    elif pkg_type == "sayri_plugin":
-        return install_sayri_plugin(pkg)
-    elif pkg_type == "system":
-        return install_system_package(pkg)
-
-    print(f"✗ Unknown package type: {pkg_type}")
-    return False
+    try:
+        install_package_core(pkg)
+        return True
+    except Exception as exc:
+        print(f"\n❌ Installation failed for '{name}' ({pkg_id}):\n{exc}\n", file=sys.stderr)
+        return False
 
 
 def run_gui_install(pkg):
-    """Shows visual progress window when running from desktop / browser URL handler."""
+    """Shows visual progress window with full error details and copy-to-clipboard functionality."""
     pkg_type = pkg.get("type")
     pkg_id = pkg.get("id")
     name = pkg.get("name", pkg_id)
@@ -217,8 +374,7 @@ def run_gui_install(pkg):
     try:
         import gi
         gi.require_version("Gtk", "4.0")
-        gi.require_version("Adw", "1")
-        from gi.repository import Gtk, GLib, Adw
+        from gi.repository import Gtk, GLib, Gdk
     except Exception:
         return run_text_install(pkg)
 
@@ -229,79 +385,150 @@ def run_gui_install(pkg):
     def on_activate(app):
         win = Gtk.Window(application=app)
         win.set_title(f"Pulsar Store — {name}")
-        win.set_default_size(380, 180)
-        win.set_resizable(False)
+        win.set_default_size(460, 240)
+        win.set_resizable(True)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        box.set_margin_top(20)
-        box.set_margin_bottom(20)
-        box.set_margin_start(20)
-        box.set_margin_end(20)
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        main_box.set_margin_top(18)
+        main_box.set_margin_bottom(18)
+        main_box.set_margin_start(20)
+        main_box.set_margin_end(20)
 
+        # Header with title and badge
+        header_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         title = Gtk.Label()
         title.set_markup(f"<span weight='bold' size='11500'>Installing {name}</span>")
         title.set_halign(Gtk.Align.START)
-        box.append(title)
+        header_box.append(title)
 
         meta_lbl = Gtk.Label()
         meta_lbl.set_markup(f"<span size='8500' foreground='#94a3b8'>{pkg_id} • {pkg_type}</span>")
         meta_lbl.set_halign(Gtk.Align.START)
-        box.append(meta_lbl)
+        header_box.append(meta_lbl)
+        main_box.append(header_box)
 
+        # Progress bar
         pbar = Gtk.ProgressBar()
         pbar.set_fraction(0.2)
-        box.append(pbar)
+        main_box.append(pbar)
 
+        # Status text
         status_lbl = Gtk.Label()
         status_lbl.set_markup("<span size='9000'>Connecting to Pulsar Store…</span>")
         status_lbl.set_halign(Gtk.Align.START)
-        box.append(status_lbl)
+        status_lbl.set_wrap(True)
+        main_box.append(status_lbl)
+
+        # Container for dynamic error widgets
+        error_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        error_container.set_vexpand(True)
+        main_box.append(error_container)
+
+        # Action Buttons Box
+        actions_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        actions_box.set_halign(Gtk.Align.END)
+        actions_box.set_margin_top(6)
+
+        btn_copy = Gtk.Button(label="📋 Copy Error")
+        btn_copy.set_visible(False)
+        actions_box.append(btn_copy)
 
         btn_close = Gtk.Button(label="Cancel")
         btn_close.connect("clicked", lambda _: win.close())
-        btn_close.set_halign(Gtk.Align.END)
-        box.append(btn_close)
+        actions_box.append(btn_close)
 
-        win.set_child(box)
+        main_box.append(actions_box)
+        win.set_child(main_box)
         win.present()
 
         def _worker():
             try:
                 GLib.idle_add(lambda: (
                     pbar.set_fraction(0.5),
-                    status_lbl.set_markup("<span size='9000'>Installing package files…</span>")
+                    status_lbl.set_markup("<span size='9000'>Downloading & configuring package files…</span>")
                 ))
 
-                ok = run_text_install(pkg)
+                install_package_core(pkg)
 
-                if ok:
-                    def _on_success():
-                        pbar.set_fraction(1.0)
-                        title.set_markup(f"<span weight='bold' size='11500' foreground='#22c55e'>✓ Installed {name}</span>")
-                        status_lbl.set_markup("<span size='9000' foreground='#22c55e'>Ready to use.</span>")
-                        btn_close.set_label("OK (closes in 4s)")
-                        countdown = [4]
-                        def _tick():
-                            countdown[0] -= 1
-                            if countdown[0] <= 0:
-                                win.close()
-                                return False
-                            btn_close.set_label(f"OK (closes in {countdown[0]}s)")
-                            return True
-                        GLib.timeout_add_seconds(1, _tick)
-                    GLib.idle_add(_on_success)
-                else:
-                    def _on_fail():
-                        pbar.set_fraction(1.0)
-                        title.set_markup("<span weight='bold' size='11500' foreground='#ef4444'>Installation Failed</span>")
-                        status_lbl.set_markup("<span size='9000' foreground='#ef4444'>Check terminal output for details.</span>")
-                        btn_close.set_label("Close")
-                    GLib.idle_add(_on_fail)
-            except Exception as e:
-                def _on_err(err=e):
-                    title.set_markup("<span weight='bold' size='11500' foreground='#ef4444'>Error</span>")
-                    status_lbl.set_markup(f"<span size='8500' foreground='#ef4444'>{err}</span>")
+                def _on_success():
+                    pbar.set_fraction(1.0)
+                    title.set_markup(f"<span weight='bold' size='11500' foreground='#22c55e'>✓ Installed {name}</span>")
+                    status_lbl.set_markup("<span size='9000' foreground='#22c55e'>Ready to use in Pulsar OS.</span>")
+                    btn_close.set_label("OK (closes in 4s)")
+                    btn_close.add_css_class("suggested-action")
+                    countdown = [4]
+                    def _tick():
+                        countdown[0] -= 1
+                        if countdown[0] <= 0:
+                            win.close()
+                            return False
+                        btn_close.set_label(f"OK (closes in {countdown[0]}s)")
+                        return True
+                    GLib.timeout_add_seconds(1, _tick)
+                GLib.idle_add(_on_success)
+
+            except Exception as exc:
+                err_text = str(exc)
+                full_error_log = (
+                    f"Pulsar Store Installation Error\n"
+                    f"Package: {name} ({pkg_id})\n"
+                    f"Type: {pkg_type}\n"
+                    f"Download URL: {pkg.get('download_url', 'N/A')}\n"
+                    f"Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    f"Details:\n{err_text}"
+                )
+
+                def _on_err():
+                    pbar.set_fraction(1.0)
+                    title.set_markup("<span weight='bold' size='11500' foreground='#ef4444'>Installation Failed</span>")
+                    status_lbl.set_markup("<span size='9000' foreground='#ef4444'>The installer encountered an error:</span>")
+
+                    # Scrolled text view with error details
+                    scrolled = Gtk.ScrolledWindow()
+                    scrolled.set_min_content_height(100)
+                    scrolled.set_max_content_height(180)
+                    scrolled.set_vexpand(True)
+                    scrolled.set_hexpand(True)
+
+                    tv = Gtk.TextView()
+                    tv.set_editable(False)
+                    tv.set_cursor_visible(False)
+                    tv.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+                    tv.set_monospace(True)
+                    tv.get_buffer().set_text(err_text)
+                    tv.set_margin_top(6)
+                    tv.set_margin_bottom(6)
+                    tv.set_margin_start(8)
+                    tv.set_margin_end(8)
+                    scrolled.set_child(tv)
+                    error_container.append(scrolled)
+
+                    # Configure Copy Error button
+                    def _copy_error(_btn):
+                        copied = False
+                        try:
+                            disp = Gdk.Display.get_default()
+                            if disp:
+                                disp.get_clipboard().set(full_error_log)
+                                copied = True
+                        except Exception:
+                            pass
+                        if not copied:
+                            for tool in [["wl-copy"], ["xclip", "-selection", "clipboard"], ["xsel", "--clipboard", "--input"]]:
+                                try:
+                                    subprocess.run(tool, input=full_error_log, text=True, check=True)
+                                    copied = True
+                                    break
+                                except Exception:
+                                    continue
+                        btn_copy.set_label("✓ Copied!")
+                        GLib.timeout_add_seconds(2, lambda: (btn_copy.set_label("📋 Copy Error"), False))
+
+                    btn_copy.connect("clicked", _copy_error)
+                    btn_copy.set_visible(True)
                     btn_close.set_label("Close")
+                    win.set_default_size(520, 340)
+
                 GLib.idle_add(_on_err)
 
         threading.Thread(target=_worker, daemon=True).start()

@@ -143,6 +143,51 @@ function updateNavActiveState(activeRoute) {
   });
 }
 
+function getPackageEditions(pkg) {
+  const editions = [];
+  const f = pkg.formats || {};
+  const meta = pkg.metadata || {};
+  const url = pkg.download_url || '';
+
+  // Flatpak
+  if (f.flatpak || meta.flatpakref_url || (pkg.type === 'flatpak' && !f.deb && !f.arch) || url.endsWith('.flatpak') || url.endsWith('.flatpakref') || url.includes('flathub.org')) {
+    editions.push({
+      key: 'flatpak',
+      label: 'Flatpak',
+      badgeClass: 'flatpak',
+      icon: '📦',
+      desc: 'Universal sandboxed container',
+      url: f.flatpak || meta.flatpakref_url || (url.includes('flathub.org') || url.endsWith('.flatpak') || url.endsWith('.flatpakref') ? url : '')
+    });
+  }
+
+  // Debian
+  if (f.deb || url.endsWith('.deb')) {
+    editions.push({
+      key: 'debian',
+      label: 'Debian Edition',
+      badgeClass: 'debian',
+      icon: '🌀',
+      desc: 'Native .deb package (Pulsar OS Debian, Ubuntu)',
+      url: f.deb || (url.endsWith('.deb') ? url : '')
+    });
+  }
+
+  // Arch
+  if (f.arch || f.pacman || url.endsWith('.pkg.tar.zst') || url.endsWith('.pkg.tar.xz') || url.endsWith('.pacman')) {
+    editions.push({
+      key: 'arch',
+      label: 'Arch Edition',
+      badgeClass: 'arch',
+      icon: '🏹',
+      desc: 'Native .pkg.tar.zst package (Pulsar OS Arch, Manjaro)',
+      url: f.arch || f.pacman || (url.endsWith('.pkg.tar.zst') || url.endsWith('.pkg.tar.xz') || url.endsWith('.pacman') ? url : '')
+    });
+  }
+
+  return editions;
+}
+
 function showPackageDetail(pkgId) {
   const pkg = allPackages.find(p => p.id === pkgId);
   if (!pkg) return;
@@ -154,6 +199,7 @@ function showPackageDetail(pkgId) {
 
   const meta = typeMeta[pkg.type] || { label: pkg.type, category: 'Software' };
   const container = document.getElementById('package-detail-content');
+  const editions = getPackageEditions(pkg);
 
   container.innerHTML = `
     <article class="detail-article">
@@ -167,6 +213,11 @@ function showPackageDetail(pkgId) {
           <div class="detail-meta-text">
             Version v${escapeHtml(pkg.version || '1.0')} • by @${escapeHtml(pkg.author || 'Pulsar')} • ${escapeHtml(meta.label)}
           </div>
+          ${editions.length > 0 ? `
+            <div class="format-badges-container" style="margin-top: 8px;">
+              ${editions.map(e => `<span class="format-badge ${e.badgeClass}">${e.icon} ${e.label}</span>`).join('')}
+            </div>
+          ` : ''}
         </div>
       </div>
 
@@ -180,6 +231,31 @@ function showPackageDetail(pkgId) {
       <p class="detail-description">
         ${escapeHtml(pkg.description || '')}
       </p>
+
+      ${editions.length > 0 ? `
+      <!-- Available Editions Section -->
+      <div class="editions-box">
+        <div class="editions-title">📦 Available Editions</div>
+        <div class="editions-subtitle">Pulsar Store installer automatically selects and installs the matching edition for your Pulsar OS base (Arch or Debian). You can also download standalone binaries:</div>
+        <div class="editions-grid">
+          ${editions.map(e => `
+            <div class="edition-card">
+              <div class="edition-card-header">
+                <span class="format-badge ${e.badgeClass}">${e.icon} ${e.label}</span>
+              </div>
+              <div class="edition-card-desc">${escapeHtml(e.desc)}</div>
+              ${e.url ? `
+                <div class="edition-card-actions">
+                  <a href="${escapeHtml(e.url)}" download class="btn btn-secondary btn-sm" style="width:100%; text-align:center; display:block; padding: 6px 10px; font-size: 0.8rem;">
+                    Download ${e.label} ⬇
+                  </a>
+                </div>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
 
       <!-- Terminal Command Snippet with soft highlight background -->
       <div class="terminal-highlight-box">
@@ -389,6 +465,7 @@ function renderGrid() {
 
   grid.innerHTML = filtered.map(pkg => {
     const meta = typeMeta[pkg.type] || { label: pkg.type };
+    const editions = getPackageEditions(pkg);
 
     return `
       <article class="pkg-card" onclick="window.location.hash='pkg=${escapeHtml(pkg.id)}'">
@@ -402,6 +479,11 @@ function renderGrid() {
           <div class="card-info">
             <h3 class="card-title">${escapeHtml(pkg.name)}</h3>
             <div class="card-meta-line">${escapeHtml(meta.label)} • v${escapeHtml(pkg.version || '1.0')}</div>
+            ${editions.length > 0 ? `
+              <div class="format-badges-container">
+                ${editions.map(e => `<span class="format-badge ${e.badgeClass}">${e.icon} ${e.label}</span>`).join('')}
+              </div>
+            ` : ''}
             <p class="card-desc">${escapeHtml(pkg.description || '')}</p>
           </div>
         </div>

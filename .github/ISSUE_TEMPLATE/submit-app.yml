@@ -1,26 +1,31 @@
-name: "📦 Submit Flatpak Desktop App"
-description: "Register or index a Flatpak desktop application for Pulsar OS"
+name: "📦 Submit Desktop App (Flatpak, Debian, Arch)"
+description: "Submit a desktop application for Pulsar OS (Flatpak or dual Debian .deb + Arch .pkg.tar.zst packages)"
 title: "[App]: "
 labels: ["app", "flatpak", "submission"]
 body:
   - type: markdown
     attributes:
       value: |
-        ### 📦 Flatpak Application Submission
-        Index your Flatpak application or Flathub container reference.
+        ### 📦 Desktop Application Submission Guidelines
+        To publish an application on Pulsar Store, you must provide **one** of these formats:
+        
+        * **Option A (Recommended - 1 Asset)**: **Flatpak** (`.flatpakref` URL, `.flatpak` binary bundle, or Flathub ID).
+        * **Option B (Native Packages - 2 Required Assets)**: **Debian Package** (`.deb`) **AND** **Arch Linux Package** (`.pkg.tar.zst` / `.pkg.tar.xz` / `.pacman`). *You must provide both native formats so the app works on both Arch-based and Debian-based Pulsar OS systems.*
+        
+        ⚠️ **Strict Rule**: Generic `.zip` archives containing uncompiled source code or loose unpacked binaries will be **rejected**.
   - type: input
     id: id
     attributes:
-      label: "Flatpak Application ID"
-      description: "Reverse-DNS format application identifier"
-      placeholder: "com.brave.Browser"
+      label: "Application ID"
+      description: "Reverse-DNS format application identifier (e.g. com.example.app)"
+      placeholder: "com.example.app"
     validations:
       required: true
   - type: input
     id: name
     attributes:
       label: "Application Name"
-      placeholder: "Brave Web Browser"
+      placeholder: "My Awesome App"
     validations:
       required: true
   - type: textarea
@@ -31,28 +36,38 @@ body:
     validations:
       required: true
   - type: input
-    id: zip_url
+    id: flatpak_url
     attributes:
-      label: "Flatpakref URL or Download Link"
-      description: "Official .flatpakref link from Flathub or direct container repository"
+      label: "Flatpakref URL / Flathub ID (Option A)"
+      description: "Official .flatpakref link from Flathub or direct .flatpak binary URL"
       placeholder: "https://dl.flathub.org/repo/appstream/com.brave.Browser.flatpakref"
-    validations:
-      required: true
+  - type: input
+    id: deb_url
+    attributes:
+      label: "Debian Package (.deb) Download URL (Option B)"
+      description: "Direct download link to compiled .deb package (Required if not providing Flatpak)"
+      placeholder: "https://github.com/myorg/myrepo/releases/download/v1.0.0/myapp_1.0.0_amd64.deb"
+  - type: input
+    id: arch_url
+    attributes:
+      label: "Arch Linux Package (.pkg.tar.zst) Download URL (Option B)"
+      description: "Direct download link to compiled Arch Linux pacman package (Required if delivering Debian)"
+      placeholder: "https://github.com/myorg/myrepo/releases/download/v1.0.0/myapp-1.0.0-1-x86_64.pkg.tar.zst"
   - type: textarea
     id: icon_url
     attributes:
       label: "Application Icon (PNG or SVG)"
-      description: "Drag and drop the app icon image."
-      placeholder: "Drag and drop icon image here..."
+      description: "Direct link to square PNG or SVG icon (128x128+)"
+      placeholder: "https://raw.githubusercontent.com/myorg/myrepo/main/icon.png"
     validations:
       required: true
   - type: input
     id: promo_url
     attributes:
       label: "Official Website (Optional)"
-      placeholder: "https://brave.com"
+      placeholder: "https://myapp.com"
   - type: input
     id: github_url
     attributes:
       label: "Source Repository (Optional)"
-      placeholder: "https://github.com/flathub/com.brave.Browser"
+      placeholder: "https://github.com/myorg/myrepo"

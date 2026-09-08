@@ -156,7 +156,10 @@ function parseIssueBody(bodyText) {
             if (header.includes('id') || header.includes('package id') || header.includes('skill id') || header.includes('plugin id') || header.includes('extension id') || header.includes('app id')) currentKey = 'id';
             else if (header.includes('name')) currentKey = 'name';
             else if (header.includes('description')) currentKey = 'description';
-            else if (header.includes('zip') || header.includes('archive') || header.includes('download') || header.includes('flatpak')) currentKey = 'zip_url';
+            else if (header.includes('deb')) currentKey = 'deb_url';
+            else if (header.includes('arch') || header.includes('pacman')) currentKey = 'arch_url';
+            else if (header.includes('flatpak') || header.includes('flathub')) currentKey = 'flatpak_url';
+            else if (header.includes('zip') || header.includes('archive') || header.includes('download')) currentKey = 'zip_url';
             else if (header.includes('icon')) currentKey = 'icon_url';
             else if (header.includes('source') || header.includes('repository')) currentKey = 'github_url';
             else if (header.includes('sandbox') || header.includes('isolation')) currentKey = 'sandbox_level';
@@ -178,6 +181,9 @@ function parseIssueBody(bodyText) {
     if (data.id) data.id = cleanText(data.id);
     if (data.name) data.name = cleanText(data.name);
     if (data.description) data.description = cleanText(data.description);
+    if (data.flatpak_url) data.flatpak_url = extractUrl(data.flatpak_url);
+    if (data.deb_url) data.deb_url = extractUrl(data.deb_url);
+    if (data.arch_url) data.arch_url = extractUrl(data.arch_url);
     if (data.zip_url) data.zip_url = extractUrl(data.zip_url);
     if (data.icon_url) data.icon_url = extractUrl(data.icon_url);
     if (data.github_url) data.github_url = extractUrl(data.github_url);
@@ -307,8 +313,39 @@ async function run() {
     }
 
     // 3. FULL CODE PUBLICATION / UPDATE (Requires VirusTotal + OpenCode Agent)
-    if (!pkgId || !formData.name || !formData.zip_url || !formData.icon_url) {
-        await failAudit('prep', 'Missing mandatory fields (ID, Name, Package Archive URL, or Icon URL).');
+    const formats = {};
+    if (pkgType === 'flatpak' || pkgType === 'app') {
+        const flatpakUrl = formData.flatpak_url || (formData.zip_url && (formData.zip_url.endsWith('.flatpak') || formData.zip_url.endsWith('.flatpakref') || formData.zip_url.includes('flathub.org')) ? formData.zip_url : '');
+        const debUrl = formData.deb_url || (formData.zip_url && formData.zip_url.endsWith('.deb') ? formData.zip_url : '');
+        const archUrl = formData.arch_url || (formData.zip_url && (formData.zip_url.endsWith('.pkg.tar.zst') || formData.zip_url.endsWith('.pkg.tar.xz') || formData.zip_url.endsWith('.pacman')) ? formData.zip_url : '');
+
+        if (flatpakUrl) {
+            formats.flatpak = flatpakUrl;
+        }
+        if (debUrl || archUrl) {
+            if (!debUrl) {
+                await failAudit('prep', '❌ Falta el paquete de Debian (.deb). Al entregar paquetes nativos, debes incluir tanto la versión Debian (.deb) como la de Arch (.pkg.tar.zst) para asegurar compatibilidad total con todas las bases de Pulsar OS.');
+            }
+            if (!archUrl) {
+                await failAudit('prep', '❌ Falta el paquete de Arch Linux (.pkg.tar.zst / .pacman). Al entregar paquetes nativos, debes incluir tanto la versión Debian (.deb) como la de Arch (.pkg.tar.zst) para asegurar compatibilidad total con todas las bases de Pulsar OS.');
+            }
+            formats.deb = debUrl;
+            formats.arch = archUrl;
+        }
+
+        if (!formats.flatpak && !formats.deb && !formats.arch) {
+            await failAudit('prep', '❌ Formato no válido para aplicaciones de escritorio. Debes entregar un paquete de Flathub/Flatpak (.flatpakref / .flatpak) O BIEN ambos paquetes nativos: Debian (.deb) y Arch Linux (.pkg.tar.zst / .pacman). Los archivos .zip genéricos con código fuente o ejecutables sueltos no están permitidos.');
+        }
+
+        formData.zip_url = formats.flatpak || formats.deb || formats.arch || formData.zip_url;
+    } else {
+        if (!formData.zip_url) {
+            await failAudit('prep', 'Missing Package Archive URL (.zip).');
+        }
+    }
+
+    if (!pkgId || !formData.name || !formData.icon_url) {
+        await failAudit('prep', 'Missing mandatory fields (ID, Name, or Icon URL).');
     }
 
     if (mode === 'new' && targetPkg) {
@@ -320,15 +357,37 @@ async function run() {
     await updateStep('prep', 'success', `Submission valid [Type: ${pkgType}, ID: ${pkgId}, Mode: ${mode}].`);
 
     // 4. ASSET DOWNLOAD
-    await updateStep('download', 'running', 'Downloading package binary, icon, and screenshot assets...');
+    await updateStep('download', 'running', 'Downloading package binaries, icon, and screenshot assets...');
     const tmpDir = path.join('/tmp', `pulsar-pkg-${pkgId}-${Date.now()}`);
     const extractedDir = path.join(tmpDir, 'extracted');
     fs.mkdirSync(tmpDir, { recursive: true });
     fs.mkdirSync(extractedDir, { recursive: true });
 
-    const archiveExt = (formData.zip_url.endsWith('.flatpak') || formData.zip_url.endsWith('.flatpakref')) ? 'package.flatpak' : 'package.zip';
-    const downloadedPkgPath = path.join(tmpDir, archiveExt);
-    await downloadFile(formData.zip_url, downloadedPkgPath);
+    // Download all format binaries
+    const downloadedAssets = {};
+    if (formats.deb) {
+        const debPath = path.join(tmpDir, `${pkgId}.deb`);
+        await downloadFile(formats.deb, debPath);
+        downloadedAssets.deb = debPath;
+    }
+    if (formats.arch) {
+        const archPath = path.join(tmpDir, `${pkgId}.pkg.tar.zst`);
+        await downloadFile(formats.arch, archPath);
+        downloadedAssets.arch = archPath;
+    }
+    if (formats.flatpak && !formats.flatpak.includes('flathub.org') && !formats.flatpak.endsWith('.flatpakref')) {
+        const flatpakPath = path.join(tmpDir, `${pkgId}.flatpak`);
+        await downloadFile(formats.flatpak, flatpakPath);
+        downloadedAssets.flatpak = flatpakPath;
+    }
+
+    let downloadedPkgPath = downloadedAssets.deb || downloadedAssets.arch || downloadedAssets.flatpak;
+    const archiveExt = (formData.zip_url.endsWith('.flatpak') || formData.zip_url.endsWith('.flatpakref')) ? 'package.flatpak' : (formData.zip_url.endsWith('.deb') ? 'package.deb' : 'package.zip');
+    
+    if (!downloadedPkgPath && formData.zip_url && !formData.zip_url.includes('flathub.org')) {
+        downloadedPkgPath = path.join(tmpDir, archiveExt);
+        await downloadFile(formData.zip_url, downloadedPkgPath);
+    }
 
     const iconPath = path.join('assets/icons', `${pkgId}.png`);
     if (formData.icon_url) {
@@ -609,18 +668,69 @@ Respond strictly with a JSON object:
     await updateStep('publish', 'running', 'Publishing package asset to GitHub Releases and updating catalog...');
     const repo = process.env.REPOSITORY || 'Inled-Pulsar-OS/store';
     const releaseTag = "packages";
-    const finalArchiveName = archiveExt.endsWith('.flatpak') ? `${pkgId}.flatpak` : `${pkgId}.zip`;
+    const publishedFormats = {};
 
     let finalDownloadUrl = formData.zip_url;
-    if (archiveExt.endsWith('.zip') || (archiveExt.endsWith('.flatpak') && !formData.zip_url.includes('flathub.org'))) {
+
+    try {
+        execSync(`gh release view ${releaseTag} --repo ${repo} || gh release create ${releaseTag} --repo ${repo} --title "Pulsar Store Binary Packages" --notes "Official storage for approved store packages."`, { stdio: 'inherit' });
+    } catch (e) {
+        console.warn(`[GitHub Release] Ensure release error: ${e.message}`);
+    }
+
+    // Upload individual formats if present
+    if (downloadedAssets.deb && fs.existsSync(downloadedAssets.deb)) {
         try {
-            console.log(`[GitHub Release] Publishing ${finalArchiveName} to release '${releaseTag}' on ${repo}...`);
-            execSync(`gh release view ${releaseTag} --repo ${repo} || gh release create ${releaseTag} --repo ${repo} --title "Pulsar Store Binary Packages" --notes "Official storage for approved store packages."`, { stdio: 'inherit' });
-            execSync(`gh release upload ${releaseTag} "${downloadedPkgPath}#${finalArchiveName}" --repo ${repo} --clobber`, { stdio: 'inherit' });
+            const debAsset = `${pkgId}.deb`;
+            execSync(`gh release upload ${releaseTag} "${downloadedAssets.deb}" --repo ${repo} --clobber`, { stdio: 'inherit' });
+            publishedFormats.deb = `https://github.com/${repo}/releases/download/${releaseTag}/${debAsset}`;
+        } catch (e) {
+            console.warn(`[GitHub Release] Deb upload error: ${e.message}`);
+            publishedFormats.deb = formats.deb;
+        }
+    } else if (formats.deb) {
+        publishedFormats.deb = formats.deb;
+    }
+
+    if (downloadedAssets.arch && fs.existsSync(downloadedAssets.arch)) {
+        try {
+            const archAsset = `${pkgId}.pkg.tar.zst`;
+            execSync(`gh release upload ${releaseTag} "${downloadedAssets.arch}" --repo ${repo} --clobber`, { stdio: 'inherit' });
+            publishedFormats.arch = `https://github.com/${repo}/releases/download/${releaseTag}/${archAsset}`;
+        } catch (e) {
+            console.warn(`[GitHub Release] Arch upload error: ${e.message}`);
+            publishedFormats.arch = formats.arch;
+        }
+    } else if (formats.arch) {
+        publishedFormats.arch = formats.arch;
+    }
+
+    if (formats.flatpak) {
+        if (downloadedAssets.flatpak && fs.existsSync(downloadedAssets.flatpak)) {
+            try {
+                const flatpakAsset = `${pkgId}.flatpak`;
+                execSync(`gh release upload ${releaseTag} "${downloadedAssets.flatpak}" --repo ${repo} --clobber`, { stdio: 'inherit' });
+                publishedFormats.flatpak = `https://github.com/${repo}/releases/download/${releaseTag}/${flatpakAsset}`;
+            } catch (e) {
+                publishedFormats.flatpak = formats.flatpak;
+            }
+        } else {
+            publishedFormats.flatpak = formats.flatpak;
+        }
+    }
+
+    // Default primary download url
+    if (publishedFormats.flatpak) finalDownloadUrl = publishedFormats.flatpak;
+    else if (publishedFormats.deb) finalDownloadUrl = publishedFormats.deb;
+    else if (publishedFormats.arch) finalDownloadUrl = publishedFormats.arch;
+    else if (downloadedPkgPath && fs.existsSync(downloadedPkgPath)) {
+        const finalArchiveName = archiveExt.endsWith('.flatpak') ? `${pkgId}.flatpak` : `${pkgId}.zip`;
+        try {
+            const targetUploadPath = path.join(path.dirname(downloadedPkgPath), finalArchiveName);
+            fs.copyFileSync(downloadedPkgPath, targetUploadPath);
+            execSync(`gh release upload ${releaseTag} "${targetUploadPath}" --repo ${repo} --clobber`, { stdio: 'inherit' });
             finalDownloadUrl = `https://github.com/${repo}/releases/download/${releaseTag}/${finalArchiveName}`;
-            console.log(`[GitHub Release] Published asset at: ${finalDownloadUrl}`);
-        } catch (relErr) {
-            console.warn(`[GitHub Release] Upload notice: ${relErr.message}`);
+        } catch (e) {
             finalDownloadUrl = `https://github.com/${repo}/releases/download/${releaseTag}/${finalArchiveName}`;
         }
     }
@@ -633,6 +743,7 @@ Respond strictly with a JSON object:
         version: version,
         author: issueUser,
         download_url: finalDownloadUrl,
+        formats: Object.keys(publishedFormats).length > 0 ? publishedFormats : undefined,
         icon_url: `assets/icons/${pkgId}.png`,
         demo_urls: demoPaths,
         github_url: formData.github_url || "",
@@ -648,7 +759,8 @@ Respond strictly with a JSON object:
         },
         metadata: {
             shell_versions: shellVersions,
-            sandbox_level: declaredSandbox
+            sandbox_level: declaredSandbox,
+            flatpakref_url: publishedFormats.flatpak
         }
     };
 
