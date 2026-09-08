@@ -820,10 +820,9 @@ Respond strictly with a JSON object:
             // 4. Launch in headless virtual display (Xvfb)
             // Timeout 6s: If status is 124 (timeout while running) or 0 (exited cleanly), app booted successfully.
             // If it terminates with error (e.g. zypak-sandbox failure, missing modules, crash), it will exit with code 1/127/133 etc.
+            const dbusBin = spawnSync('which', ['dbus-run-session']).status === 0 ? 'dbus-run-session --' : '';
             const xvfbBin = spawnSync('which', ['xvfb-run']).status === 0 ? 'xvfb-run -a' : '';
-            const testCmd = xvfbBin 
-                ? `timeout --preserve-status 6s ${xvfbBin} flatpak run ${flatpakAppId}`
-                : `timeout --preserve-status 6s flatpak run ${flatpakAppId}`;
+            const testCmd = `timeout --preserve-status 6s ${xvfbBin} ${dbusBin} flatpak run ${flatpakAppId}`;
 
             const runRes = spawnSync('sh', ['-c', testCmd], {
                 encoding: 'utf8',
