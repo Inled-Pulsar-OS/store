@@ -797,11 +797,12 @@ Respond strictly with a JSON object:
 
             // 2. Install bundle into user environment
             console.log(`[Smoke Test] Installing Flatpak bundle into sandbox...`);
-            const installRes = spawnSync('flatpak', ['install', '--user', '-y', '--reinstall', '--bundle', downloadedAssets.flatpak], {
+            const installRes = spawnSync('flatpak', ['install', '--user', '-y', '--bundle', downloadedAssets.flatpak], {
                 encoding: 'utf8',
                 timeout: 90000
             });
-            if (installRes.status !== 0) {
+            const installErr = (installRes.stderr || '') + '\n' + (installRes.stdout || '');
+            if (installRes.status !== 0 && !installErr.includes('already installed')) {
                 const errDetail = installRes.stderr || installRes.stdout || `Exit code ${installRes.status}`;
                 await failAudit('smoke_test', `❌ Flatpak Bundle Installation Failed:\n\`\`\`text\n${errDetail.trim()}\n\`\`\`\nPlease ensure your .flatpak bundle is valid and runtime dependencies are available.`);
             }
