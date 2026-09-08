@@ -91,6 +91,40 @@ function cleanText(val) {
     return val.trim();
 }
 
+function getCodeSnippets(dir, maxTotalBytes = 25000) {
+    let snippets = "";
+    let totalBytes = 0;
+
+    function walk(currentDir, depth = 0) {
+        if (depth > 5 || totalBytes >= maxTotalBytes) return;
+        try {
+            const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+            for (const entry of entries) {
+                const fullPath = path.join(currentDir, entry.name);
+                const relPath = path.relative(dir, fullPath);
+                if (entry.isDirectory()) {
+                    if (entry.name !== 'node_modules' && entry.name !== '.git' && !entry.name.startsWith('.')) {
+                        walk(fullPath, depth + 1);
+                    }
+                } else if (entry.isFile()) {
+                    const ext = path.extname(entry.name).toLowerCase();
+                    if (['.js', '.py', '.json', '.sh', '.yaml', '.yml', '.md', '.desktop', '.xml'].includes(ext) || entry.name === 'metadata' || entry.name.startsWith('manifest')) {
+                        try {
+                            const content = fs.readFileSync(fullPath, 'utf8');
+                            const chunk = content.substring(0, 4000);
+                            snippets += `\n// File: ${relPath}\n` + chunk + '\n';
+                            totalBytes += chunk.length;
+                            if (totalBytes >= maxTotalBytes) break;
+                        } catch (readErr) {}
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+    walk(dir);
+    return snippets;
+}
+
 async function downloadFile(url, dest) {
     if (!url) throw new Error("URL is empty");
     console.log(`Downloading: ${url} -> ${dest}`);
@@ -440,33 +474,86 @@ async function run() {
     let declaredSandbox = formData.sandbox_level || "LEVEL_0_NO_EXEC";
     let extractedSkillMd = "";
 
-    if (archiveExt.endsWith('.zip')) {
+    // Extract all package formats into extractedDir
+    if (downloadedAssets.flatpak || (downloadedPkgPath && downloadedPkgPath.endsWith('.flatpak'))) {
+        const flatpakFile = downloadedAssets.flatpak || downloadedPkgPath;
         try {
-            const zip = new AdmZip(downloadedPkgPath);
-            zip.extractAllTo(extractedDir, true);
-
-            for (let entry of zip.getEntries()) {
-                const name = entry.entryName.toLowerCase();
-                if (name.endsWith('metadata.json') || name.endsWith('manifest.json') || name.endsWith('plugin.yaml') || name.endsWith('skill.md')) {
-                    try {
-                        const metaContent = zip.readAsText(entry);
-                        if (name.endsWith('skill.md')) {
-                            extractedSkillMd = metaContent;
-                        }
-                        if (name.endsWith('.json')) {
-                            const parsed = JSON.parse(metaContent);
-                            version = parsed.version || version;
-                            shellVersions = parsed['shell-version'] || [];
-                            if (parsed.sandbox?.level) declaredSandbox = parsed.sandbox.level;
-                            else if (parsed.sandbox_level) declaredSandbox = parsed.sandbox_level;
-                        }
-                    } catch (e) {}
+            console.log(`[Extraction] Extracting Flatpak bundle: ${flatpakFile}`);
+            try { execSync('flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo', { stdio: 'pipe' }); } catch(e) {}
+            execSync(`flatpak install --user -y --bundle "${flatpakFile}"`, { stdio: 'pipe', timeout: 90000 });
+            const baseFlatpakDir = path.join(process.env.HOME || '/home/runner', '.local/share/flatpak/app');
+            if (fs.existsSync(baseFlatpakDir)) {
+                const apps = fs.readdirSync(baseFlatpakDir);
+                const matched = apps.find(a => a === pkgId || a.replace(/-/g, '') === pkgId.replace(/-/g, '') || a.toLowerCase().includes(pkgId.toLowerCase())) || apps[0];
+                if (matched) {
+                    const activeDir = path.join(baseFlatpakDir, matched, 'current/active');
+                    if (fs.existsSync(activeDir)) {
+                        try { execSync(`cp -r "${activeDir}/files"/* "${extractedDir}/" 2>/dev/null || true`); } catch(e) {}
+                        try { execSync(`cp "${activeDir}"/manifest*.json "${extractedDir}/" 2>/dev/null || true`); } catch(e) {}
+                        try { execSync(`cp "${activeDir}"/metadata "${extractedDir}/" 2>/dev/null || true`); } catch(e) {}
+                    }
                 }
             }
         } catch (e) {
-            console.warn("Could not parse as ZIP:", e.message);
+            console.warn("Flatpak extraction notice:", e.message);
+        }
+    } else if (downloadedAssets.deb || (downloadedPkgPath && downloadedPkgPath.endsWith('.deb'))) {
+        const debFile = downloadedAssets.deb || downloadedPkgPath;
+        try {
+            console.log(`[Extraction] Extracting Debian package: ${debFile}`);
+            execSync(`dpkg-deb -x "${debFile}" "${extractedDir}"`);
+            try { execSync(`dpkg-deb -e "${debFile}" "${extractedDir}/DEBIAN"`); } catch(e) {}
+        } catch (e) {
+            console.warn("Debian extraction notice:", e.message);
+        }
+    } else if (downloadedAssets.arch || (downloadedPkgPath && (downloadedPkgPath.endsWith('.pkg.tar.zst') || downloadedPkgPath.endsWith('.pkg.tar.xz') || downloadedPkgPath.endsWith('.pacman')))) {
+        const archFile = downloadedAssets.arch || downloadedPkgPath;
+        try {
+            console.log(`[Extraction] Extracting Arch Linux package: ${archFile}`);
+            execSync(`tar -xf "${archFile}" -C "${extractedDir}"`);
+        } catch (e) {
+            console.warn("Arch extraction notice:", e.message);
+        }
+    } else if (downloadedPkgPath && downloadedPkgPath.endsWith('.zip')) {
+        try {
+            console.log(`[Extraction] Extracting ZIP archive: ${downloadedPkgPath}`);
+            const zip = new AdmZip(downloadedPkgPath);
+            zip.extractAllTo(extractedDir, true);
+        } catch (e) {
+            console.warn("ZIP extraction notice:", e.message);
         }
     }
+
+    // Recursively parse manifests in extracted directory
+    function searchManifests(dir, depth = 0) {
+        if (depth > 4) return;
+        try {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const ent of entries) {
+                const fullP = path.join(dir, ent.name);
+                if (ent.isDirectory() && ent.name !== 'node_modules' && !ent.name.startsWith('.')) {
+                    searchManifests(fullP, depth + 1);
+                } else if (ent.isFile()) {
+                    const lName = ent.name.toLowerCase();
+                    if (lName.endsWith('skill.md')) {
+                        try { extractedSkillMd = fs.readFileSync(fullP, 'utf8'); } catch(e) {}
+                    }
+                    if (lName.endsWith('metadata.json') || lName.endsWith('manifest.json') || lName === 'plugin.yaml') {
+                        try {
+                            const metaContent = fs.readFileSync(fullP, 'utf8');
+                            const parsed = JSON.parse(metaContent);
+                            version = parsed.version || version;
+                            shellVersions = parsed['shell-version'] || shellVersions;
+                            if (parsed.sandbox?.level) declaredSandbox = parsed.sandbox.level;
+                            else if (parsed.sandbox_level) declaredSandbox = parsed.sandbox_level;
+                        } catch(e) {}
+                    }
+                }
+            }
+        } catch(e) {}
+    }
+    searchManifests(extractedDir);
+
     await updateStep('metadata', 'success', `Metadata valid (v${version}, Sandbox: ${declaredSandbox}).`);
 
     // 6. VIRUSTOTAL SCAN (STRICT ZERO-TOLERANCE)
@@ -502,36 +589,60 @@ async function run() {
             }
 
             if (!gotStats) {
-                const formDataVT = new FormData();
-                formDataVT.append('file', fs.createReadStream(downloadedPkgPath));
-                const vtRes = await axios.post('https://www.virustotal.com/api/v3/files', formDataVT, {
-                    headers: { ...formDataVT.getHeaders(), 'x-apikey': vtKey },
-                    timeout: 25000
-                });
-                const analysisId = vtRes.data?.data?.id;
-                console.log(`🛡️ [VirusTotal] File uploaded successfully. Analysis ID: ${analysisId}`);
+                let uploadUrl = 'https://www.virustotal.com/api/v3/files';
+                const fileSizeBytes = fs.statSync(downloadedPkgPath).size;
+                if (fileSizeBytes > 32 * 1024 * 1024) {
+                    console.log(`🛡️ [VirusTotal] File is ${Math.round(fileSizeBytes / 1024 / 1024)}MB (>32MB), requesting large upload URL...`);
+                    try {
+                        const urlRes = await axios.get('https://www.virustotal.com/api/v3/files/upload_url', {
+                            headers: { 'x-apikey': vtKey },
+                            timeout: 10000
+                        });
+                        if (urlRes.data?.data) {
+                            uploadUrl = urlRes.data.data;
+                            console.log(`🛡️ [VirusTotal] Obtained large file upload URL: ${uploadUrl.substring(0, 40)}...`);
+                        }
+                    } catch(uErr) {
+                        console.warn("🛡️ [VirusTotal] Large upload URL notice:", uErr.message);
+                    }
+                }
 
-                if (analysisId) {
-                    for (let attempt = 0; attempt < 6; attempt++) {
-                        await new Promise(r => setTimeout(r, 4000));
-                        try {
-                            const checkRes = await axios.get(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
-                                headers: { 'x-apikey': vtKey }
-                            });
-                            const stats = checkRes.data?.data?.attributes?.stats;
-                            const status = checkRes.data?.data?.attributes?.status;
-                            console.log(`🛡️ [VirusTotal] Polling analysis (attempt ${attempt + 1}/6): status = ${status}`);
-                            if (stats && (status === 'completed' || stats.malicious > 0 || stats.undetected > 0)) {
-                                vtResult.malicious = stats.malicious || 0;
-                                vtResult.suspicious = stats.suspicious || 0;
-                                vtResult.undetected = stats.undetected || (stats.harmless ? stats.undetected + stats.harmless : 72);
-                                gotStats = true;
-                                break;
+                try {
+                    const formDataVT = new FormData();
+                    formDataVT.append('file', fs.createReadStream(downloadedPkgPath));
+                    const vtRes = await axios.post(uploadUrl, formDataVT, {
+                        headers: { ...formDataVT.getHeaders(), 'x-apikey': vtKey },
+                        maxBodyLength: 250 * 1024 * 1024,
+                        maxContentLength: 250 * 1024 * 1024,
+                        timeout: 60000
+                    });
+                    const analysisId = vtRes.data?.data?.id;
+                    console.log(`🛡️ [VirusTotal] File uploaded successfully. Analysis ID: ${analysisId}`);
+
+                    if (analysisId) {
+                        for (let attempt = 0; attempt < 6; attempt++) {
+                            await new Promise(r => setTimeout(r, 4000));
+                            try {
+                                const checkRes = await axios.get(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
+                                    headers: { 'x-apikey': vtKey }
+                                });
+                                const stats = checkRes.data?.data?.attributes?.stats;
+                                const status = checkRes.data?.data?.attributes?.status;
+                                console.log(`🛡️ [VirusTotal] Polling analysis (attempt ${attempt + 1}/6): status = ${status}`);
+                                if (stats && (status === 'completed' || stats.malicious > 0 || stats.undetected > 0)) {
+                                    vtResult.malicious = stats.malicious || 0;
+                                    vtResult.suspicious = stats.suspicious || 0;
+                                    vtResult.undetected = stats.undetected || (stats.harmless ? stats.undetected + stats.harmless : 72);
+                                    gotStats = true;
+                                    break;
+                                }
+                            } catch (pollErr) {
+                                console.warn("🛡️ [VirusTotal] Polling warning:", pollErr.message);
                             }
-                        } catch (pollErr) {
-                            console.warn("🛡️ [VirusTotal] Polling warning:", pollErr.message);
                         }
                     }
+                } catch (uploadErr) {
+                    console.warn(`🛡️ [VirusTotal] Upload warning (${uploadErr.message}), proceeding with SHA256 hash validation.`);
                 }
             }
 
@@ -604,27 +715,14 @@ Respond strictly with a JSON object:
     // B. Direct LLM Audit with Groq / OpenAI Fallback
     if (!aiResponse && (process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY)) {
         console.log("[OpenCode] Running direct LLM semantic audit...");
-        let codeSnippet = "";
-        try {
-            const files = fs.readdirSync(extractedDir);
-            for (const f of files) {
-                if (f.endsWith('.py') || f.endsWith('.js') || f.endsWith('.json') || f.endsWith('.sh') || f.endsWith('.md')) {
-                    const content = fs.readFileSync(path.join(extractedDir, f), 'utf8');
-                    codeSnippet += `\n// File: ${f}\n` + content.substring(0, 7000);
-                }
-            }
-        } catch (e) {}
+        let codeSnippet = getCodeSnippets(extractedDir, 25000);
+        if (!codeSnippet.trim()) {
+            codeSnippet = `// Package Type: ${pkgType}\n// ID: ${pkgId}\n// Version: ${version}\n// Declared Sandbox: ${declaredSandbox}\n// Binary archive extracted. No plain script files.`;
+        }
 
         const providers = [];
         if (process.env.GROQ_API_KEY) {
-            let groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
-            try {
-                const listRes = await axios.get('https://api.groq.com/openai/v1/models', {
-                    headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` }
-                });
-                const fetched = (listRes.data?.data || []).map(m => m.id).filter(id => !id.includes('whisper') && !id.includes('guard'));
-                if (fetched.length > 0) groqModels = fetched;
-            } catch (e) {}
+            let groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
             providers.push({
                 apiKey: process.env.GROQ_API_KEY,
                 baseURL: 'https://api.groq.com/openai/v1',
