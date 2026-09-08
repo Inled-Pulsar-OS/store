@@ -480,7 +480,7 @@ async function run() {
         try {
             console.log(`[Extraction] Extracting Flatpak bundle: ${flatpakFile}`);
             try { execSync('flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo', { stdio: 'pipe' }); } catch(e) {}
-            execSync(`flatpak install --user -y --bundle "${flatpakFile}"`, { stdio: 'pipe', timeout: 90000 });
+            execSync(`flatpak install --user -y --reinstall --bundle "${flatpakFile}"`, { stdio: 'pipe', timeout: 90000 });
             const baseFlatpakDir = path.join(process.env.HOME || '/home/runner', '.local/share/flatpak/app');
             if (fs.existsSync(baseFlatpakDir)) {
                 const apps = fs.readdirSync(baseFlatpakDir);
@@ -797,7 +797,7 @@ Respond strictly with a JSON object:
 
             // 2. Install bundle into user environment
             console.log(`[Smoke Test] Installing Flatpak bundle into sandbox...`);
-            const installRes = spawnSync('flatpak', ['install', '--user', '-y', '--bundle', downloadedAssets.flatpak], {
+            const installRes = spawnSync('flatpak', ['install', '--user', '-y', '--reinstall', '--bundle', downloadedAssets.flatpak], {
                 encoding: 'utf8',
                 timeout: 90000
             });
