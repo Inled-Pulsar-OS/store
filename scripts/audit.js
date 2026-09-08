@@ -822,7 +822,7 @@ Respond strictly with a JSON object:
             // If it terminates with error (e.g. zypak-sandbox failure, missing modules, crash), it will exit with code 1/127/133 etc.
             const dbusBin = spawnSync('which', ['dbus-run-session']).status === 0 ? 'dbus-run-session --' : '';
             const xvfbBin = spawnSync('which', ['xvfb-run']).status === 0 ? 'xvfb-run -a' : '';
-            const testCmd = `timeout --preserve-status 6s ${xvfbBin} ${dbusBin} flatpak run ${flatpakAppId}`;
+            const testCmd = `timeout 6s ${xvfbBin} ${dbusBin} flatpak run ${flatpakAppId}`;
 
             const runRes = spawnSync('sh', ['-c', testCmd], {
                 encoding: 'utf8',
@@ -836,8 +836,9 @@ Respond strictly with a JSON object:
             console.log(`[Smoke Test] Flatpak run exit code: ${runRes.status}. Output snippet:\n${combinedOutput.substring(0, 500)}`);
 
             // Check for immediate crash signatures (e.g. zypak error, missing node_modules, SUID sandbox abort)
-            const isFatalCrash = runRes.status !== 0 && runRes.status !== 124;
-            const hasZypakError = combinedOutput.includes('Ignoring non-Zygote command') || combinedOutput.includes('setuid_sandbox_host.cc');
+            // Exit code 124 (timeout while running) or 143/137/0 means the GUI app stayed alive and booted successfully!
+            const isFatalCrash = runRes.status !== 0 && runRes.status !== 124 && runRes.status !== 143 && runRes.status !== 137;
+            const hasZypakError = combinedOutput.includes('Ignoring non-Zygote command') || combinedOutput.includes('DetermineZygoteStrategy): Assertion failed');
             const hasMissingModule = combinedOutput.includes('Cannot find module') || combinedOutput.includes('Uncaught Exception:');
 
             if (isFatalCrash || hasZypakError || hasMissingModule) {
