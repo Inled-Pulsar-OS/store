@@ -28,7 +28,6 @@
       <!-- Navigation Links (Clean, No Category Overcrowding) -->
       <nav class="nav-menu">
         <a href="#all" class="nav-link" data-route="all">Explore</a>
-        <a href="#cli" class="nav-link" data-route="cli">CLI Tool</a>
         <a href="#submit" class="nav-link" data-route="submit">Submit</a>
         <a href="#skill" class="nav-link" data-route="skill">SKILL.md</a>
       </nav>
@@ -158,60 +157,7 @@
     </div>
   </div>
 
-  <!-- =========================================================================
-       VIEW 3: CLI HELPER GUIDE (Flat Clean Article)
-       ========================================================================= -->
-  <div id="cli-view" class="app-view hidden">
-    <div class="container package-detail-container">
-      <button class="back-link-btn" onclick="showCatalogView()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Back to Store
-      </button>
 
-      <article class="detail-article">
-        <div>
-          <h1 class="detail-title">Pulsar Store CLI Helper</h1>
-          <p class="detail-lead">Manage, install, and update Flatpak apps, GNOME extensions, and Sayri AI skills directly from your Linux terminal.</p>
-        </div>
-        
-        <div class="terminal-highlight-box">
-          <code>curl -fsSL https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/install.sh | bash</code>
-          <button class="btn-copy" onclick="copyCode(this, 'curl -fsSL https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/install.sh | bash')">Copy</button>
-        </div>
-
-        <div>
-          <h3 class="detail-section-heading">Command Reference</h3>
-          <table class="specs-table">
-            <tbody>
-              <tr>
-                <td><code>pulsar-store search &lt;query&gt;</code></td>
-                <td>Search packages across all ecosystems.</td>
-              </tr>
-              <tr>
-                <td><code>pulsar-store install &lt;package-id&gt;</code></td>
-                <td>Download, verify, and install package.</td>
-              </tr>
-              <tr>
-                <td><code>pulsar-store check</code></td>
-                <td>Check updates across installed software.</td>
-              </tr>
-              <tr>
-                <td><code>pulsar-store update</code></td>
-                <td>Upgrade all installed extensions, flatpaks, and skills.</td>
-              </tr>
-              <tr>
-                <td><code>pulsar-store self-update</code></td>
-                <td>Check and upgrade the pulsar-store CLI binary itself from upstream.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </article>
-    </div>
-  </div>
 
   <!-- =========================================================================
        VIEW 4: SUBMIT PACKAGE GUIDE (Flat Clean Article)
@@ -740,13 +686,7 @@ zip -r ../sayri-gateway-myplatform.zip . \
         </a>
       </div>
 
-      <div style="margin-top: 18px;">
-        <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;">Or install CLI tool via Terminal:</h4>
-        <div class="terminal-highlight-box">
-          <code>curl -fsSL https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/install.sh | bash</code>
-          <button class="btn-copy" onclick="copyCode(this, 'curl -fsSL https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/cli/install.sh | bash')">Copy</button>
-        </div>
-      </div>
+
     </div>
   </div>
 

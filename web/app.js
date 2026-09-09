@@ -8,10 +8,10 @@ let currentFilter = 'all';
 let searchQuery = '';
 
 const typeMeta = {
-  'flatpak': { label: 'Desktop App', category: 'Flatpak Container' },
-  'gnome_extension': { label: 'GNOME Extension', category: 'Desktop Shell' },
-  'sayri_skill': { label: 'Sayri Skill', category: 'AI Assistant Skill' },
-  'sayri_plugin': { label: 'Channel Gateway', category: 'System Plugin' }
+  'flatpak': { label: 'Desktop App', category: 'Flatpak Container', icon: '' },
+  'gnome_extension': { label: 'GNOME Extension', category: 'Desktop Shell', icon: '' },
+  'sayri_skill': { label: 'Sayri Skill', category: 'AI Assistant Skill', icon: '' },
+  'sayri_plugin': { label: 'Channel Gateway', category: 'System Plugin', icon: '' }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -155,7 +155,7 @@ function getPackageEditions(pkg) {
       key: 'flatpak',
       label: 'Flatpak',
       badgeClass: 'flatpak',
-      icon: '📦',
+      icon: '',
       desc: 'Universal sandboxed container',
       url: f.flatpak || meta.flatpakref_url || (url.includes('flathub.org') || url.endsWith('.flatpak') || url.endsWith('.flatpakref') ? url : '')
     });
@@ -167,7 +167,7 @@ function getPackageEditions(pkg) {
       key: 'debian',
       label: 'Debian Edition',
       badgeClass: 'debian',
-      icon: '🌀',
+      icon: '',
       desc: 'Native .deb package (Pulsar OS Debian, Ubuntu)',
       url: f.deb || (url.endsWith('.deb') ? url : '')
     });
@@ -179,7 +179,7 @@ function getPackageEditions(pkg) {
       key: 'arch',
       label: 'Arch Edition',
       badgeClass: 'arch',
-      icon: '🏹',
+      icon: '',
       desc: 'Native .pkg.tar.zst package (Pulsar OS Arch, Manjaro)',
       url: f.arch || f.pacman || (url.endsWith('.pkg.tar.zst') || url.endsWith('.pkg.tar.xz') || url.endsWith('.pacman') ? url : '')
     });
@@ -235,19 +235,19 @@ function showPackageDetail(pkgId) {
       ${editions.length > 0 ? `
       <!-- Available Editions Section -->
       <div class="editions-box">
-        <div class="editions-title">📦 Available Editions</div>
+        <div class="editions-title">Available Editions</div>
         <div class="editions-subtitle">Pulsar Store installer automatically selects and installs the matching edition for your Pulsar OS base (Arch or Debian). You can also download standalone binaries:</div>
         <div class="editions-grid">
           ${editions.map(e => `
             <div class="edition-card">
               <div class="edition-card-header">
-                <span class="format-badge ${e.badgeClass}">${e.icon} ${e.label}</span>
+                <span class="format-badge ${e.badgeClass}">${e.label}</span>
               </div>
               <div class="edition-card-desc">${escapeHtml(e.desc)}</div>
               ${e.url ? `
                 <div class="edition-card-actions">
                   <a href="${escapeHtml(e.url)}" download class="btn btn-secondary btn-sm" style="width:100%; text-align:center; display:block; padding: 6px 10px; font-size: 0.8rem;">
-                    Download ${e.label} ⬇
+                    Download ${e.label}
                   </a>
                 </div>
               ` : ''}
@@ -257,11 +257,7 @@ function showPackageDetail(pkgId) {
       </div>
       ` : ''}
 
-      <!-- Terminal Command Snippet with soft highlight background -->
-      <div class="terminal-highlight-box">
-        <code>pulsar-store install ${escapeHtml(pkg.id)}</code>
-        <button class="btn-copy" onclick="copyCode(this, 'pulsar-store install ${escapeHtml(pkg.id)}')">Copy Command</button>
-      </div>
+
 
       <!-- Package Files & Bundle Contents -->
       <div>
