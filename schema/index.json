@@ -225,6 +225,32 @@
         "sandbox_level": "LEVEL_1_READ_ONLY",
         "flatpakref_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
       }
+    },
+    {
+      "id": "sayri-prismml",
+      "type": "sayri_plugin",
+      "name": "Prism ML Server",
+      "description": "",
+      "version": "0.1.2",
+      "author": "jaimegh-es",
+      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/sayri-prismml.zip",
+      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/sayri-prismml.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/Inled-Pulsar-OS/packages",
+      "promo_url": "",
+      "skill_md": "",
+      "security_report": {
+        "score": 92,
+        "status": "PASSED",
+        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 92/100):\nNo backdoors, creds exfiltration, or destructive commands found. Subprocess calls use arg-lists without shell=True, all network downloads target known sources (GitHub/Hugging Face) with pinned SHA256 for binaries and LFS-oid verification for models, host/port/family/size are allowlist/range validated, and HTTP servers bind to 127.0.0.1. Minor deductions: model integrity may be skipped when no LFS checksum is available (or via PRISM_SKIP_INTEGRITY), and the serve panel optionally binds beyond loopback via --host.",
+        "virustotal_detections": 0,
+        "timestamp": 1789161635704
+      },
+      "metadata": {
+        "shell_versions": [],
+        "sandbox_level": "LEVEL_3_HOST_USER"
+      }
     }
   ]
 }
