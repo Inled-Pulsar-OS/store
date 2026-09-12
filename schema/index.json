@@ -197,36 +197,6 @@
       "metadata": {}
     },
     {
-      "id": "com.ios-notes.app",
-      "type": "flatpak",
-      "name": "Notes",
-      "description": "iOS-style Notes app for Linux. Features a clean, minimal interface with folder/tag organization, favorites, search, dark mode, and rich text editing. Built with Electron.",
-      "version": "1.0.0-flatpak-r2",
-      "author": "ggg610523-lab",
-      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak",
-      "formats": {
-        "flatpak": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
-      },
-      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/com.ios-notes.app.png",
-      "demo_urls": [],
-      "github_url": "https://github.com/ggg610523-lab/notes",
-      "promo_url": "",
-      "skill_md": "",
-      "security_report": {
-        "score": 70,
-        "status": "PASSED",
-        "audited_by": "OpenCode (openai/gpt-oss-120b) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (OpenCode (openai/gpt-oss-120b) - Score: 70/100):\nThe package largely follows secure Electron practices (contextIsolation enabled, nodeIntegration disabled, limited IPC surface). However, the renderer stores and later renders user‑editable HTML from notes without sanitization, creating a potential XSS vector, and the app writes plain JSON files to the home directory without encryption, exposing data to other local users.",
-        "virustotal_detections": 0,
-        "timestamp": 1788882851297
-      },
-      "metadata": {
-        "shell_versions": [],
-        "sandbox_level": "LEVEL_1_READ_ONLY",
-        "flatpakref_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
-      }
-    },
-    {
       "id": "sayri-prismml",
       "type": "sayri_plugin",
       "name": "Prism ML Server",
@@ -250,6 +220,37 @@
       "metadata": {
         "shell_versions": [],
         "sandbox_level": "LEVEL_3_HOST_USER"
+      }
+    },
+    {
+      "id": "com.ios-notes.app",
+      "type": "flatpak",
+      "name": "Notes",
+      "description": "iOS-style Notes app for Linux. Features a clean, minimal interface with folder/tag organization, favorites, search, dark mode, and rich text editing. Built with Electron.",
+      "version": "1.1.0",
+      "author": "ggg610523-lab",
+      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.deb",
+      "formats": {
+        "deb": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.deb",
+        "arch": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.pkg.tar.zst"
+      },
+      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/com.ios-notes.app.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/ggg610523-lab/notes",
+      "promo_url": "",
+      "skill_md": "",
+      "security_report": {
+        "score": 85,
+        "status": "PASSED",
+        "audited_by": "OpenCode (openai/gpt-oss-120b) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (OpenCode (openai/gpt-oss-120b) - Score: 85/100):\nThe files contain standard configuration data without suspicious commands or external references. The update YAML, Vulkan ICD JSON, and desktop entry follow typical formats and do not expose obvious security vulnerabilities.",
+        "virustotal_detections": 0,
+        "timestamp": 1789242459497
+      },
+      "metadata": {
+        "shell_versions": [],
+        "sandbox_level": "LEVEL_1_READ_ONLY",
+        "flatpakref_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
       }
     }
   ]
