@@ -252,32 +252,6 @@
         "sandbox_level": "LEVEL_1_READ_ONLY",
         "flatpakref_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
       }
-    },
-    {
-      "id": "sayri-skill-eicar-probe",
-      "type": "sayri_skill",
-      "name": "EICAR Security Probe",
-      "description": "Test skill embedding the standard EICAR anti-malware test file. Used ONLY to verify the Pulsar Store security pipeline blocks it.",
-      "version": "1.0.0",
-      "author": "jaimegh-es",
-      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/sayri-skill-eicar-probe.zip",
-      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/sayri-skill-eicar-probe.png",
-      "demo_urls": [],
-      "github_url": "",
-      "promo_url": "",
-      "skill_md": "---\nname: \"EICAR Security Probe\"\ndescription: \"Minimal ARM-virus test probe skill for the security pipeline\"\nsandbox_level: \"LEVEL_1_READONLY\"\nversion: \"1.0.0\"\n---\n# EICAR Security Probe\nThis skill contains the standard EICAR anti-malware test file to verify the store pipeline.\n",
-      "security_report": {
-        "score": 95,
-        "status": "PASSED",
-        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 95/100):\nAll three files are passive data (markdown manifest, JSON metadata, and a plain-text EICAR test string) with no executable code, network calls, command execution, credential handling, or destructive operations, so there are no backdoors or exfiltration paths. The EICAR string is the standard benign anti-malware test marker, correctly and transparently labeled as such, and the declared LEVEL_1_READONLY sandbox level is properly satisfied by the contents.",
-        "virustotal_detections": 0,
-        "timestamp": 1789286069859
-      },
-      "metadata": {
-        "shell_versions": [],
-        "sandbox_level": "LEVEL_1_READONLY"
-      }
     }
   ]
 }
