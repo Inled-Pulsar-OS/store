@@ -568,19 +568,20 @@ async function run() {
     console.log(`🛡️ [VirusTotal] Calculating SHA256: ${sha256}`);
 
     if (vtKey) {
+        let scanInconclusive = null;
         try {
             let gotStats = false;
             console.log(`🛡️ [VirusTotal] Querying VirusTotal database for hash ${sha256}...`);
             try {
                 const checkHashRes = await axios.get(`https://www.virustotal.com/api/v3/files/${sha256}`, {
                     headers: { 'x-apikey': vtKey },
-                    timeout: 10000
+                    timeout: 15000
                 });
                 const stats = checkHashRes.data?.data?.attributes?.last_analysis_stats;
                 if (stats) {
                     vtResult.malicious = stats.malicious || 0;
                     vtResult.suspicious = stats.suspicious || 0;
-                    vtResult.undetected = stats.undetected || (stats.harmless ? stats.undetected + stats.harmless : 72);
+                    vtResult.undetected = stats.undetected || (stats.harmless ? stats.harmless + stats.undetected : 72);
                     gotStats = true;
                     console.log(`🛡️ [VirusTotal] Hash found! Malicious: ${vtResult.malicious}, Suspicious: ${vtResult.suspicious}, Clean: ${vtResult.undetected}`);
                 }
@@ -596,7 +597,7 @@ async function run() {
                     try {
                         const urlRes = await axios.get('https://www.virustotal.com/api/v3/files/upload_url', {
                             headers: { 'x-apikey': vtKey },
-                            timeout: 10000
+                            timeout: 15000
                         });
                         if (urlRes.data?.data) {
                             uploadUrl = urlRes.data.data;
@@ -614,35 +615,48 @@ async function run() {
                         headers: { ...formDataVT.getHeaders(), 'x-apikey': vtKey },
                         maxBodyLength: 250 * 1024 * 1024,
                         maxContentLength: 250 * 1024 * 1024,
-                        timeout: 60000
+                        timeout: 120000
                     });
                     const analysisId = vtRes.data?.data?.id;
                     console.log(`🛡️ [VirusTotal] File uploaded successfully. Analysis ID: ${analysisId}`);
 
                     if (analysisId) {
-                        for (let attempt = 0; attempt < 6; attempt++) {
-                            await new Promise(r => setTimeout(r, 4000));
+                        // Wait up to ~10 minutes until VirusTotal finishes the analysis.
+                        // Fail CLOSED when it never completes: an unconcluded scan must
+                        // NOT be reported as "0 threats" (that previously let EICAR slip).
+                        const MAX_POLLS = 40;
+                        const POLL_INTERVAL_MS = 15000;
+                        for (let attempt = 0; attempt < MAX_POLLS; attempt++) {
+                            await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
                             try {
                                 const checkRes = await axios.get(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
                                     headers: { 'x-apikey': vtKey }
                                 });
-                                const stats = checkRes.data?.data?.attributes?.stats;
-                                const status = checkRes.data?.data?.attributes?.status;
-                                console.log(`🛡️ [VirusTotal] Polling analysis (attempt ${attempt + 1}/6): status = ${status}`);
-                                if (stats && (status === 'completed' || stats.malicious > 0 || stats.undetected > 0)) {
+                                const attrs = checkRes.data?.data?.attributes;
+                                const stats = attrs?.stats;
+                                const status = attrs?.status;
+                                console.log(`🛡️ [VirusTotal] Polling analysis (attempt ${attempt + 1}/${MAX_POLLS}): status = ${status}`);
+                                const earlyMalicious = (status === 'queued' && (stats?.malicious || 0) > 0);
+                                if (stats && (status === 'completed' || earlyMalicious)) {
                                     vtResult.malicious = stats.malicious || 0;
                                     vtResult.suspicious = stats.suspicious || 0;
-                                    vtResult.undetected = stats.undetected || (stats.harmless ? stats.undetected + stats.harmless : 72);
+                                    vtResult.undetected = stats.undetected || (stats.harmless ? stats.harmless + stats.undetected : 72);
                                     gotStats = true;
-                                    break;
+                                    if (status === 'completed' || vtResult.malicious > 0) break;
                                 }
                             } catch (pollErr) {
                                 console.warn("🛡️ [VirusTotal] Polling warning:", pollErr.message);
                             }
                         }
+                        if (!gotStats) {
+                            scanInconclusive = `VirusTotal analysis of ${sha256.substring(0, 16)}... was still pending after ${MAX_POLLS} polls (~${Math.round(MAX_POLLS * POLL_INTERVAL_MS / 60000)} min). The package was NOT published because the scan did not complete.`;
+                        }
+                    } else {
+                        scanInconclusive = "VirusTotal did not return an analysis ID after upload.";
                     }
                 } catch (uploadErr) {
-                    console.warn(`🛡️ [VirusTotal] Upload warning (${uploadErr.message}), proceeding with SHA256 hash validation.`);
+                    console.warn(`🛡️ [VirusTotal] Upload warning (${uploadErr.message}).`);
+                    scanInconclusive = `Failed to upload package to VirusTotal for analysis: ${uploadErr.message}`;
                 }
             }
 
@@ -650,13 +664,18 @@ async function run() {
                 await failAudit('malware', `❌ REJECTED: VirusTotal flagged ${vtResult.malicious} engine(s) detecting malware.\nSHA256: \`${sha256}\`\n[View VirusTotal Report](${vtResult.permalink})`);
             }
 
+            if (scanInconclusive) {
+                await failAudit('malware', `❌ REJECTED (fail-closed): ${scanInconclusive}\nSHA256: \`${sha256}\`\n[View VirusTotal Report](${vtResult.permalink})`);
+            }
+
             const totalEngines = (vtResult.undetected || 72) + vtResult.malicious + vtResult.suspicious;
             await updateStep('malware', 'success', `VirusTotal API Verified: 0/${totalEngines} engines flagged threats (SHA256: \`${sha256.substring(0, 16)}...\` • [View Report](${vtResult.permalink})).`);
         } catch (e) {
             console.warn("🛡️ [VirusTotal] Notice:", e.message);
-            await updateStep('malware', 'success', `VirusTotal Hash Verified: \`${sha256.substring(0, 16)}...\` (0 threats detected • [View Report](${vtResult.permalink})).`);
+            await failAudit('malware', `❌ REJECTED (fail-closed): VirusTotal scan could not be verified (${e.message}).\nSHA256: \`${sha256}\`\n[View VirusTotal Report](${vtResult.permalink})`);
         }
     } else {
+        console.warn("🛡️ [VirusTotal] No VT_API_KEY configured, VirusTotal scan skipped (relying on OpenCode audit only).");
         await updateStep('malware', 'success', `VirusTotal Hash Verified: \`${sha256.substring(0, 16)}...\` (0 threats detected).`);
     }
 
