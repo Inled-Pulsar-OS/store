@@ -197,32 +197,6 @@
       "metadata": {}
     },
     {
-      "id": "sayri-prismml",
-      "type": "sayri_plugin",
-      "name": "Prism ML Server",
-      "description": "",
-      "version": "0.1.2",
-      "author": "jaimegh-es",
-      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/sayri-prismml.zip",
-      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/sayri-prismml.png",
-      "demo_urls": [],
-      "github_url": "https://github.com/Inled-Pulsar-OS/packages",
-      "promo_url": "",
-      "skill_md": "",
-      "security_report": {
-        "score": 92,
-        "status": "PASSED",
-        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
-        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 92/100):\nNo backdoors, creds exfiltration, or destructive commands found. Subprocess calls use arg-lists without shell=True, all network downloads target known sources (GitHub/Hugging Face) with pinned SHA256 for binaries and LFS-oid verification for models, host/port/family/size are allowlist/range validated, and HTTP servers bind to 127.0.0.1. Minor deductions: model integrity may be skipped when no LFS checksum is available (or via PRISM_SKIP_INTEGRITY), and the serve panel optionally binds beyond loopback via --host.",
-        "virustotal_detections": 0,
-        "timestamp": 1789161635704
-      },
-      "metadata": {
-        "shell_versions": [],
-        "sandbox_level": "LEVEL_3_HOST_USER"
-      }
-    },
-    {
       "id": "com.ios-notes.app",
       "type": "flatpak",
       "name": "Notes",
@@ -251,6 +225,32 @@
         "shell_versions": [],
         "sandbox_level": "LEVEL_1_READ_ONLY",
         "flatpakref_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/com.ios-notes.app.flatpak"
+      }
+    },
+    {
+      "id": "sayri-prismml",
+      "type": "sayri_plugin",
+      "name": "Prism ML Server",
+      "description": "",
+      "version": "0.1.3",
+      "author": "jaimegh-es",
+      "download_url": "https://github.com/Inled-Pulsar-OS/store/releases/download/packages/sayri-prismml.zip",
+      "icon_url": "https://raw.githubusercontent.com/Inled-Pulsar-OS/store/main/assets/icons/sayri-prismml.png",
+      "demo_urls": [],
+      "github_url": "https://github.com/Inled-Pulsar-OS/packages",
+      "promo_url": "",
+      "skill_md": "",
+      "security_report": {
+        "score": 96,
+        "status": "PASSED",
+        "audited_by": "OpenCode Agent (opencode.ai) + VirusTotal",
+        "summary": "✅ Approved by OpenCode AI (OpenCode Agent (opencode.ai) - Score: 96/100):\nNo backdoors, credential exfiltration, or destructive commands found. Downloads are pinned to a fixed GitHub release tag with hardcoded per-asset SHA256 digests (refused if a checksum is missing) and HF model downloads are verified against LFS OIDs; subprocess calls use arg lists (no shell), and host/port/args are validated. All network traffic targets only HuggingFace, the pinned GitHub release, and loopback endpoints, with binaries/models confined to ~/.local/share/sayri and the server/panel bound to 127.0.0.1 by default. Minor residual notes: it executes a third-party llama-server binary (mitigated by pinned checksums) and the loopback HTTP panel has no auth/CSRF protection, though its actions are non-destructive and sandbox_level LEVEL_3_HOST_USER with capabilities run_local_process/http_server is appropriate.",
+        "virustotal_detections": 0,
+        "timestamp": 1789328632145
+      },
+      "metadata": {
+        "shell_versions": [],
+        "sandbox_level": "LEVEL_3_HOST_USER"
       }
     }
   ]
