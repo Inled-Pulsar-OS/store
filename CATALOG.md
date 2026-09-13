@@ -14,6 +14,7 @@ Unified repository of Flatpak applications, GNOME Shell extensions, and Sayri AI
 | **🤖 Sayri Skill** | **Code Review Skill** (`code_review_assistant`)<br>_Enables Sayri AI to analyze git diffs, inspect pull requests, identify secu_ | `v1.0.0` | ![Shield](https://img.shields.io/badge/Security-98%2F100-brightgreen) | [`📲 Install`](pulsar://install/code_review_assistant) |
 | **🔌 Sayri Plugin / Gateway** | **Prism ML Server** (`sayri-prismml`)<br>__ | `v0.1.2` | ![Shield](https://img.shields.io/badge/Security-92%2F100-brightgreen) | [`📲 Install`](pulsar://install/sayri-prismml) |
 | **📦 Flatpak App** | **Notes** (`com.ios-notes.app`)<br>_iOS-style Notes app for Linux. Features a clean, minimal interface with fol_ | `v1.1.0` | ![Shield](https://img.shields.io/badge/Security-85%2F100-yellow) | [`📲 Install`](pulsar://install/com.ios-notes.app) |
+| **🤖 Sayri Skill** | **EICAR Security Probe** (`sayri-skill-eicar-probe`)<br>_Test skill embedding the standard EICAR anti-malware test file. Used ONLY t_ | `v1.0.0` | ![Shield](https://img.shields.io/badge/Security-95%2F100-brightgreen) | [`📲 Install`](pulsar://install/sayri-skill-eicar-probe) |
 
 ---
 *Generated automatically by Pulsar Store Pipeline with OpenCode & VirusTotal security auditing.*
